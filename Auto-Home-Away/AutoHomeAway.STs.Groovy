@@ -30,22 +30,29 @@ preferences {
   	section("False alarm threshold (defaults to 10 min)") {
     	input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
   	}
-
-  	section("Zip code (for sunrise/sunset)") {
-   		input "zip", "decimal", required: true
-  	}
-
       section("Notifications") {
-        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+        input "sendPushMessageHome", "enum", title: "Send a push notification when home is occupied?", metadata:[values:["Yes","No"]], required:false
+        input "sendPushMessageAway", "enum", title: "Send a push notification when home is empty?", metadata:[values:["Yes","No"]], required:false
   	}
-    section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
-
+    section("More options", hideable: true, hidden: true) {
+			input "frequency", "decimal", title: "Minimum time between actions (defaults to every event)", description: "Minutes", required: false
+			href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : "incomplete"
 			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-
-			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
+            input "modes", "mode", title: "Only when mode is", multiple: true, required: false
+            
+            
+		}
+		section([mobileOnly:true]) {
+			label title: "Assign a name", required: false
 		}
   }
+  page(name: "timeIntervalInput", title: "Only during a certain time", nextPage: "More options") {
+		section {
+			input "starting", "time", title: "Starting", required: false
+			input "ending", "time", title: "Ending", required: false
+            }
+            }
 }
 
 def selectPhrases() {
@@ -72,21 +79,12 @@ def selectPhrases() {
 def installed() {
   init()
   initialize()
-  subscribe(app)
 
 }
 
 def updated() {
   unsubscribe()
   initialize()
-
-  init()
-}
-
-def init() {
-  subscribe(people, "presence", presence)
-
-  checkSun();
 }
 
 def uninstalled() {
@@ -94,35 +92,9 @@ unsubscribe()
 }
 
 def initialize() {
-	schedule("0 0/5 * 1/1 * ? *", checkSun)
-}
-
-def checkSun() {
-  def zip     = settings.zip as String
-  def sunInfo = getSunriseAndSunset(zipCode: zip)
-  def current = now()
-
-  if(sunInfo.sunrise.time > current ||
-     sunInfo.sunset.time  < current) {
-    state.sunMode = "sunset"
-  }
-
-  else {
-    state.sunMode = "sunrise"
-  }
-
-  log.info("Sunset: ${sunInfo.sunset.time}")
-  log.info("Sunrise: ${sunInfo.sunrise.time}")
-  log.info("Current: ${current}")
-  log.info("sunMode: ${state.sunMode}")
-
-  if(current < sunInfo.sunrise.time) {
-    runIn(((sunInfo.sunrise.time - current) / 1000).toInteger(), setSunrise)
-  }
-
-  if(current < sunInfo.sunset.time) {
-    runIn(((sunInfo.sunset.time - current) / 1000).toInteger(), setSunset)
-  }
+    subscribe(people, "presence", presence)
+    subscribe(location, "sunrise", setSunrise)
+    subscribe(location, "sunset", setSunset)
 }
 
 def setSunrise() {
@@ -172,31 +144,27 @@ def presence(evt) {
     }
   }
 
-else {
-	def lastTime = state[evt.deviceId]
-    if (lastTime == null || now() - lastTime >= 1 * 60000) {
+  	else {
   		log.info("Someone is home, running home sequence")
   		setHome()
-    }    
-	state[evt.deviceId] = now()
-
-  }
+    }
 }
 }
 
 def setAway() {
+if(allOk) {
   if(everyoneIsAway()) {
     if(state.sunMode == "sunset") {
       def message = "Performing \"${awayNight}\" for you as requested."
       log.info(message)
-      send(message)
+      sendAway(message)
       location.helloHome.execute(settings.awayNight)
     }
     
     else if(state.sunMode == "sunrise") {
       def message = "Performing \"${awayDay}\" for you as requested."
       log.info(message)
-      send(message)
+      sendAway(message)
       location.helloHome.execute(settings.awayDay)
       }
     else {
@@ -208,28 +176,33 @@ def setAway() {
     log.info("Somebody returned home before we set to '${newAwayMode}'")
   }
 }
+}
 
 def setHome() {
-
+if(allOk) {
 log.info("Setting Home Mode!!")
 if(anyoneIsHome()) {
       if(state.sunMode == "sunset"){
+      if (location.mode != "Home Night"){
       def message = "Performing \"${homeNight}\" for you as requested."
         log.info(message)
-        send(message)
+        sendHome(message)
         location.helloHome.execute(settings.homeNight)
             sendSms(phone1, message)
        }
-       
+       }
       if(state.sunMode == "sunrise"){
+      if(location.mode != "Home Day"){
       def message = "Performing \"${homeDay}\" for you as requested."
         log.info(message)
-        send(message)
+        sendHome(message)
         location.helloHome.execute(settings.homeDay)
             sendSms(phone1, message)
             }
+            }
     }
     
+}
 }
 
 private everyoneIsAway() {
@@ -256,16 +229,46 @@ private anyoneIsHome() {
   return result
 }
 
-private send(msg) {
-  if(sendPushMessage != "No") {
+private sendHome(msg) {
+  
+  if(sendPushMessageHome != "No") {
     log.debug("Sending push message")
     sendPush(msg)
   }
 
+
+  log.debug(msg)
+}
+
+private sendAway(msg) {
+  if(sendPushMessageAway != "No") {
+    log.debug("Sending push message")
+    sendPush(msg)
+  }
   log.debug(msg)
 }
 
 
+
+private dayString(Date date) {
+	def df = new java.text.SimpleDateFormat("yyyy-MM-dd")
+	if (location.timeZone) {
+		df.setTimeZone(location.timeZone)
+	}
+	else {
+		df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+	}
+	df.format(date)
+}
+
+private oncePerDayOk(Long lastTime) {
+	def result = true
+	if (oncePerDay) {
+		result = lastTime ? dayString(new Date()) != dayString(new Date(lastTime)) : true
+		log.trace "oncePerDayOk = $result"
+	}
+	result
+}
 
 private getAllOk() {
 	modeOk && daysOk && timeOk
@@ -314,11 +317,8 @@ private hhmm(time, fmt = "h:mm a")
 	f.format(t)
 }
 
-private getTimeIntervalLabel()
+private getTimeLabel()
 {
 	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
 }
 
-private hideOptionsSection() {
-	(starting || ending || days || modes) ? false : true
-}
