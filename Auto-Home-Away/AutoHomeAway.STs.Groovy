@@ -98,12 +98,12 @@ def initialize() {
 }
 
 def setSunrise() {
-  state.sunMode = "sunrise";
+  state.sunMode = 'sunrise';
   changeSunMode(newMode)
 }
 
 def setSunset() {
-  state.sunMode = "sunset";
+  state.sunMode = 'sunset';
   changeSunMode(newMode)
 }
 
