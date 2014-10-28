@@ -14,11 +14,11 @@
  *
  */
 definition(
-    name: "Auto away/home with night modes",
+    name: "Magic Home",
     namespace: "tslagle13",
     author: "Tim Slagle",
     description: "Monitor a set of presence sensors and change mode based on when your home is empty or occupied.  Included Night and Day modes for both an occupied and unoccupied house.",
-    category: "Mode Magic",
+    category: "Convenience",
     iconUrl: "http://icons.iconarchive.com/icons/icons8/ios7/512/Very-Basic-Home-Filled-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/icons8/ios7/512/Very-Basic-Home-Filled-icon.png"
 )
@@ -30,29 +30,23 @@ preferences {
   	section("False alarm threshold (defaults to 10 min)") {
     	input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
   	}
-      section("Notifications") {
-        input "sendPushMessageHome", "enum", title: "Send a push notification when home is occupied?", metadata:[values:["Yes","No"]], required:false
-        input "sendPushMessageAway", "enum", title: "Send a push notification when home is empty?", metadata:[values:["Yes","No"]], required:false
+
+  	section("Zip code (for sunrise/sunset)") {
+   		input "zip", "decimal", required: true
   	}
-    section("More options", hideable: true, hidden: true) {
-			input "frequency", "decimal", title: "Minimum time between actions (defaults to every event)", description: "Minutes", required: false
-			href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : "incomplete"
+
+      section("Notifications") {
+        input "sendPushMessage", "enum", title: "Send a push notification when house is empty?", metadata:[values:["Yes","No"]], required:false
+        input "sendPushMessageHome", "enum", title: "Send a push notification when home is occupied?", metadata:[values:["Yes","No"]], required:false
+  	}
+
+    section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
+    		label title: "Assign a name", required: false
 			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-            input "modes", "mode", title: "Only when mode is", multiple: true, required: false
-            
-            
-		}
-		section([mobileOnly:true]) {
-			label title: "Assign a name", required: false
+			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
 		}
   }
-  page(name: "timeIntervalInput", title: "Only during a certain time", nextPage: "More options") {
-		section {
-			input "starting", "time", title: "Starting", required: false
-			input "ending", "time", title: "Ending", required: false
-            }
-            }
 }
 
 def selectPhrases() {
@@ -85,6 +79,14 @@ def installed() {
 def updated() {
   unsubscribe()
   initialize()
+
+  init()
+}
+
+def init() {
+  subscribe(people, "presence", presence)
+
+  checkSun();
 }
 
 def uninstalled() {
@@ -92,18 +94,45 @@ unsubscribe()
 }
 
 def initialize() {
-    subscribe(people, "presence", presence)
-    subscribe(location, "sunrise", setSunrise)
-    subscribe(location, "sunset", setSunset)
+	schedule("0 0 0/12 1/1 * ?", checkSun)
+}
+
+def checkSun() {
+  def zip     = settings.zip as String
+  def sunInfo = getSunriseAndSunset(zipCode: zip)
+  def current = now()
+
+  if (sunInfo.sunrise.time < current && sunInfo.sunset.time > current) {
+    state.sunMode = "sunrise"
+    setSunrise()
+  }
+  
+  else {
+     state.sunMode = "sunset"
+     setSunset()
+  }
+
+  log.info("Sunset: ${sunInfo.sunset.time}")
+  log.info("Sunrise: ${sunInfo.sunrise.time}")
+  log.info("Current: ${current}")
+  log.info("sunMode: ${state.sunMode}")
+
+  if(current < sunInfo.sunrise.time) {
+    runIn(((sunInfo.sunrise.time - current) / 1000).toInteger(), setSunrise)
+  }
+
+  if(current < sunInfo.sunset.time) {
+    runIn(((sunInfo.sunset.time - current) / 1000).toInteger(), setSunset)
+  }
 }
 
 def setSunrise() {
-  state.sunMode = 'sunrise';
+  state.sunMode = "sunrise";
   changeSunMode(newMode)
 }
 
 def setSunset() {
-  state.sunMode = 'sunset';
+  state.sunMode = "sunset";
   changeSunMode(newMode)
 }
 
@@ -111,13 +140,13 @@ def setSunset() {
 def changeSunMode(newMode) {
   if(allOk) {
 
-  if(everyoneIsAway() && (state.sunMode = "sunrise")) {
+  if(everyoneIsAway() && (state.sunMode == "sunrise")) {
     log.info("Home is Empty  Setting New Away Mode")
     def delay = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? falseAlarmThreshold * 60 : 10 * 60 
     runIn(delay, "setAway")
   }
 
-  if(everyoneIsAway() && (state.sunMode = "sunset")) {
+  if(everyoneIsAway() && (state.sunMode == "sunset")) {
     log.info("Home is Empty  Setting New Away Mode")
     def delay = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? falseAlarmThreshold * 60 : 10 * 60 
     runIn(delay, "setAway")
@@ -144,27 +173,31 @@ def presence(evt) {
     }
   }
 
-  	else {
+else {
+	def lastTime = state[evt.deviceId]
+    if (lastTime == null || now() - lastTime >= 1 * 60000) {
   		log.info("Someone is home, running home sequence")
   		setHome()
-    }
+    }    
+	state[evt.deviceId] = now()
+
+  }
 }
 }
 
 def setAway() {
-if(allOk) {
   if(everyoneIsAway()) {
     if(state.sunMode == "sunset") {
       def message = "Performing \"${awayNight}\" for you as requested."
       log.info(message)
-      sendAway(message)
+      send(message)
       location.helloHome.execute(settings.awayNight)
     }
     
     else if(state.sunMode == "sunrise") {
       def message = "Performing \"${awayDay}\" for you as requested."
       log.info(message)
-      sendAway(message)
+      send(message)
       location.helloHome.execute(settings.awayDay)
       }
     else {
@@ -176,10 +209,9 @@ if(allOk) {
     log.info("Somebody returned home before we set to '${newAwayMode}'")
   }
 }
-}
 
 def setHome() {
-if(allOk) {
+
 log.info("Setting Home Mode!!")
 if(anyoneIsHome()) {
       if(state.sunMode == "sunset"){
@@ -188,21 +220,19 @@ if(anyoneIsHome()) {
         log.info(message)
         sendHome(message)
         location.helloHome.execute(settings.homeNight)
-            sendSms(phone1, message)
+        }
        }
-       }
+       
       if(state.sunMode == "sunrise"){
-      if(location.mode != "Home Day"){
+      if (location.mode != "Home Day"){
       def message = "Performing \"${homeDay}\" for you as requested."
         log.info(message)
         sendHome(message)
         location.helloHome.execute(settings.homeDay)
-            sendSms(phone1, message)
             }
-            }
+      }      
     }
     
-}
 }
 
 private everyoneIsAway() {
@@ -229,46 +259,25 @@ private anyoneIsHome() {
   return result
 }
 
+private send(msg) {
+  if(sendPushMessage != "No") {
+    log.debug("Sending push message")
+    sendPush(msg)
+  }
+
+  log.debug(msg)
+}
+
 private sendHome(msg) {
-  
   if(sendPushMessageHome != "No") {
     log.debug("Sending push message")
     sendPush(msg)
   }
 
-
-  log.debug(msg)
-}
-
-private sendAway(msg) {
-  if(sendPushMessageAway != "No") {
-    log.debug("Sending push message")
-    sendPush(msg)
-  }
   log.debug(msg)
 }
 
 
-
-private dayString(Date date) {
-	def df = new java.text.SimpleDateFormat("yyyy-MM-dd")
-	if (location.timeZone) {
-		df.setTimeZone(location.timeZone)
-	}
-	else {
-		df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-	}
-	df.format(date)
-}
-
-private oncePerDayOk(Long lastTime) {
-	def result = true
-	if (oncePerDay) {
-		result = lastTime ? dayString(new Date()) != dayString(new Date(lastTime)) : true
-		log.trace "oncePerDayOk = $result"
-	}
-	result
-}
 
 private getAllOk() {
 	modeOk && daysOk && timeOk
@@ -317,8 +326,11 @@ private hhmm(time, fmt = "h:mm a")
 	f.format(t)
 }
 
-private getTimeLabel()
+private getTimeIntervalLabel()
 {
 	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
 }
 
+private hideOptionsSection() {
+	(starting || ending || days || modes) ? false : true
+}
