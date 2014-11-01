@@ -92,38 +92,39 @@ unsubscribe()
 }
 
 def initialize() {
+       checkSun()
 	subscribe(location, "sunrise", setSunrise)
 	subscribe(location, "sunset", setSunset)
 }
 
-//def checkSun() {
-//  def zip     = settings.zip as String
-//  def sunInfo = getSunriseAndSunset(zipCode: zip)
-//  def current = now()
-//
-//  if (sunInfo.sunrise.time < current && sunInfo.sunset.time > current) {
-//    state.sunMode = "sunrise"
-//    setSunrise()
-///  }
+def checkSun() {
+  def zip     = settings.zip as String
+  def sunInfo = getSunriseAndSunset(zipCode: zip)
+ def current = now()
+
+if (sunInfo.sunrise.time < current && sunInfo.sunset.time > current) {
+    state.sunMode = "sunrise"
+   setSunrise()
+  }
   
-//  else {
-//     state.sunMode = "sunset"
-//     setSunset()
-//  }
-//
-//  log.info("Sunset: ${sunInfo.sunset.time}")
-//  log.info("Sunrise: ${sunInfo.sunrise.time}")
-//  log.info("Current: ${current}")
-//  log.info("sunMode: ${state.sunMode}")
-//
-//  if(current < sunInfo.sunrise.time) {
-//    runIn(((sunInfo.sunrise.time - current) / 1000).toInteger(), setSunrise)
-//  }
-//
-//  if(current < sunInfo.sunset.time) {
-//    runIn(((sunInfo.sunset.time - current) / 1000).toInteger(), setSunset)
-//  }
-//}
+else {
+   state.sunMode = "sunset"
+    setSunset()
+  }
+
+log.info("Sunset: ${sunInfo.sunset.time}")
+ log.info("Sunrise: ${sunInfo.sunrise.time}")
+ log.info("Current: ${current}")
+log.info("sunMode: ${state.sunMode}")
+
+ if(current < sunInfo.sunrise.time) {
+  runIn(((sunInfo.sunrise.time - current) / 1000).toInteger(), setSunrise)
+  }
+
+  if(current < sunInfo.sunset.time) {
+  runIn(((sunInfo.sunset.time - current) / 1000).toInteger(), setSunset)
+ }
+}
 
 def setSunrise(evt) {
   state.sunMode = "sunrise";
