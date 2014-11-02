@@ -38,6 +38,7 @@ preferences {
       section("Notifications") {
         input "sendPushMessage", "enum", title: "Send a push notification when house is empty?", metadata:[values:["Yes","No"]], required:false
         input "sendPushMessageHome", "enum", title: "Send a push notification when home is occupied?", metadata:[values:["Yes","No"]], required:false
+        input "phone", "phone", title: "Send SMS? (Optional, Seperate by semicolon for multiple numbers)", required: false
   	}
 
     section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
@@ -193,6 +194,7 @@ def setAway() {
       def message = "Performing \"${awayNight}\" for you as requested."
       log.info(message)
       sendAway(message)
+      sendSMS(message)
       location.helloHome.execute(settings.awayNight)
     }
     
@@ -200,6 +202,7 @@ def setAway() {
       def message = "Performing \"${awayDay}\" for you as requested."
       log.info(message)
       sendAway(message)
+      sendSMS(message)
       location.helloHome.execute(settings.awayDay)
       }
     else {
@@ -221,6 +224,7 @@ if(anyoneIsHome()) {
       def message = "Performing \"${homeNight}\" for you as requested."
         log.info(message)
         sendHome(message)
+        sendSMS(message)
         location.helloHome.execute(settings.homeNight)
         }
        }
@@ -230,6 +234,7 @@ if(anyoneIsHome()) {
       def message = "Performing \"${homeDay}\" for you as requested."
         log.info(message)
         sendHome(message)
+        sendSMS(message)
         location.helloHome.execute(settings.homeDay)
             }
       }      
@@ -279,7 +284,21 @@ private sendHome(msg) {
   log.debug(msg)
 }
 
-
+private sendSMS(msg) {
+if (phone) {
+    if ( phone.indexOf(";") > 1){
+        def phones = phone.split(";")
+        for ( def i = 0; i < phones.size(); i++) {
+            log.debug "sending SMS ${i+1} to ${phones[i]}"
+            sendSms(phones[i], msg)
+         }
+    }
+    else {
+        log.debug "sending SMS to ${phone}"
+        sendSms(phone, msg)
+    }
+}
+}
 
 private getAllOk() {
 	modeOk && daysOk && timeOk
