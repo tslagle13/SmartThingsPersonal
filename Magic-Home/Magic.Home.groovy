@@ -1,4 +1,4 @@
-/**
+A/**
  *  Auto Home/Away with night modes
  *
  *  Copyright 2014 Tim Slagle
@@ -192,14 +192,14 @@ def setAway() {
     if(state.sunMode == "sunset") {
       def message = "Performing \"${awayNight}\" for you as requested."
       log.info(message)
-      send(message)
+      sendAway(message)
       location.helloHome.execute(settings.awayNight)
     }
     
     else if(state.sunMode == "sunrise") {
       def message = "Performing \"${awayDay}\" for you as requested."
       log.info(message)
-      send(message)
+      sendAway(message)
       location.helloHome.execute(settings.awayDay)
       }
     else {
@@ -261,7 +261,7 @@ private anyoneIsHome() {
   return result
 }
 
-private send(msg) {
+private sendAway(msg) {
   if(sendPushMessage != "No") {
     log.debug("Sending push message")
     sendPush(msg)
