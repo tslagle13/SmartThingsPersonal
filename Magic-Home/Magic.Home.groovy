@@ -1,4 +1,4 @@
-A/**
+/**
  *  Auto Home/Away with night modes
  *
  *  Copyright 2014 Tim Slagle
