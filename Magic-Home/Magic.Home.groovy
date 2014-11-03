@@ -1,5 +1,5 @@
 /**
- *  Auto Home/Away with night modes
+ *  Magic Home
  *
  *  Copyright 2014 Tim Slagle
  *
