@@ -25,7 +25,7 @@ definition(
 
 preferences {
   page(name: "selectPhrases")
-  
+    
   page( name:"Settings", title:"Settings", uninstall:true, install:true ) {
   	section("False alarm threshold (defaults to 10 min)") {
     	input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
@@ -38,7 +38,6 @@ preferences {
       section("Notifications") {
         input "sendPushMessage", "enum", title: "Send a push notification when house is empty?", metadata:[values:["Yes","No"]], required:false
         input "sendPushMessageHome", "enum", title: "Send a push notification when home is occupied?", metadata:[values:["Yes","No"]], required:false
-        input "phone", "phone", title: "Send SMS? (Optional, Seperate by semicolon for multiple numbers)", required: false
   	}
 
     section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
@@ -67,6 +66,10 @@ def selectPhrases() {
                 input "homeDay", "enum", title: "At Least One Person Is Home And It's Day", required: true, options: phrases,  refreshAfterSelection:true
                 input "homeNight", "enum", title: "At Least One Person Is Home And It's Night", required: true, options: phrases,  refreshAfterSelection:true
 			}
+            section("Select modes used for each condition. (Needed for better app logic)") {
+        input "homeModeDay", "mode", title: "Select Mode Used for 'Home Day'", required: true
+        input "homeModeNight", "mode", title: "Select Mode Used for 'Home Night'", required: true
+  	}
 		}
     }
 }
@@ -93,7 +96,7 @@ unsubscribe()
 }
 
 def initialize() {
-       checkSun()
+    runIn(60, checkSun)
 	subscribe(location, "sunrise", setSunrise)
 	subscribe(location, "sunset", setSunset)
 }
@@ -220,21 +223,19 @@ def setHome() {
 log.info("Setting Home Mode!!")
 if(anyoneIsHome()) {
       if(state.sunMode == "sunset"){
-      if (location.mode != "Home Night"){
+      if (location.mode != "${homeModeNight}"){
       def message = "Performing \"${homeNight}\" for you as requested."
         log.info(message)
         sendHome(message)
-        sendSMS(message)
         location.helloHome.execute(settings.homeNight)
         }
        }
        
       if(state.sunMode == "sunrise"){
-      if (location.mode != "Home Day"){
+      if (location.mode != "${homeModeDay}"){
       def message = "Performing \"${homeDay}\" for you as requested."
         log.info(message)
         sendHome(message)
-        sendSMS(message)
         location.helloHome.execute(settings.homeDay)
             }
       }      
@@ -266,7 +267,7 @@ private anyoneIsHome() {
   return result
 }
 
-private sendAway(msg) {
+def sendAway(msg) {
   if(sendPushMessage != "No") {
     log.debug("Sending push message")
     sendPush(msg)
@@ -275,29 +276,13 @@ private sendAway(msg) {
   log.debug(msg)
 }
 
-private sendHome(msg) {
+def sendHome(msg) {
   if(sendPushMessageHome != "No") {
     log.debug("Sending push message")
     sendPush(msg)
   }
 
   log.debug(msg)
-}
-
-private sendSMS(msg) {
-if (phone) {
-    if ( phone.indexOf(";") > 1){
-        def phones = phone.split(";")
-        for ( def i = 0; i < phones.size(); i++) {
-            log.debug "sending SMS ${i+1} to ${phones[i]}"
-            sendSms(phones[i], msg)
-         }
-    }
-    else {
-        log.debug "sending SMS to ${phone}"
-        sendSms(phone, msg)
-    }
-}
 }
 
 private getAllOk() {
