@@ -1,5 +1,5 @@
 /**
- *  Magic Home
+ *  Auto Home/Away with night modes
  *
  *  Copyright 2014 Tim Slagle
  *
@@ -50,7 +50,7 @@ preferences {
 }
 
 def selectPhrases() {
-	def configured = (settings.awayDay && settings.awayNight && settings.homeDay && settings.awayDay)
+	def configured = (settings.awayDay && settings.awayNight && settings.homeDay && settings.homeNight)
     dynamicPage(name: "selectPhrases", title: "Configure", nextPage:"Settings", uninstall: true) {		
 		section("Who?") {
 			input "people", "capability.presenceSensor", title: "Monitor These Presences", required: true, multiple: true,  refreshAfterSelection:true
