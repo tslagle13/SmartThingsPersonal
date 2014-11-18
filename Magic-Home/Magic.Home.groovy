@@ -45,6 +45,10 @@ preferences {
 			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
+	        input "sunriseOffsetValue", "text", title: "Sunrise offset (HH:MM)", required: false
+	        input "sunriseOffsetDir", "enum", title: "Before or After Sunrise?", required: false, metadata: [values: ["Before","After"]]
+	        input "sunsetOffsetValue", "text", title: "Sunset offset (HH:MM)", required: false
+	        input "sunsetOffsetDir", "enum", title: "Before or After Sunset?", required: false, metadata: [values: ["Before","After"]]
 		}
   }
 }
@@ -103,7 +107,7 @@ def initialize() {
 
 def checkSun() {
   def zip     = settings.zip as String
-  def sunInfo = getSunriseAndSunset(zipCode: zip)
+  def sunInfo = getSunriseAndSunset(zipCode: zip, sunriseOffset: sunriseOffset, sunsetOffset: sunsetOffset)
  def current = now()
 
 if (sunInfo.sunrise.time < current && sunInfo.sunset.time > current) {
@@ -339,4 +343,12 @@ private getTimeIntervalLabel()
 
 private hideOptionsSection() {
 	(starting || ending || days || modes) ? false : true
+}
+
+private getSunriseOffset() {
+	sunriseOffsetValue ? (sunriseOffsetDir == "Before" ? "-$sunriseOffsetValue" : sunriseOffsetValue) : null
+}
+
+private getSunsetOffset() {
+	sunsetOffsetValue ? (sunsetOffsetDir == "Before" ? "-$sunsetOffsetValue" : sunsetOffsetValue) : null
 }
