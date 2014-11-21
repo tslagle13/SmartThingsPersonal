@@ -20,7 +20,7 @@ definition(
 
 preferences {
  page(name: "Setup", title: "", nextPage:"Settings") { 
- section("Which mode changes triggers the simulator? (This app will only run in selected mode(s))") {
+ section("Which mode change triggers the simulator? (This app will only run in selected mode(s))") {
 		input "newMode", "mode", title: "Which?", multiple: true, required: false, refreshAfterSelection:true
 	}
   section("Light switches to turn on/off"){
@@ -29,7 +29,7 @@ preferences {
   section("How often to cycle the lights"){
     input "frequency_minutes", "number", title: "Minutes?"
   }
-  section("Number of actives lights at any given time"){
+  section("Number of active lights at any given time"){
     input "number_of_active_lights", "number", title: "Number of active lights"
   }
   section("People") {
