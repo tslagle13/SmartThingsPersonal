@@ -38,12 +38,13 @@ preferences {
     section("Vacation mode: Check every X hours. (minimum every 5 hours)") {
     	input "timeToCheckVacation", "number", title: "How often? (Optional)", required: false
     }   
-    section("Notification delay... (defaults to 2 min") {
+    section("Notification delay... (defaults to 2 min)") {
     	input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
   	}
-    section("Via a push notification and/or an SMS message"){
-		input "phone", "phone", title: "Phone Number (for SMS, optional)", required: false
-		input "pushAndPhone", "enum", title: "Both Push and SMS?", required: false, options: ["Yes","No"]
+    section("Add SMS alerts?"){
+    input "phone", "phone", title: "Phone number (For SMS - Optional)", required: false
+		input "pushAndPhone", "enum", title: "Send push message too?", required: false, options: ["Yes","No"]
+        
 	}
     section("Settings"){
 		input "sendPushUnsecure", "enum", title: "Send a SMS/push notification when home is unsecure?", metadata:[values:["Yes","No"]], required:true
@@ -84,6 +85,7 @@ initializeVacation()
 schedule(timeToCheck, checkDoor)    
 }
 
+//set vacation mode if vacation mode is set
 def initializeVacation() {
 if(allOk){
 if (timeToCheckVacation){
@@ -94,7 +96,7 @@ if (timeToCheckVacation){
 }
 }
 
-
+//mode change set check door wait
 def modeChangeHandler(evt) {
 	log.debug "Mode change to: ${evt.value}"
     // Have to handle when they select one mode or multiple
@@ -104,6 +106,7 @@ def modeChangeHandler(evt) {
     }
 }
 
+//check doors after delay
 def checkDoor(evt) {
 if(allOk){
 log.debug("checkDoor")
@@ -137,6 +140,8 @@ log.debug("checkDoor")
 }  
 }
 
+
+//locks doors if lock door variable is set
 def lockDoors(){
 if(allOk){
 	if (lockAuto == "Yes"){
@@ -156,6 +161,7 @@ if(allOk){
 }    
 }
 
+//send push/phone if all is secure
 private sendSecure(msg) {
 log.debug("checking push")
   if(sendPushSecure != "No"){
@@ -175,6 +181,7 @@ log.debug("checking push")
   log.debug(msg)
 }
 
+//send push/phone is unsecure
 private sendUnsecure(msg) {
 log.debug("checking push")
   if(sendPushUnsecure != "No") {
@@ -249,6 +256,7 @@ private getTimeIntervalLabel()
 private hideOptionsSection() {
 	(starting || ending || days || modes) ? false : true
 }
+
 
 
 
