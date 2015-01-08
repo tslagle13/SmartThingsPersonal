@@ -14,7 +14,7 @@
  *
  */
 definition(
-    name: "Sump Pump Monitor",
+    name: "Sump Pump Check",
     namespace: "tslagle13",
     author: "Tim Slagle",
     description: "Checks to see whether your sump pump is running more than usual.  Connect a multi-sensor to the sump pump outlet pipe and it will alert you if it detects vibration more than twice in X amount of minutes.",
@@ -24,13 +24,6 @@ definition(
 
 
 preferences {
-
- page(name: "timeIntervalInput", title: "Only during a certain time") {
-		section {
-			input "starting", "time", title: "Starting", required: false
-			input "ending", "time", title: "Ending", required: false
-		}
-      }
 	section("Which multisensor should I monitor?") {
 		input "multi", "capability.accelerationSensor", title: "Which?", multiple: false, required: true
 	}
@@ -44,13 +37,6 @@ preferences {
 		input "phone", "phone", title: "Phone Number (for SMS, optional)", required: false
 		input "pushAndPhone", "enum", title: "Both Push and SMS?", required: false, options: ["Yes","No"]
 	}
-    
-    section(title: "More options", hidden: hideOptionsSection()) {
-			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
-		}
-       
 
 }
 
@@ -72,7 +58,6 @@ def initialize() {
 }
 
 def checkFrequency(evt){
-if(allOk){
 log.debug("running check sump")
 def lastTime = state[frequencyKeyAccelration(evt)]
 
@@ -103,73 +88,8 @@ def msg = messageText ?: "Alert: Sump pump has ran in twice in the last ${timePa
 	}
 }
 }
-}
+
 
 private frequencyKeyAccelration(evt) {
 	"lastActionTimeStamp"
 }
-
-
-private getAllOk() {
-	modeOk && daysOk && timeOk
-}
-
-private getModeOk() {
-	def result = !modes || modes.contains(location.mode)
-	log.trace "modeOk = $result"
-	result
-}
-
-private getDaysOk() {
-	def result = true
-	if (days) {
-		def df = new java.text.SimpleDateFormat("EEEE")
-		if (location.timeZone) {
-			df.setTimeZone(location.timeZone)
-		}
-		else {
-			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
-		}
-		def day = df.format(new Date())
-		result = days.contains(day)
-	}
-	log.trace "daysOk = $result"
-	result
-}
-
-private getTimeOk() {
-	def result = true
-	if (starting && ending) {
-		def currTime = now()
-		def start = timeToday(starting).time
-		def stop = timeToday(ending).time
-		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
-	}
-	log.trace "timeOk = $result"
-	result
-}
-
-private hhmm(time, fmt = "h:mm a")
-{
-	def t = timeToday(time, location.timeZone)
-	def f = new java.text.SimpleDateFormat(fmt)
-	f.setTimeZone(location.timeZone ?: timeZone(time))
-	f.format(t)
-}
-
-private getTimeIntervalLabel()
-{
-	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
-}
-
-private hideOptionsSection() {
-	(starting || ending || days || modes) ? false : true
-}
-
-
-
-
-
-
-
-
