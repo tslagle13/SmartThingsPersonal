@@ -5,10 +5,10 @@ date_default_timezone_set('UTC');
 /**
  * oAuth settings from http://dev.netatmo.com/dev/listapps
  */
-define('APP_ID', '');
-define('APP_SECRET', '');
-define('USERNAME', '');
-define('PASSWORD', '');
+define('APP_ID', '5498b04b197759100c7b2694');
+define('APP_SECRET', 'rgWd9vWAd8nbx3foWzOn9UOmW8CgR');
+define('USERNAME', 'tslagle13@gmail.com');
+define('PASSWORD', 'Simba2001');
 define('TOKEN_URL', 'https://api.netatmo.net/oauth2/token');
 define('DEVICELIST_URL', 'https://api.netatmo.net/api/devicelist');
 define('MEASURE_URL', 'https://api.netatmo.net/api/getmeasure');
@@ -17,8 +17,8 @@ define('MEASURE_URL', 'https://api.netatmo.net/api/getmeasure');
  * Station ID from http://www.wunderground.com/wxstation/signup.html
  */
 define('STATION_URL', 'http://weatherstation.wunderground.com/weatherstation/updateweatherstation.php');
-define('STATION_ID', '');
-define('STATION_PASSWORD', '');
+define('STATION_ID', 'KILSCHAU11');
+define('STATION_PASSWORD', 'Simba2001');
 define('DEBUG', 0);
 
 /**
