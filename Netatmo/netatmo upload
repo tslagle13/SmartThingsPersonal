@@ -1,6 +1,5 @@
 #!/usr/bin/php
 <?php
-$orig_tz = date_default_timezone_get();
 date_default_timezone_set('UTC');
 /**
  * oAuth settings from http://dev.netatmo.com/dev/listapps
