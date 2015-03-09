@@ -538,7 +538,7 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
-    def inputLuxSensorsA = [
+    def inputLuxSensorsC = [
         name:       "C_luxSensors",
         type:       "capability.illuminanceMeasurement",
         title:      "On these lux sensors",
