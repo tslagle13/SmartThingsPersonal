@@ -1,7 +1,7 @@
 /**
  *  Light Follows Me with Zones and Mode Control
  *
- *  Verion - 0.5
+ *  Verion - 0.51
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -1110,7 +1110,7 @@ def pageSetupScenarioH() {
 
     return dynamicPage(pageProperties) {
         section("Name your scene") {
-            input inputScenarioNameC
+            input inputScenarioNameH
         }
 
 section("Devices included in the scene") {
@@ -2557,7 +2557,6 @@ def delayTurnOffO(){
 	settings.O_switches?.off()
 	settings.O_dimmers?.setLevel(0)
 }
-
 
 
 
