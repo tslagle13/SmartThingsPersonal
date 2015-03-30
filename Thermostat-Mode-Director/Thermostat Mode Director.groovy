@@ -1,5 +1,7 @@
 /**
- *  Temperature Based Thermostat
+ *  Thermostat Mode Director
+ *
+ *	Version 1.0
  *
  *  Copyright 2014 Tim Slagle
  *
@@ -16,10 +18,10 @@
 
 // Automatically generated. Make future change here.
 definition(
-    name: "Temprature based Thermostat Mode",
+    name: "Thermostat Mode Director",
     namespace: "tslagle13",
     author: "Tim Slagle",
-    description: "Changes mode of your thermostat based on the temperature range of a specified temperature sensor.",
+    description: "Changes mode of your thermostat based on the temperature range of a specified temperature sensor and shuts off the thermostat if any windows/doors are open.",
     category: "Green Living",
     iconUrl: "http://icons.iconarchive.com/icons/icons8/windows-8/512/Science-Temperature-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/icons8/windows-8/512/Science-Temperature-icon.png"
@@ -48,15 +50,26 @@ preferences {
             input "neutral", "enum", title: "Mode?", metadata:[values:["auto", "heat", "cool", "off"]], required:false
 		}    
     }
-    page( name:"Thermostat", title:"Thermostat", nextPage:"Settings", uninstall:true, install:false ) {
+    page( name:"Thermostat", title:"Thermostat", nextPage:"Doors", uninstall:true, install:false ) {
     		section("Choose thermostat...") {
 			input "thermostat", "capability.thermostat", multiple: true
 		}
+    }
+    page( name:"Doors", title:"Doors", nextPage:"Settings", uninstall:true, install:false ) {
+    		section("If these doors/windows are open turn off thermostat regardless of outdoor temperature") {
+				input "doors", "capability.contactSensor", multiple: true
+            }    
+            section("Wait this long before turning the thermostat off (defaults to 1 minute)") {
+    			input "turnOffDelay", "decimal", title: "Number of minutes", required: false
+			}
     }
     page( name:"Settings", title:"Settings", uninstall:false, install:true ) {
     	section( "Notifications" ) {
 			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
     	}
+        section("Settings") {
+    	label title: "Assign a name", required: false
+  	}
         section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
 			
 			def timeLabel = timeIntervalLabel()
@@ -70,79 +83,120 @@ preferences {
 }
 
 
+
 def installed(){
-	go()
+	init()
 }
 
 def updated(){
 	unsubscribe()
-    go()
+    init()
 }
 
-def go(){
+def init(){
+	subscribe(app, temperatureHandler)
 	subscribe(sensor, "temperature", temperatureHandler)
+    subscribe(doors, "contact", temperatureHandler)
 }
 
 def temperatureHandler(evt) {
-	if(allOk) {
+	if(modeOk && daysOk && timeOk) {
     if(setLow > setHigh){
     	def temp = setLow
         setLow = setHigh
         setHigh = temp
     }
-	def currentTemp = evt.doubleValue
+    if (doorsOk) {
+	def currentTemp = sensor.latestValue("temperature")
     if (currentTemp < setLow) {
-    	if (state.lastStatus != "${cold}") {
-            log.info "Setting thermostat mode to ${cold}"
+            //log.info "Setting thermostat mode to ${cold}"
         	def msg = "I changed your thermostat mode to ${cold}"
 			thermostat."${cold}"()
         	if (state.lastStatus != "${cold}"){
         		if ( sendPushMessage != "No" ) {
-        			sendPush(msg)
+        			sendMessage(msg)
         		}
         	}
-        }
+        
     def lastStatus = state.lastStatus
     state.lastStatus = "${cold}" 
 	}
     if (currentTemp > setHigh) {
-       	if (state.lastStatus != "${hot}") {
-    		log.info "Setting thermostat mode to ${hot}"
+    		//log.info "Setting thermostat mode to ${hot}"
         	def msg = "I changed your thermostat mode to ${hot}"
 			thermostat."${hot}"()
         	if (state.lastStatus != "${hot}"){
         		if ( sendPushMessage != "No" ) {
-        			sendPush(msg)
+        			sendMessage(msg)
         		}
        		}
-        }        
+               
 	 def lastStatus = state.lastStatus
      state.lastStatus = "${hot}" 
 	 }
-     else if (currentTemp > setLow && currentTemp < setHigh) {
-        if (state.lastStatus != "${neutral}"){
-    		log.info "Setting thermostat mode to ${neutral}"
+     if (currentTemp > setLow && currentTemp < setHigh) {
+    		//log.info "Setting thermostat mode to ${neutral}"
         	def msg = "I changed your thermostat mode to ${neutral}"
 			thermostat."${neutral}"()
         	if (state.lastStatus != "${neutral}"){
         		if ( sendPushMessage != "No" ) {
-        		sendPush(msg)
+        		sendMessage(msg)
         		}
         	}
-         }   
+            
         def lastStatus = state.lastStatus
         state.lastStatus = "${neutral}" 
 		}
      }
+     else{
+     	def delay = (turnOffDelay != null && turnOffDelay != "") ? turnOffDelay * 60 : 60
+     	log.debug("Detected open doors.  Checking door states again")
+     	runIn(delay, "doorCheck")
+     }
+     }
+     
+}
+
+def doorCheck(){
+	if (!doorsOk){
+		//log.debug("doors still open turning off ${thermostat}")
+		thermostat.off()
+	}
+
+	else{
+    	temperatureHandler()
+		//log.debug("doors are actually closed checking stuff again")
+	}
+}
+
+
+private sendMessage(msg){
+if (state.lastStatus != "${hot}"){
+	sendPush(msg)
+}    
+
+if (state.lastStatus != "${cold}"){
+	sendPush(msg)
+}
+
+if (state.lastStatus != "${neutral}"){
+	sendPush(msg)
+}
 }
 
 private getAllOk() {
-	modeOk && daysOk && timeOk
+	modeOk && daysOk && timeOk && doorsOk
 }
 
 private getModeOk() {
 	def result = !modes || modes.contains(location.mode)
 	log.trace "modeOk = $result"
+	result
+}
+
+private getDoorsOk() {
+	def result = !doors || !doors.latestValue("contact").contains("open")
+	log.trace "doorsOk = $result"
 	result
 }
 
