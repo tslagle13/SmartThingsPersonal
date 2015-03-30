@@ -1,5 +1,7 @@
     /**
-     *  Magic Home
+     *  Hello, Home Phrase Director
+     * 
+     * Version 1.2
      *
      *  Copyright 2014 Tim Slagle
      *
@@ -14,10 +16,10 @@
      *
      */
     definition(
-        name: "Magic Home",
+        name: "Hello, Home Phrase Director",
         namespace: "tslagle13",
         author: "Tim Slagle",
-        description: "Monitor a set of presence sensors and change mode based on when your home is empty or occupied.  Included Night and Day modes for both an occupied and unoccupied house.",
+        description: "Monitor a set of presence sensors and activate Hello, Home phrases based on whether your home is empty or occupied.  Each presence status change will check against the current 'sun state' to run phrases based on occupancy and whether the sun is up or down.",
         category: "Convenience",
         iconUrl: "http://icons.iconarchive.com/icons/icons8/ios7/512/Very-Basic-Home-Filled-icon.png",
         iconX2Url: "http://icons.iconarchive.com/icons/icons8/ios7/512/Very-Basic-Home-Filled-icon.png"
@@ -31,13 +33,13 @@
         	input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
       	}
     
-      	section("Zip code (for sunrise/sunset)") {
-       		input "zip", "decimal", required: true
+      	section("Zip code") {
+       		input "zip", "text", required: true
       	}
     
           section("Notifications") {
-            input "sendPushMessage", "enum", title: "Send a push notification when house is empty?", metadata:[values:["Yes","No"]], required:false
-            input "sendPushMessageHome", "enum", title: "Send a push notification when home is occupied?", metadata:[values:["Yes","No"]], required:false
+            input "sendPushMessage", "enum", title: "Send a push notification when the house is empty?", metadata:[values:["Yes","No"]], required:false
+            input "sendPushMessageHome", "enum", title: "Send a push notification when the house is occupied?", metadata:[values:["Yes","No"]], required:false
       	}
     
         section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
@@ -53,7 +55,7 @@
     	def configured = (settings.awayDay && settings.awayNight && settings.homeDay && settings.homeNight)
         dynamicPage(name: "selectPhrases", title: "Configure", nextPage:"Settings", uninstall: true) {		
     		section("Who?") {
-    			input "people", "capability.presenceSensor", title: "Monitor These Presences", required: true, multiple: true,  refreshAfterSelection:true
+    			input "people", "capability.presenceSensor", title: "Monitor the presences", required: true, multiple: true,  refreshAfterSelection:false
     		}
             
     		def phrases = location.helloHome?.getPhrases()*.label
@@ -61,14 +63,14 @@
             	phrases.sort()
     			section("Run This Phrase When...") {
     				log.trace phrases
-    				input "awayDay", "enum", title: "Everyone Is Away And It's Day", required: true, options: phrases,  refreshAfterSelection:true
-    				input "awayNight", "enum", title: "Everyone Is Away And It's Night", required: true, options: phrases,  refreshAfterSelection:true
-                    input "homeDay", "enum", title: "At Least One Person Is Home And It's Day", required: true, options: phrases,  refreshAfterSelection:true
-                    input "homeNight", "enum", title: "At Least One Person Is Home And It's Night", required: true, options: phrases,  refreshAfterSelection:true
+    				input "awayDay", "enum", title: "Everyone is away and it's day.", required: true, options: phrases,  refreshAfterSelection:false
+    				input "awayNight", "enum", title: "Everyone is away and it's night.", required: true, options: phrases,  refreshAfterSelection:false
+                    input "homeDay", "enum", title: "At least one person is home and it's day.", required: true, options: phrases,  refreshAfterSelection:false
+                    input "homeNight", "enum", title: "At least one person is home and it's night.", required: true, options: phrases,  refreshAfterSelection:false
     			}
                 section("Select modes used for each condition. (Needed for better app logic)") {
-            input "homeModeDay", "mode", title: "Select Mode Used for 'Home Day'", required: true
-            input "homeModeNight", "mode", title: "Select Mode Used for 'Home Night'", required: true
+            input "homeModeDay", "mode", title: "Select mode used for the 'Home Day' phrase", required: true
+            input "homeModeNight", "mode", title: "Select mode used for the 'Home Night' phrase", required: true
       	}
     		}
         }
