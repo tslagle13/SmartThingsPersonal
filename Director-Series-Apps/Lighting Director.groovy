@@ -1,7 +1,7 @@
 /**
  *  Lighting Director
  *
- *  Verion - 1.1
+ *  Verion - 1.2
  *
  *  Copyright 2015 Tim Slagle
  *
