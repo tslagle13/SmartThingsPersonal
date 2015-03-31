@@ -1,7 +1,7 @@
 /**
  *  Lighting Director
  *
- *  Verion - 1.2
+ *  Verion - 1.21
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -642,7 +642,7 @@ def pageSetupScenarioD() {
     ]
     
     def inputTurnOnLuxD = [
-        name:       "A_turnOnLux",
+        name:       "D_turnOnLux",
         type:       "number",
         title:      "Only run this scene if lux is below...",
         multiple:   false,
@@ -650,7 +650,7 @@ def pageSetupScenarioD() {
     ]
     
     def inputLuxSensorsD = [
-        name:       "A_luxSensors",
+        name:       "D_luxSensors",
         type:       "capability.illuminanceMeasurement",
         title:      "On these lux sensors",
         multiple:   false,
