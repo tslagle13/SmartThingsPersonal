@@ -81,7 +81,7 @@ preferences {
     }
     page( name:"Doors", title:"Doors", nextPage:"Settings", uninstall:true, install:false ) {
     		section("If these doors/windows are open turn off thermostat regardless of outdoor temperature") {
-				input "doors", "capability.contactSensor", multiple: true
+				input "doors", "capability.contactSensor", multiple: true, required:false
             }    
             section("Wait this long before turning the thermostat off (defaults to 1 minute)") {
     			input "turnOffDelay", "decimal", title: "Number of minutes", required: false
