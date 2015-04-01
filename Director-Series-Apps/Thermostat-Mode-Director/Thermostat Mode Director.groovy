@@ -1,7 +1,7 @@
 /**
  *  Thermostat Mode Director
  *
- *	Version 1.0
+ *	Version 1.1
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -120,7 +120,9 @@ def updated(){
 def init(){
 	subscribe(app, temperatureHandler)
 	subscribe(sensor, "temperature", temperatureHandler)
-    subscribe(doors, "contact", temperatureHandler)
+    if(doors){
+    	subscribe(doors, "contact", temperatureHandler)
+    }
 }
 
 def temperatureHandler(evt) {
