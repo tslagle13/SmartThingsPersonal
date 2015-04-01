@@ -52,7 +52,7 @@ definition(
 
 preferences {
 	preferences {
-page( name:"Setup", title:"Setup", nextPage:"Settings", uninstall:false, install:tfalse ) {   
+page( name:"Setup", title:"Setup", nextPage:"Settings", uninstall:false, install:true ) {   
 	section("Choose HVAC fan to control") {
 		input "thermostat", "capability.thermostat", title: "Thermostat"
         input "honeywell", "enum", title: "Is this a Honeywell Wifi Thermostat?", metadata:[values:["Yes", "No"]], required:true
