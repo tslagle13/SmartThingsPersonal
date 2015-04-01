@@ -43,7 +43,7 @@ definition(
     name: "HVAC Fan Director",
     namespace: "tslagle13",
     author: "Tim Slagle",
-    description: "Control your HVAC fan based on a temperature difference between two temperature sensors.",
+    description: "Automate your fan from "On" to "Auto" based on the temperature difference between two temp sensors in your home.  Helps even out the temperature of your home without turning on the AC/Heat.",
     category: "Green Living",
     iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
     iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
