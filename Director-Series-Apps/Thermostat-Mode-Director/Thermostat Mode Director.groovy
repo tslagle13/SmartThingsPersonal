@@ -137,7 +137,7 @@ def temperatureHandler(evt) {
     if (currentTemp < setLow) {
             //log.info "Setting thermostat mode to ${cold}"
         	def msg = "I changed your thermostat mode to ${cold}"
-			thermostat."${cold}"()
+			thermostat?."${cold}"()
         	if (state.lastStatus != "${cold}"){
         		if ( sendPushMessage != "No" ) {
         			sendMessage(msg)
@@ -150,7 +150,7 @@ def temperatureHandler(evt) {
     if (currentTemp > setHigh) {
     		//log.info "Setting thermostat mode to ${hot}"
         	def msg = "I changed your thermostat mode to ${hot}"
-			thermostat."${hot}"()
+			thermostat?."${hot}"()
         	if (state.lastStatus != "${hot}"){
         		if ( sendPushMessage != "No" ) {
         			sendMessage(msg)
@@ -163,7 +163,7 @@ def temperatureHandler(evt) {
      if (currentTemp > setLow && currentTemp < setHigh) {
     		//log.info "Setting thermostat mode to ${neutral}"
         	def msg = "I changed your thermostat mode to ${neutral}"
-			thermostat."${neutral}"()
+			thermostat?."${neutral}"()
         	if (state.lastStatus != "${neutral}"){
         		if ( sendPushMessage != "No" ) {
         		sendMessage(msg)
@@ -186,7 +186,7 @@ def temperatureHandler(evt) {
 def doorCheck(){
 	if (!doorsOk){
 		//log.debug("doors still open turning off ${thermostat}")
-		thermostat.off()
+		thermostat?.off()
 	}
 
 	else{
