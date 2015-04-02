@@ -88,9 +88,10 @@ preferences {
 			}
     }
     page( name:"Settings", title:"Settings", uninstall:false, install:true ) {
-    	section( "Notifications" ) {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
-    	}
+        section( "Notifications" ) {
+            input "sendPushMessage", "bool", title: "Send a push notification?", defaultValue: false
+            input "phoneNumber", "phone", title: "Send SMS notifications to?", required: false
+        }
         section("Settings") {
     	label title: "Assign a name", required: false
   	}
@@ -126,68 +127,63 @@ def init(){
 }
 
 def temperatureHandler(evt) {
-	if(modeOk && daysOk && timeOk) {
-    if(setLow > setHigh){
-    	def temp = setLow
-        setLow = setHigh
-        setHigh = temp
+    if(modeOk && daysOk && timeOk) {
+        if(setLow > setHigh){
+            def temp = setLow
+            setLow = setHigh
+            setHigh = temp
+        }
+        if (doorsOk) {
+            def currentTemp = sensor.latestValue("temperature")
+            if (currentTemp < setLow) {
+                //log.info "Setting thermostat mode to ${cold}"
+                def msg = "I changed your thermostat mode to ${cold} because temperature dropped below settings.setLow"
+                thermostat?."${cold}"()
+
+                if (state.lastStatus != "${cold}"){
+                    sendMessage(msg)
+                }
+                state.lastStatus = "${cold}"
+            }
+            if (currentTemp > setHigh) {
+                //log.info "Setting thermostat mode to ${hot}"
+                def msg = "I changed your thermostat mode to ${hot} because temperature rose above settings.setHigh"
+                thermostat?."${hot}"()
+
+                if (state.lastStatus != "${hot}"){
+                    sendMessage(msg)
+                }
+                state.lastStatus = "${hot}"
+            }
+            if (currentTemp > setLow && currentTemp < setHigh) {
+                //log.info "Setting thermostat mode to ${neutral}"
+                def msg = "I changed your thermostat mode to ${neutral} because temperature is neutral"
+                thermostat?."${neutral}"()
+
+                if (state.lastStatus != "${neutral}"){
+                    sendMessage(msg)
+                }
+                state.lastStatus = "${neutral}"
+            }
+        }else{
+            def delay = (turnOffDelay != null && turnOffDelay != "") ? turnOffDelay * 60 : 60
+            log.debug("Detected open doors.  Checking door states again")
+            runIn(delay, "doorCheck")
+        }
     }
-    if (doorsOk) {
-	def currentTemp = sensor.latestValue("temperature")
-    if (currentTemp < setLow) {
-            //log.info "Setting thermostat mode to ${cold}"
-        	def msg = "I changed your thermostat mode to ${cold}"
-			thermostat?."${cold}"()
-        	if (state.lastStatus != "${cold}"){
-        		if ( sendPushMessage != "No" ) {
-        			sendMessage(msg)
-        		}
-        	}
-        
-    def lastStatus = state.lastStatus
-    state.lastStatus = "${cold}" 
-	}
-    if (currentTemp > setHigh) {
-    		//log.info "Setting thermostat mode to ${hot}"
-        	def msg = "I changed your thermostat mode to ${hot}"
-			thermostat?."${hot}"()
-        	if (state.lastStatus != "${hot}"){
-        		if ( sendPushMessage != "No" ) {
-        			sendMessage(msg)
-        		}
-       		}
-               
-	 def lastStatus = state.lastStatus
-     state.lastStatus = "${hot}" 
-	 }
-     if (currentTemp > setLow && currentTemp < setHigh) {
-    		//log.info "Setting thermostat mode to ${neutral}"
-        	def msg = "I changed your thermostat mode to ${neutral}"
-			thermostat?."${neutral}"()
-        	if (state.lastStatus != "${neutral}"){
-        		if ( sendPushMessage != "No" ) {
-        		sendMessage(msg)
-        		}
-        	}
-            
-        def lastStatus = state.lastStatus
-        state.lastStatus = "${neutral}" 
-		}
-     }
-     else{
-     	def delay = (turnOffDelay != null && turnOffDelay != "") ? turnOffDelay * 60 : 60
-     	log.debug("Detected open doors.  Checking door states again")
-     	runIn(delay, "doorCheck")
-     }
-     }
-     
 }
 
 def doorCheck(){
-	if (!doorsOk){
-		//log.debug("doors still open turning off ${thermostat}")
-		thermostat?.off()
-	}
+    if (!doorsOk){
+        //log.debug("doors still open turning off ${thermostat}")
+        def msg = "I changed your thermostat mode to off because some doors are open"
+        thermostat?.off()
+
+        if (state.lastStatus != "off"){
+            sendMessage(msg)
+        }
+        state.lastStatus = "off"
+    }
 
 	else{
     	temperatureHandler()
@@ -197,17 +193,12 @@ def doorCheck(){
 
 
 private sendMessage(msg){
-if (state.lastStatus != "${hot}"){
-	sendPush(msg)
-}    
-
-if (state.lastStatus != "${cold}"){
-	sendPush(msg)
-}
-
-if (state.lastStatus != "${neutral}"){
-	sendPush(msg)
-}
+    if (sendPushMessage) {
+        sendPush(msg)
+    }
+    if (phoneNumber != null) {
+        sendSms(phoneNumber, msg) 
+    }
 }
 
 private getAllOk() {
