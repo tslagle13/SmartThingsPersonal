@@ -134,7 +134,7 @@ def temperatureHandler(evt) {
 			def currentTemp = sensor.latestValue("temperature")
 			if (currentTemp < setLow) {
 				//log.info "Setting thermostat mode to ${cold}"
-				def msg = "I changed your thermostat mode to ${cold} because temperature dropped below settings.setLow"
+				def msg = "I changed your thermostat mode to ${cold} because temperature is below ${setLow}"
 				thermostat?."${cold}"()
 
 				if (state.lastStatus != "${cold}"){
@@ -144,7 +144,7 @@ def temperatureHandler(evt) {
 			}
 			if (currentTemp > setHigh) {
 				//log.info "Setting thermostat mode to ${hot}"
-				def msg = "I changed your thermostat mode to ${hot} because temperature rose above settings.setHigh"
+				def msg = "I changed your thermostat mode to ${hot} because temperature is above ${setHigh}"
 				thermostat?."${hot}"()
 
 				if (state.lastStatus != "${hot}"){
@@ -193,7 +193,7 @@ private sendMessage(msg){
 		sendPush(msg)
 	}
 	if (phoneNumber != null) {
-		sendSms(phoneNumber, msg) 
+		sendSms(phoneNumber, msg)
 	}
 }
 
