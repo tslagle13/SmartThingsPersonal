@@ -89,7 +89,7 @@ preferences {
 	}
 	page( name:"Settings", title:"Settings", uninstall:false, install:true ) {
 		section( "Notifications" ) {
-			input "sendPushMessage", "bool", title: "Send a push notification?", defaultValue: false
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
 			input "phoneNumber", "phone", title: "Send SMS notifications to?", required: false
 		}
 		section("Settings") {
@@ -189,7 +189,7 @@ def doorCheck(){
 }
 
 private sendMessage(msg){
-	if (sendPushMessage) {
+	if (sendPushMessage == "Yes") {
 		sendPush(msg)
 	}
 	if (phoneNumber != null) {
