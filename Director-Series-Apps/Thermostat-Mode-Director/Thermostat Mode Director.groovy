@@ -1,7 +1,7 @@
 /**
  *  Thermostat Mode Director
  *
- *  Version 1.1
+ *  Version 1.2
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -134,7 +134,7 @@ def temperatureHandler(evt) {
 			def currentTemp = sensor.latestValue("temperature")
 			if (currentTemp < setLow) {
 				//log.info "Setting thermostat mode to ${cold}"
-				def msg = "I changed your thermostat mode to ${cold} because temperature is below ${setLow}"
+				def msg = "I changed your thermostat mode to ${cold} because ${sensor} temperature is below ${setLow}"
 				thermostat?."${cold}"()
 
 				if (state.lastStatus != "${cold}"){
@@ -144,7 +144,7 @@ def temperatureHandler(evt) {
 			}
 			if (currentTemp > setHigh) {
 				//log.info "Setting thermostat mode to ${hot}"
-				def msg = "I changed your thermostat mode to ${hot} because temperature is above ${setHigh}"
+				def msg = "I changed your thermostat mode to ${hot} because ${sensor} temperature is above ${setHigh}"
 				thermostat?."${hot}"()
 
 				if (state.lastStatus != "${hot}"){
@@ -154,7 +154,7 @@ def temperatureHandler(evt) {
 			}
 			if (currentTemp > setLow && currentTemp < setHigh) {
 				//log.info "Setting thermostat mode to ${neutral}"
-				def msg = "I changed your thermostat mode to ${neutral} because temperature is neutral"
+				def msg = "I changed your thermostat mode to ${neutral} because ${sensor} temperature is between ${setLow} and ${setHigh}"
 				thermostat?."${neutral}"()
 
 				if (state.lastStatus != "${neutral}"){
