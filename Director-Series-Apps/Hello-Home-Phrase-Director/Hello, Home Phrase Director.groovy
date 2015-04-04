@@ -86,10 +86,6 @@
       initialize()
     }
     
-    def uninstalled() {
-    unsubscribe()
-    }
-    
     def initialize() {
     	subscribe(people, "presence", presence)
         runIn(60, checkSun)
