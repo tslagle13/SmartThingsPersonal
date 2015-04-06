@@ -1,7 +1,7 @@
 /**
  *  Thermostat Mode Director
  *
- *  Version 1.2
+ *  Version 2.0
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -52,44 +52,68 @@ definition(
 )
 
 preferences {
-	page( name:"Sensor", title:"Use the following temperature sensor...", nextPage:"Cold", uninstall:true, install:false ) {
-		section("Sensor"){
+	page( name:"Sensor", title:"Setup", nextPage:"directorSettings", uninstall:true, install:false ) {
+    	section("About 'Thermostat Mode Director'"){
+        	paragraph "Changes mode of your thermostat based on the temperature range of a specified temperature sensor and shuts off the thermostat if any windows/doors are open."
+        }
+		section("Which temperature sensor will control your thermostat?"){
 			input "sensor", "capability.temperatureMeasurement", title: "Sensor", multiple:false
 		}
 	}
-	page( name:"Cold", title:"Cold", nextPage:"Hot", uninstall:true, install:false ) {
+	page( name:"directorSettings", title:"Director Settings", nextPage:"ThermostatandDoors", uninstall:true, install:false ) {
+    	section(""){
+        	paragraph "Here you will setup the upper and lower thresholds for the temperature sensor that will send commands to your thermostat."
+        }
 		section("When the temperature falls below this tempurature set mode to..."){
 			input "setLow", "decimal", title: "Low temp?"
 			input "cold", "enum", title: "Mode?", metadata:[values:["auto", "heat", "cool", "off"]], required:false
 		}
-	}
-	page( name:"Hot", title:"Hot", nextPage:"Neutral", uninstall:true, install:false ) {
-		section("When the temperature goes above this tempurature set mode to..."){
+        section("When the temperature goes above this tempurature set mode to..."){
 			input "setHigh", "decimal", title: "High temp?"
 			input "hot", "enum", title: "Mode?", metadata:[values:["auto", "heat", "cool", "off"]], required:false
 		}
-	}
-	page( name:"Neutral", title:"Neutral", nextPage:"Thermostat", uninstall:true, install:false ) {
-		section("When temperature is between the previous temperatures, change mode to..."){
+        section("When temperature is between the previous temperatures, change mode to..."){
 			input "neutral", "enum", title: "Mode?", metadata:[values:["auto", "heat", "cool", "off"]], required:false
 		}
 	}
-	page( name:"Thermostat", title:"Thermostat", nextPage:"Doors", uninstall:true, install:false ) {
-		section("Choose thermostat...") {
+	page( name:"ThermostatandDoors", title:"Thermostat and Doors", nextPage:"ThermostatBoost", uninstall:true, install:false ) {
+		section(""){
+        	paragraph "If any of the doors selected here are open the thermostat will automatically be turned off and this app will be 'disabled' until all the doors are closed. (This is optional)"
+        }
+        section("Choose thermostat...") {
 			input "thermostat", "capability.thermostat", multiple: true
 		}
-	}
-	page( name:"Doors", title:"Doors", nextPage:"Settings", uninstall:true, install:false ) {
-		section("If these doors/windows are open turn off thermostat regardless of outdoor temperature") {
+        section("If these doors/windows are open turn off thermostat regardless of outdoor temperature") {
 			input "doors", "capability.contactSensor", multiple: true, required:false
 		}
 		section("Wait this long before turning the thermostat off (defaults to 1 minute)") {
 			input "turnOffDelay", "decimal", title: "Number of minutes", required: false
 		}
 	}
+    page( name:"ThermostatBoost", title:"Thermostat Boost", nextPage:"Settings", uninstall:true, install:false ) {
+    	section(""){
+        	paragraph "Here you can setup the ability to 'boost' your thermostat.  In the event that your thermostat is 'off'" +
+            " and you need to heat or cool your your home for a little bit you can 'touch' the app in the 'My Apps' section to boost your thermostat."
+        }
+		section("Choose a thermostats to boost") {
+   			input "thermostat1", "capability.thermostat", multiple: true
+        }
+        section("If thermostat is off switch to which mode?") {
+    		input "turnOnTherm", "enum", metadata: [values: ["cool", "heat"]], required: false
+  		}
+        section("Set the thermostat to the following temps") {
+    		input "coolingTemp", "decimal", title: "Cooling temp?", required: false
+    		input "heatingTemp", "decimal", title: "Heating temp?", required: false
+  		}
+  		section("For how long?") {
+    		input "turnOffDelay2", "decimal", defaultValue:30
+  		}
+	}
+   	
+	
 	page( name:"Settings", title:"Settings", uninstall:false, install:true ) {
 		section( "Notifications" ) {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:true, defaultValue: "Yes"
 			input "phoneNumber", "phone", title: "Send SMS notifications to?", required: false
 		}
 		section("Settings") {
@@ -116,7 +140,8 @@ def updated(){
 }
 
 def init(){
-	subscribe(app, temperatureHandler)
+	state.lastStatus = null
+	subscribe(app, appTouch)
 	subscribe(sensor, "temperature", temperatureHandler)
 	if(doors){
 		subscribe(doors, "contact", temperatureHandler)
@@ -133,41 +158,86 @@ def temperatureHandler(evt) {
 		if (doorsOk) {
 			def currentTemp = sensor.latestValue("temperature")
 			if (currentTemp < setLow) {
-				//log.info "Setting thermostat mode to ${cold}"
-				def msg = "I changed your thermostat mode to ${cold} because ${sensor} temperature is below ${setLow}"
-				thermostat?."${cold}"()
-
-				if (state.lastStatus != "${cold}"){
-					sendMessage(msg)
-				}
+            	if ((state.lastStatus == "${hot}") || (state.lastStatus == "${neutral}") || (state.lastStatus == null)){
+					//log.info "Setting thermostat mode to ${cold}"
+					def msg = "I changed your thermostat mode to ${cold} because temperature is below ${setLow}"
+					thermostat?."${cold}"()
+                    sendMessage(msg)
+                    }
 				state.lastStatus = "${cold}"
 			}
 			if (currentTemp > setHigh) {
-				//log.info "Setting thermostat mode to ${hot}"
-				def msg = "I changed your thermostat mode to ${hot} because ${sensor} temperature is above ${setHigh}"
-				thermostat?."${hot}"()
-
-				if (state.lastStatus != "${hot}"){
+            	if ((state.lastStatus == "${cold}") || (state.lastStatus == "${neutral}") || (state.lastStatus == null)){
+					//log.info "Setting thermostat mode to ${hot}"
+					def msg = "I changed your thermostat mode to ${hot} because temperature is above ${setHigh}"
+					thermostat?."${hot}"()
 					sendMessage(msg)
 				}
 				state.lastStatus = "${hot}"
 			}
 			if (currentTemp > setLow && currentTemp < setHigh) {
-				//log.info "Setting thermostat mode to ${neutral}"
-				def msg = "I changed your thermostat mode to ${neutral} because ${sensor} temperature is between ${setLow} and ${setHigh}"
-				thermostat?."${neutral}"()
-
-				if (state.lastStatus != "${neutral}"){
+            	if ((state.lastStatus == "${hot}") || (state.lastStatus == "${cold}") || (state.lastStatus == null)){
+					//log.info "Setting thermostat mode to ${neutral}"
+					def msg = "I changed your thermostat mode to ${neutral} because temperature is neutral"
+					thermostat?."${neutral}"()
 					sendMessage(msg)
 				}
 				state.lastStatus = "${neutral}"
 			}
-		}else{
+		}
+        else{
 			def delay = (turnOffDelay != null && turnOffDelay != "") ? turnOffDelay * 60 : 60
 			log.debug("Detected open doors.  Checking door states again")
 			runIn(delay, "doorCheck")
 		}
 	}
+}
+
+def appTouch(evt) {
+if(thermostat1){
+	state.lastStatusDisabled = state.lastStatus
+	state.lastStatus = "disabled"
+	def currentCoolSetpoint = thermostat1.latestValue("coolingSetpoint") as String
+    def currentHeatSetpoint = thermostat1.latestValue("heatingSetpoint") as String
+    def currentMode = thermostat1.latestValue("thermostatMode") as String
+	def mode = turnOnTherm
+    state.currentCoolSetpoint1 = currentCoolSetpoint
+    state.currentHeatSetpoint1 = currentHeatSetpoint
+    state.currentMode1 = currentMode
+    
+    	thermostat1."${mode}"()
+    	thermostat1.setCoolingSetpoint(coolingTemp)
+    	thermostat1.setHeatingSetpoint(heatingTemp)
+        
+    thermoShutOffTrigger()
+    log.debug("current coolingsetpoint is ${state.currentCoolSetpoint1}")
+    log.debug("current heatingsetpoint is ${state.currentHeatSetpoint1}")
+    log.debug("current mode is ${state.currentMode1}")
+    //thermostats.setCoolingSetpoint(currentCoolSetpoint)
+}    
+}
+
+def thermoShutOffTrigger() {
+    log.info("Starting timer to turn off thermostat")
+    def delay = (turnOffDelay2 != null && turnOffDelay2 != "") ? turnOffDelay2 * 60 : 60 
+    state.turnOffTime = now()
+	log.debug ("Turn off delay is ${delay}")
+    runIn(delay, "thermoShutOff")
+  }
+
+def thermoShutOff(){
+	def coolSetpoint = state.currentCoolSetpoint1
+    def heatSetpoint = state.currentHeatSetpoint1
+	def mode = state.currentMode1
+    def coolSetpoint1 = coolSetpoint.replaceAll("\\]", "").replaceAll("\\[", "")
+    def heatSetpoint1 = heatSetpoint.replaceAll("\\]", "").replaceAll("\\[", "")
+    def mode1 = mode.replaceAll("\\]", "").replaceAll("\\[", "")
+    
+	state.lastStatus = state.lastStatusDisabled
+	log.info("Returning thermostat back to normal")
+	thermostat1.setCoolingSetpoint("${coolSetpoint1}")
+    thermostat1.setHeatingSetpoint("${heatSetpoint1}")
+    thermostat1."${mode1}"()
 }
 
 def doorCheck(){
