@@ -1,7 +1,7 @@
 /**
  *  Lighting Director
  *
- *  Verion - 1.21
+ *  Verion - 1.2
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -1336,7 +1336,7 @@ def pageSetupScenarioJ() {
         }
 
 section("Devices included in the scene") {
-            input inputMotionxJ
+            input inputMotionJ
             input inputLightsJ
             input inputDimmersJ
             }
