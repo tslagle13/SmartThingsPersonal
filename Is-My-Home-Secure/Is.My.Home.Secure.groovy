@@ -1,6 +1,8 @@
 /**
  *  Is my home secure?
- *
+ *  
+ *  Version 1.1
+ * 
  *  Copyright 2014 Tim Slagle
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -81,8 +83,7 @@ def initialize(){
     if (timeToCheck != null) {
     	schedule(timeToCheck, checkDoor)
     }
-initializeVacation()
-schedule(timeToCheck, checkDoor)    
+initializeVacation()    
 }
 
 //set vacation mode if vacation mode is set
@@ -91,7 +92,7 @@ if(allOk){
 if (timeToCheckVacation){
     if (timeToCheckVacation > 4)
         // Schedule polling daemon to run every N minutes
-        schedule("0 0 0/${timeToCheckVacation} * * ?", checkDoor)
+        schedule("0 0/${timeToCheckVacation} * * * ?", checkDoor)
 }    
 }
 }
@@ -256,7 +257,6 @@ private getTimeIntervalLabel()
 private hideOptionsSection() {
 	(starting || ending || days || modes) ? false : true
 }
-
 
 
 
