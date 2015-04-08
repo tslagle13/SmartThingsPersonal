@@ -1,7 +1,7 @@
 /**
  *  Lighting Director
  *
- *  Verion - 1.21
+ *  Verion - 1.3
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -1985,11 +1985,11 @@ if(settings.O_motion) {
 }
 
 def onMotionA(evt) {
-def A_turnOnLuxTrigger = settings.A_turnOnLux as Integer
-def currentLux = settings.A_luxSensors.latestValue("illuminance") as Integer
+//def A_turnOnLuxTrigger = settings.A_turnOnLux as Integer
+//def currentLux = settings.A_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.A_mode == null) || (settings.A_mode.contains(location.mode))){
-if ((settings.A_luxSensors == null) || (currentLux <= A_turnOnLuxTrigger)){
+if ((settings.A_luxSensors == null) || (settings.A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
 def A_levelOn = settings.A_level as Integer
 def delayA = settings.A_turnOff * 60
 
@@ -2023,11 +2023,11 @@ def delayTurnOffA(){
 }
 
 def onMotionB(evt) {
-def B_turnOnLuxTrigger = settings.B_turnOnLux as Integer
-def currentLux = settings.B_luxSensors.latestValue("illuminance") as Integer
+//def B_turnOnLuxTrigger = settings.B_turnOnLux as Integer
+//def currentLux = settings.B_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.B_mode == null) || (settings.B_mode.contains(location.mode))){
-if ((settings.B_luxSensors == null) || (currentLux <= B_turnOnLuxTrigger)){
+if ((settings.B_luxSensors == null) || (settings.B_luxSensors.latestValue("illuminance") <= B_turnOnLux)){
 def B_levelOn = settings.B_level as Integer
 def delayB = settings.B_turnOff * 60
 
@@ -2062,11 +2062,11 @@ def delayTurnOffB(){
 
 
 def onMotionC(evt) {
-def C_turnOnLuxTrigger = settings.C_turnOnLux as Integer
-def currentLux = settings.C_luxSensors.latestValue("illuminance") as Integer
+//def C_turnOnLuxTrigger = settings.C_turnOnLux as Integer
+//def currentLux = settings.C_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.C_mode == null) || (settings.C_mode.contains(location.mode))){
-if ((settings.C_luxSensors == null) || (currentLux <= C_turnOnLuxTrigger)){
+if ((settings.C_luxSensors == null) || (settings.C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
 def C_levelOn = settings.C_level as Integer
 def delayC = settings.C_turnOff * 60
 
@@ -2101,11 +2101,11 @@ def delayTurnOffC(){
 
 
 def onMotionD(evt) {
-def D_turnOnLuxTrigger = settings.D_turnOnLux as Integer
-def currentLux = settings.D_luxSensors.latestValue("illuminance") as Integer
+//def D_turnOnLuxTrigger = settings.D_turnOnLux as Integer
+//def currentLux = settings.D_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.D_mode == null) || (settings.D_mode.contains(location.mode))){
-if ((settings.D_luxSensors == null) || (currentLux <= D_turnOnLuxTrigger)){
+if ((settings.D_luxSensors == null) || (settings.D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
 def D_levelOn = settings.D_level as Integer
 def delayD = settings.D_turnOff * 60
 
@@ -2140,11 +2140,11 @@ def delayTurnOffD(){
 
 
 def onMotionE(evt) {
-def E_turnOnLuxTrigger = settings.E_turnOnLux as Integer
-def currentLux = settings.E_luxSensors.latestValue("illuminance") as Integer
+//def E_turnOnLuxTrigger = settings.E_turnOnLux as Integer
+//def currentLux = settings.E_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.E_mode == null) || (settings.E_mode.contains(location.mode))){
-if ((settings.E_luxSensors == null) || (currentLux <= E_turnOnLuxTrigger)){
+if ((settings.E_luxSensors == null) || (settings.E_luxSensors.latestValue("illuminance") <= E_turnOnLux)){
 def E_levelOn = settings.E_level as Integer
 def delayE = settings.E_turnOff * 60
 
@@ -2178,11 +2178,11 @@ def delayTurnOffE(){
 }
 
 def onMotionF(evt) {
-def F_turnOnLuxTrigger = settings.F_turnOnLux as Integer
-def currentLux = settings.F_luxSensors.latestValue("illuminance") as Integer
+//def F_turnOnLuxTrigger = settings.F_turnOnLux as Integer
+//def currentLux = settings.F_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.F_mode == null) || (settings.F_mode.contains(location.mode))){
-if ((settings.F_luxSensors == null) || (currentLux <= F_turnOnLuxTrigger)){
+if ((settings.F_luxSensors == null) || (settings.F_luxSensors.latestValue("illuminance") <= F_turnOnLux)){
 def F_levelOn = settings.F_level as Integer
 def delayF = settings.F_turnOff * 60
 
@@ -2217,11 +2217,11 @@ def delayTurnOffF(){
 
 
 def onMotionG(evt) {
-def G_turnOnLuxTrigger = settings.G_turnOnLux as Integer
-def currentLux = settings.G_luxSensors.latestValue("illuminance") as Integer
+//def G_turnOnLuxTrigger = settings.G_turnOnLux as Integer
+//def currentLux = settings.G_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.G_mode == null) || (settings.G_mode.contains(location.mode))){
-if ((settings.G_luxSensors == null) || (currentLux <= G_turnOnLuxTrigger)){
+if ((settings.G_luxSensors == null) || (settings.G_luxSensors.latestValue("illuminance") <= G_turnOnLux)){
 def G_levelOn = settings.G_level as Integer
 def delayG = settings.G_turnOff * 60
 
@@ -2255,11 +2255,11 @@ def delayTurnOffG(){
 }
 
 def onMotionH(evt) {
-def H_turnOnLuxTrigger = settings.H_turnOnLux as Integer
-def currentLux = settings.H_luxSensors.latestValue("illuminance") as Integer
+//def H_turnOnLuxTrigger = settings.H_turnOnLux as Integer
+//def currentLux = settings.H_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.H_mode == null) || (settings.H_mode.contains(location.mode))){
-if ((settings.H_luxSensors == null) || (currentLux <= H_turnOnLuxTrigger)){
+if ((settings.H_luxSensors == null) || (settings.H_luxSensors.latestValue("illuminance") <= H_turnOnLux)){
 def H_levelOn = settings.H_level as Integer
 def delayH = settings.H_turnOff * 60
 
@@ -2293,11 +2293,11 @@ def delayTurnOffH(){
 }
 
 def onMotionI(evt) {
-def I_turnOnLuxTrigger = settings.I_turnOnLux as Integer
-def currentLux = settings.I_luxSensors.latestValue("illuminance") as Integer
+//def I_turnOnLuxTrigger = settings.I_turnOnLux as Integer
+//def currentLux = settings.I_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.I_mode == null) || (settings.I_mode.contains(location.mode))){
-if ((settings.I_luxSensors == null) || (currentLux <= I_turnOnLuxTrigger)){
+if ((settings.I_luxSensors == null) || (settings.I_luxSensors.latestValue("illuminance") <= I_turnOnLux)){
 def I_levelOn = settings.I_level as Integer
 def delayI = settings.I_turnOff * 60
 
@@ -2331,11 +2331,11 @@ def delayTurnOffI(){
 }
 
 def onMotionJ(evt) {
-def J_turnOnLuxTrigger = settings.J_turnOnLux as Integer
-def currentLux = settings.J_luxSensors.latestValue("illuminance") as Integer
+//def J_turnOnLuxTrigger = settings.J_turnOnLux as Integer
+//def currentLux = settings.J_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.J_mode == null) || (settings.J_mode.contains(location.mode))){
-if ((settings.J_luxSensors == null) || (currentLux <= J_turnOnLuxTrigger)){
+if ((settings.J_luxSensors == null) || (settings.J_luxSensors.latestValue("illuminance") <= J_turnOnLux)){
 def J_levelOn = settings.J_level as Integer
 def delayJ = settings.J_turnOff * 60
 
@@ -2369,11 +2369,11 @@ def delayTurnOffJ(){
 }
 
 def onMotionK(evt) {
-def K_turnOnLuxTrigger = settings.K_turnOnLux as Integer
-def currentLux = settings.K_luxSensors.latestValue("illuminance") as Integer
+//def K_turnOnLuxTrigger = settings.K_turnOnLux as Integer
+//def currentLux = settings.K_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.K_mode == null) || (settings.K_mode.contains(location.mode))){
-if ((settings.K_luxSensors == null) || (currentLux <= K_turnOnLuxTrigger)){
+if ((settings.K_luxSensors == null) || (settings.K_luxSensors.latestValue("illuminance") <= K_turnOnLux)){
 def K_levelOn = settings.K_level as Integer
 def delayK = settings.K_turnOff * 60
 
@@ -2407,11 +2407,11 @@ def delayTurnOffK(){
 }
 
 def onMotionL(evt) {
-def L_turnOnLuxTrigger = settings.L_turnOnLux as Integer
-def currentLux = settings.L_luxSensors.latestValue("illuminance") as Integer
+//def L_turnOnLuxTrigger = settings.L_turnOnLux as Integer
+//def currentLux = settings.L_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.L_mode == null) || (settings.L_mode.contains(location.mode))){
-if ((settings.L_luxSensors == null) || (currentLux <= L_turnOnLuxTrigger)){
+if ((settings.L_luxSensors == null) || (settings.L_luxSensors.latestValue("illuminance") <= L_turnOnLux)){
 def L_levelOn = settings.L_level as Integer
 def delayL = settings.L_turnOff * 60
 
@@ -2445,11 +2445,11 @@ def delayTurnOffL(){
 }
 
 def onMotionM(evt) {
-def M_turnOnLuxTrigger = settings.M_turnOnLux as Integer
-def currentLux = settings.M_luxSensors.latestValue("illuminance") as Integer
+//def M_turnOnLuxTrigger = settings.M_turnOnLux as Integer
+//def currentLux = settings.M_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.M_mode == null) || (settings.M_mode.contains(location.mode))){
-if ((settings.M_luxSensors == null) || (currentLux <= M_turnOnLuxTrigger)){
+if ((settings.M_luxSensors == null) || (settings.M_luxSensors.latestValue("illuminance") <= M_turnOnLux)){
 def M_levelOn = settings.M_level as Integer
 def delayM = settings.M_turnOff * 60
 
@@ -2483,10 +2483,11 @@ def delayTurnOffM(){
 }
 
 def onMotionN(evt) {
-def N_turnOnLuxTrigger = settings.N_turnOnLux as Integer
-def currentLux = settings.N_luxSensors.latestValue("illuminance") as Integer
+//def N_turnOnLuxTrigger = settings.N_turnOnLux as Integer
+//def currentLux = settings.N_luxSensors.latestValue("illuminance") as Integer
+
 if ((settings.N_mode == null) || (settings.N_mode.contains(location.mode))){
-if ((settings.N_luxSensors == null) || (currentLux <= N_turnOnLuxTrigger)){
+if ((settings.N_luxSensors == null) || (settings.N_luxSensors.latestValue("illuminance") <= N_turnOnLux)){
 def N_levelOn = settings.N_level as Integer
 def delayN = settings.N_turnOff * 60
 
@@ -2520,11 +2521,11 @@ def delayTurnOffN(){
 }
 
 def onMotionO(evt) {
-def O_turnOnLuxTrigger = settings.O_turnOnLux as Integer
-def currentLux = settings.O_luxSensors.latestValue("illuminance") as Integer
+//def O_turnOnLuxTrigger = settings.O_turnOnLux as Integer
+//def currentLux = settings.O_luxSensors.latestValue("illuminance") as Integer
 
 if ((settings.O_mode == null) || (settings.O_mode.contains(location.mode))){
-if ((settings.O_luxSensors == null) || (currentLux <= O_turnOnLuxTrigger)){
+if ((settings.O_luxSensors == null) || (settings.O_luxSensors.latestValue("illuminance") <= O_turnOnLux)){
 def O_levelOn = settings.O_level as Integer
 def delayO = settings.O_turnOff * 60
 
