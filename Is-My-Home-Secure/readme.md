@@ -1,1 +1,0 @@
-This app monitors your doors, windows, and locks after mode changes, certain time of day, or on a schedule(vacation mode). Can also lock doors if they are found to be unlocked on that mode change. When push notifications are pushed is also customize-able, as is if you want a SMS, Push, or both.
