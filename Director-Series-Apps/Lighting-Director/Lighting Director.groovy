@@ -1,7 +1,8 @@
 /**
  *  Lighting Director
  *
- *  Verion - 1.3
+ *  Version - 1.3
+ *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -247,8 +248,8 @@ if (settings.ScenarioNameO == null) {
 // Show "pageSetupScenarioA" page
 def pageSetupScenarioA() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsA = [
@@ -358,8 +359,8 @@ section("Help") {
 
 def pageSetupScenarioB() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsB = [
@@ -469,8 +470,8 @@ section("Help") {
 
 def pageSetupScenarioC() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsC = [
@@ -580,8 +581,8 @@ section("Help") {
 
 def pageSetupScenarioD() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsD = [
@@ -691,8 +692,8 @@ section("Help") {
 
 def pageSetupScenarioE() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsE = [
@@ -802,8 +803,8 @@ section("Help") {
 
 def pageSetupScenarioF() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsF = [
@@ -913,8 +914,8 @@ section("Help") {
 
 def pageSetupScenarioG() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsG = [
@@ -1024,8 +1025,8 @@ section("Help") {
 
 def pageSetupScenarioH() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsH = [
@@ -1135,8 +1136,8 @@ section("Help") {
 
 def pageSetupScenarioI() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsI = [
@@ -1246,8 +1247,8 @@ section("Help") {
 
 def pageSetupScenarioJ() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsJ = [
@@ -1357,8 +1358,8 @@ section("Help") {
 
 def pageSetupScenarioK() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsK = [
@@ -1468,8 +1469,8 @@ section("Help") {
 
 def pageSetupScenarioL() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsL = [
@@ -1579,8 +1580,8 @@ section("Help") {
 
 def pageSetupScenarioM() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsM = [
@@ -1690,8 +1691,8 @@ section("Help") {
 
 def pageSetupScenarioN() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsN = [
@@ -1801,8 +1802,8 @@ section("Help") {
 
 def pageSetupScenarioO() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsO = [
@@ -2557,5 +2558,3 @@ def delayTurnOffO(){
 	settings.O_switches?.off()
 	settings.O_dimmers?.setLevel(0)
 }
-
-
