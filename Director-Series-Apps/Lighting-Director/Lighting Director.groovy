@@ -2,7 +2,7 @@
  *  Lighting Director
  *
  *  Version - 1.3
- *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text
+ *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and null title. New icon.
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -47,9 +47,9 @@ definition(
     author: "Tim Slagle",
     description: "Control up to 15 sets (scenes) of lights based on motion activity and lux levels.",
     category: "Convenience",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+    iconUrl: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector.png",
+    iconX2Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png",
+    iconX3Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png")
 
 
 
@@ -2618,3 +2618,4 @@ def delayTurnOffO(){
 	settings.O_switches?.off()
 	settings.O_dimmers?.setLevel(0)
 }
+
