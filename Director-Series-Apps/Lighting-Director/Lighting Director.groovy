@@ -1,7 +1,8 @@
 /**
  *  Lighting Director
  *
- *  Verion - 1.3
+ *  Version - 1.3
+ *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and null title. New icon.
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -46,9 +47,9 @@ definition(
     author: "Tim Slagle",
     description: "Control up to 15 sets (scenes) of lights based on motion activity and lux levels.",
     category: "Convenience",
-    iconUrl: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience.png",
-    iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png",
-    iconX3Url: "https://s3.amazonaws.com/smartapp-icons/Convenience/Cat-Convenience@2x.png")
+    iconUrl: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector.png",
+    iconX2Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png",
+    iconX3Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png")
 
 
 
@@ -247,8 +248,8 @@ if (settings.ScenarioNameO == null) {
 // Show "pageSetupScenarioA" page
 def pageSetupScenarioA() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsA = [
@@ -324,9 +325,13 @@ def pageSetupScenarioA() {
         defaultValue: empty
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameA) {
+        	pageName = settings.ScenarioNameA
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioA",
-        title:      "${settings.ScenarioNameA}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -358,8 +363,8 @@ section("Help") {
 
 def pageSetupScenarioB() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsB = [
@@ -435,9 +440,13 @@ def pageSetupScenarioB() {
         defaultValue: empty
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameB) {
+        	pageName = settings.ScenarioNameB
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioB",
-        title:      "${settings.ScenarioNameB}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -469,8 +478,8 @@ section("Help") {
 
 def pageSetupScenarioC() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsC = [
@@ -546,9 +555,13 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameC) {
+        	pageName = settings.ScenarioNameC
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioC",
-        title:      "${settings.ScenarioNameC}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -580,8 +593,8 @@ section("Help") {
 
 def pageSetupScenarioD() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsD = [
@@ -657,9 +670,13 @@ def pageSetupScenarioD() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameD) {
+        	pageName = settings.ScenarioNameD
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioD",
-        title:      "${settings.ScenarioNameD}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -691,8 +708,8 @@ section("Help") {
 
 def pageSetupScenarioE() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsE = [
@@ -768,9 +785,13 @@ def pageSetupScenarioE() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameE) {
+        	pageName = settings.ScenarioNameE
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioE",
-        title:      "${settings.ScenarioNameE}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -802,8 +823,8 @@ section("Help") {
 
 def pageSetupScenarioF() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsF = [
@@ -879,9 +900,13 @@ def pageSetupScenarioF() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameF) {
+        	pageName = settings.ScenarioNameF
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioF",
-        title:      "${settings.ScenarioNameF}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -913,8 +938,8 @@ section("Help") {
 
 def pageSetupScenarioG() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsG = [
@@ -990,9 +1015,13 @@ def pageSetupScenarioG() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameG) {
+        	pageName = settings.ScenarioNameG
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioG",
-        title:      "${settings.ScenarioNameG}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1024,8 +1053,8 @@ section("Help") {
 
 def pageSetupScenarioH() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsH = [
@@ -1101,9 +1130,13 @@ def pageSetupScenarioH() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameH) {
+        	pageName = settings.ScenarioNameH
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioH",
-        title:      "${settings.ScenarioNameH}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1135,8 +1168,8 @@ section("Help") {
 
 def pageSetupScenarioI() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsI = [
@@ -1212,9 +1245,13 @@ def pageSetupScenarioI() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameI) {
+        	pageName = settings.ScenarioNameI
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioI",
-        title:      "${settings.ScenarioNameI}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1246,8 +1283,8 @@ section("Help") {
 
 def pageSetupScenarioJ() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsJ = [
@@ -1323,9 +1360,13 @@ def pageSetupScenarioJ() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameJ) {
+        	pageName = settings.ScenarioNameJ
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioJ",
-        title:      "${settings.ScenarioNameJ}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1357,8 +1398,8 @@ section("Help") {
 
 def pageSetupScenarioK() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsK = [
@@ -1434,9 +1475,13 @@ def pageSetupScenarioK() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameK) {
+        	pageName = settings.ScenarioNameK
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioK",
-        title:      "${settings.ScenarioNameK}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1468,8 +1513,8 @@ section("Help") {
 
 def pageSetupScenarioL() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsL = [
@@ -1545,9 +1590,13 @@ def pageSetupScenarioL() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameL) {
+        	pageName = settings.ScenarioNameL
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioL",
-        title:      "${settings.ScenarioNameL}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1579,8 +1628,8 @@ section("Help") {
 
 def pageSetupScenarioM() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsM = [
@@ -1656,9 +1705,13 @@ def pageSetupScenarioM() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameM) {
+        	pageName = settings.ScenarioNameM
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioM",
-        title:      "${settings.ScenarioNameM}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1690,8 +1743,8 @@ section("Help") {
 
 def pageSetupScenarioN() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsN = [
@@ -1766,10 +1819,14 @@ def pageSetupScenarioN() {
         multiple:   false,
         required:   false
     ]
-    
+ 	
+    def pageName =""
+    if (settings.ScenarioNameN) {
+        	pageName = settings.ScenarioNameN
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioN",
-        title:      "${settings.ScenarioNameN}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -1801,8 +1858,8 @@ section("Help") {
 
 def pageSetupScenarioO() {
     def helpPage =
-        "Select a motion sensor to control a set of lights." +
-        "Each scenario can control dimmers and switches but can" +
+        "Select a motion sensor to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
         "also be restricted to mode and turned off after motions stops."
 
     def inputLightsO = [
@@ -1878,9 +1935,13 @@ def pageSetupScenarioO() {
         required:   false
     ]
     
+    def pageName = ""
+    if (settings.ScenarioNameO) {
+        	pageName = settings.ScenarioNameO
+   		}
     def pageProperties = [
         name:       "pageSetupScenarioO",
-        title:      "${settings.ScenarioNameO}",
+        title:      "${pageName}",
         nextPage:   "pageSetup",
         uninstall:  true
     ]
@@ -2557,5 +2618,4 @@ def delayTurnOffO(){
 	settings.O_switches?.off()
 	settings.O_dimmers?.setLevel(0)
 }
-
 
