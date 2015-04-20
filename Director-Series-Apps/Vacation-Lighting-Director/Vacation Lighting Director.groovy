@@ -1,7 +1,7 @@
 /**
  *  Vacation Lighting Director
  *
- *  Version 1.0
+ *  Version 1.1
  * 
  *  Copyright 2015 Tim Slagle
  *
