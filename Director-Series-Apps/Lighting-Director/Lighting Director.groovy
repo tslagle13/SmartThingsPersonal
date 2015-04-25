@@ -2,7 +2,8 @@
  *  Lighting Director
  *
  *  Version - 1.3
- *	Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios
+ *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
+ * 
  *
  *  Copyright 2015 Tim Slagle
  *
