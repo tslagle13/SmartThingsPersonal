@@ -4,7 +4,7 @@
  *  Version - 1.3
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
- *
+ *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -77,143 +77,7 @@ preferences {
 
 // Show setup page
 def pageSetup() {
-if (settings.ScenarioNameA == null) {
-        settings.ScenarioNameA = "Empty"
-        settings.EditNameA = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameA = "Tap to edit scene"
-    }
 
-
-if (settings.ScenarioNameB == null) {
-        settings.ScenarioNameB = "Empty"
-    settings.EditNameB = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameB = "Tap to edit scene"
-    }
-    
-
-if (settings.ScenarioNameC == null) {
-        settings.ScenarioNameC = "Empty"
-    settings.EditNameC = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameC = "Tap to edit scene"
-    }
-
-
-if (settings.ScenarioNameD == null) {
-        settings.ScenarioNameD = "Empty"
-    settings.EditNameD = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameD = "Tap to edit scene"
-    }   
-
-
-if (settings.ScenarioNameE == null) {
-        settings.ScenarioNameE = "Empty"
-    settings.EditNameE = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameE = "Tap to edit scene"
-    }
-
-
-if (settings.ScenarioNameF == null) {
-        settings.ScenarioNameF = "Empty"
-    settings.EditNameF = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameF = "Tap to edit scene"
-    }    
-
-
-if (settings.ScenarioNameG == null) {
-        settings.ScenarioNameG = "Empty"
-    settings.EditNameG = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameG = "Tap to edit scene"
-    }    
-
-
-if (settings.ScenarioNameH == null) {
-        settings.ScenarioNameH = "Empty"
-    settings.EditNameH = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameH = "Tap to edit scene"
-    }    
-
-
-if (settings.ScenarioNameI == null) {
-        settings.ScenarioNameI = "Empty"
-    settings.EditNameI = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameI = "Tap to edit scene"
-    }    
-
-
-if (settings.ScenarioNameJ == null) {
-        settings.ScenarioNameJ = "Empty"
-    settings.EditNameJ = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameJ = "Tap to edit scene"
-    }   
-
-
-if (settings.ScenarioNameK == null) {
-        settings.ScenarioNameK = "Empty"
-    settings.EditNameK = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameK = "Tap to edit scene"
-    }    
-
-
-if (settings.ScenarioNameL == null) {
-        settings.ScenarioNameL = "Empty"
-    settings.EditNameL = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameL = "Tap to edit scene"
-    }    
-
-
-if (settings.ScenarioNameM == null) {
-        settings.ScenarioNameM = "Empty"
-    settings.EditNameM = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameM = "Tap to edit scene"
-    }   
-
-
-if (settings.ScenarioNameN == null) {
-        settings.ScenarioNameN = "Empty"
-    settings.EditNameN = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameN = "Tap to edit scene"
-    }
-
-
-if (settings.ScenarioNameO == null) {
-        settings.ScenarioNameO = "Empty" 
-    settings.EditNameO = "Tap to create a scene"
-    }
-    else {
-    settings.EditNameO = "Tap to edit scene"
-    }
-
-	
-
-    
     def pageProperties = [
         name:       "pageSetup",
         title:      "Status",
@@ -222,24 +86,23 @@ if (settings.ScenarioNameO == null) {
         uninstall:  true
     ]
 
-
-    return dynamicPage(pageProperties) {
+	return dynamicPage(pageProperties) {
         section("Setup Menu") {
-            href "pageSetupScenarioA", title:"${settings.ScenarioNameA}", description:"${settings.EditNameA}", state: greyOut(settings.ScenarioNameA)
-            href "pageSetupScenarioB", title:"${settings.ScenarioNameB}", description:"${settings.EditNameB}", state: greyOut(settings.ScenarioNameB)
-            href "pageSetupScenarioC", title:"${settings.ScenarioNameC}", description:"${settings.EditNameC}", state: greyOut(settings.ScenarioNameC)
-            href "pageSetupScenarioD", title:"${settings.ScenarioNameD}", description:"${settings.EditNameD}", state: greyOut(settings.ScenarioNameD)
-            href "pageSetupScenarioE", title:"${settings.ScenarioNameE}", description:"${settings.EditNameE}", state: greyOut(settings.ScenarioNameE)
-            href "pageSetupScenarioF", title:"${settings.ScenarioNameF}", description:"${settings.EditNameF}", state: greyOut(settings.ScenarioNameF)
-            href "pageSetupScenarioG", title:"${settings.ScenarioNameG}", description:"${settings.EditNameG}", state: greyOut(settings.ScenarioNameG)
-            href "pageSetupScenarioH", title:"${settings.ScenarioNameH}", description:"${settings.EditNameH}", state: greyOut(settings.ScenarioNameH)
-            href "pageSetupScenarioI", title:"${settings.ScenarioNameI}", description:"${settings.EditNameI}", state: greyOut(settings.ScenarioNameI)
-            href "pageSetupScenarioJ", title:"${settings.ScenarioNameJ}", description:"${settings.EditNameJ}", state: greyOut(settings.ScenarioNameJ)
-            href "pageSetupScenarioK", title:"${settings.ScenarioNameK}", description:"${settings.EditNameK}", state: greyOut(settings.ScenarioNameK)
-            href "pageSetupScenarioL", title:"${settings.ScenarioNameL}", description:"${settings.EditNameL}", state: greyOut(settings.ScenarioNameL)
-            href "pageSetupScenarioM", title:"${settings.ScenarioNameM}", description:"${settings.EditNameM}", state: greyOut(settings.ScenarioNameM)
-            href "pageSetupScenarioN", title:"${settings.ScenarioNameN}", description:"${settings.EditNameN}", state: greyOut(settings.ScenarioNameN)
-            href "pageSetupScenarioO", title:"${settings.ScenarioNameO}", description:"${settings.EditNameO}", state: greyOut(settings.ScenarioNameO)
+            href "pageSetupScenarioA", title: getTitle(settings.ScenarioNameA), description: getDesc(settings.ScenarioNameA), state: greyOut(settings.ScenarioNameA)
+            href "pageSetupScenarioB", title: getTitle(settings.ScenarioNameB), description: getDesc(settings.ScenarioNameB), state: greyOut(settings.ScenarioNameB)
+            href "pageSetupScenarioC", title: getTitle(settings.ScenarioNameC), description: getDesc(settings.ScenarioNameC), state: greyOut(settings.ScenarioNameC)
+			href "pageSetupScenarioD", title: getTitle(settings.ScenarioNameD), description: getDesc(settings.ScenarioNameD), state: greyOut(settings.ScenarioNameD)
+            href "pageSetupScenarioE", title: getTitle(settings.ScenarioNameE), description: getDesc(settings.ScenarioNameE), state: greyOut(settings.ScenarioNameE)
+            href "pageSetupScenarioF", title: getTitle(settings.ScenarioNameF), description: getDesc(settings.ScenarioNameF), state: greyOut(settings.ScenarioNameF)
+            href "pageSetupScenarioG", title: getTitle(settings.ScenarioNameG), description: getDesc(settings.ScenarioNameG), state: greyOut(settings.ScenarioNameG)
+            href "pageSetupScenarioH", title: getTitle(settings.ScenarioNameH), description: getDesc(settings.ScenarioNameH), state: greyOut(settings.ScenarioNameH)
+            href "pageSetupScenarioI", title: getTitle(settings.ScenarioNameI), description: getDesc(settings.ScenarioNameI), state: greyOut(settings.ScenarioNameI)
+            href "pageSetupScenarioJ", title: getTitle(settings.ScenarioNameJ), description: getDesc(settings.ScenarioNameJ), state: greyOut(settings.ScenarioNameJ)
+            href "pageSetupScenarioK", title: getTitle(settings.ScenarioNameK), description: getDesc(settings.ScenarioNameK), state: greyOut(settings.ScenarioNameK)
+            href "pageSetupScenarioL", title: getTitle(settings.ScenarioNameL), description: getDesc(settings.ScenarioNameL), state: greyOut(settings.ScenarioNameL)
+            href "pageSetupScenarioM", title: getTitle(settings.ScenarioNameM), description: getDesc(settings.ScenarioNameM), state: greyOut(settings.ScenarioNameM)
+            href "pageSetupScenarioN", title: getTitle(settings.ScenarioNameN), description: getDesc(settings.ScenarioNameN), state: greyOut(settings.ScenarioNameN)
+            href "pageSetupScenarioO", title: getTitle(settings.ScenarioNameO), description: getDesc(settings.ScenarioNameO), state: greyOut(settings.ScenarioNameO)
             }
         section([title:"Options", mobileOnly:true]) {
             label title:"Assign a name", required:false
@@ -286,6 +149,20 @@ def pageSetupScenarioA() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartA = [
+        name:       "A_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndA = [
+        name:       "A_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -359,6 +236,8 @@ section("Scene settings") {
             input inputLuxSensorsA
             input inputTurnOffA
             input inputModeA
+            input inputTimeStartA
+            input inputTimeEndA
             }
 
 section("Help") {
@@ -423,7 +302,19 @@ def pageSetupScenarioB() {
         multiple:   true,
         required:   false
     ]
+    def inputTimeStartB = [
+        name:       "B_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
     
+    def inputTimeEndB = [
+        name:       "B_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
+        required:   false
+    ]
     def inputLevelB = [
         name:       "B_level",
         type:       "enum",
@@ -478,6 +369,8 @@ section("Scene settings") {
             input inputLuxSensorsB
             input inputTurnOffB
             input inputModeB
+            input inputTimeStartB
+            input inputTimeEndB
             }
 
 section("Help") {
@@ -524,6 +417,20 @@ def pageSetupScenarioC() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartC = [
+        name:       "C_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndC = [
+        name:       "C_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -597,6 +504,8 @@ section("Scene settings") {
             input inputLuxSensorsC
             input inputTurnOffC
             input inputModeC
+            input inputTimeStartC
+            input inputTimeEndC
             }
 
 section("Help") {
@@ -643,6 +552,20 @@ def pageSetupScenarioD() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartD = [
+        name:       "D_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndD = [
+        name:       "D_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -716,6 +639,8 @@ section("Scene settings") {
             input inputLuxSensorsD
             input inputTurnOffD
             input inputModeD
+            input inputTimeStartD
+            input inputTimeEndD
             }
 
 section("Help") {
@@ -762,6 +687,20 @@ def pageSetupScenarioE() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartE = [
+        name:       "E_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndE = [
+        name:       "E_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -835,6 +774,8 @@ section("Scene settings") {
             input inputLuxSensorsE
             input inputTurnOffE
             input inputModeE
+            input inputTimeStartE
+            input inputTimeEndE
             }
 
 section("Help") {
@@ -881,6 +822,20 @@ def pageSetupScenarioF() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartF = [
+        name:       "F_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndF = [
+        name:       "F_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -954,6 +909,8 @@ section("Scene settings") {
             input inputLuxSensorsF
             input inputTurnOffF
             input inputModeF
+            input inputTimeStartF
+            input inputTimeEndF
             }
 
 section("Help") {
@@ -1000,6 +957,20 @@ def pageSetupScenarioG() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartG = [
+        name:       "G_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndG = [
+        name:       "G_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -1073,6 +1044,8 @@ section("Scene settings") {
             input inputLuxSensorsG
             input inputTurnOffG
             input inputModeG
+            input inputTimeStartG
+            input inputTimeEndG
             }
 
 section("Help") {
@@ -1119,6 +1092,20 @@ def pageSetupScenarioH() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartH = [
+        name:       "H_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndH = [
+        name:       "H_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -1192,6 +1179,8 @@ section("Scene settings") {
             input inputLuxSensorsH
             input inputTurnOffH
             input inputModeH
+            input inputTimeStartH
+            input inputTimeEndH
             }
 
 section("Help") {
@@ -1238,6 +1227,20 @@ def pageSetupScenarioI() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartI = [
+        name:       "I_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndA = [
+        name:       "I_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -1311,6 +1314,8 @@ section("Scene settings") {
             input inputLuxSensorsI
             input inputTurnOffI
             input inputModeI
+            input inputTimeStartI
+            input inputTimeEndI
             }
 
 section("Help") {
@@ -1357,6 +1362,20 @@ def pageSetupScenarioJ() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartJ = [
+        name:       "J_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndJ = [
+        name:       "J_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -1430,6 +1449,8 @@ section("Scene settings") {
             input inputLuxSensorsJ
             input inputTurnOffJ
             input inputModeJ
+            input inputTimeStartJ
+            input inputTimeEndJ
             }
 
 section("Help") {
@@ -1476,6 +1497,20 @@ def pageSetupScenarioK() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartK = [
+        name:       "K_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndK = [
+        name:       "K_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -1549,6 +1584,8 @@ section("Scene settings") {
             input inputLuxSensorsK
             input inputTurnOffK
             input inputModeK
+            input inputTimeStartK
+            input inputTimeEndak
             }
 
 section("Help") {
@@ -1597,6 +1634,20 @@ def pageSetupScenarioL() {
         multiple:   true,
         required:   false
     ]
+    
+    def inputTimeStartL = [
+        name:       "L_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndL = [
+        name:       "L_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
+        required:   false
+    ]    
     
     def inputLevelL = [
         name:       "L_level",
@@ -1668,6 +1719,8 @@ section("Scene settings") {
             input inputLuxSensorsL
             input inputTurnOffL
             input inputModeL
+            input inputTimeStartL
+            input inputTimeEndL
             }
 
 section("Help") {
@@ -1714,6 +1767,20 @@ def pageSetupScenarioM() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartM = [
+        name:       "M_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndM = [
+        name:       "M_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -1787,6 +1854,8 @@ section("Scene settings") {
             input inputLuxSensorsM
             input inputTurnOffM
             input inputModeM
+            input inputTimeStartM
+            input inputTimeEndM
             }
 
 section("Help") {
@@ -1833,6 +1902,20 @@ def pageSetupScenarioN() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartN = [
+        name:       "N_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndN = [
+        name:       "N_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -1906,6 +1989,8 @@ section("Scene settings") {
             input inputLuxSensorsN
             input inputTurnOffN
             input inputModeN
+            input inputTimeStartN
+            input inputTimeEndN
             }
 
 section("Help") {
@@ -1952,6 +2037,20 @@ def pageSetupScenarioO() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
+        required:   false
+    ]
+    
+    def inputTimeStartO = [
+        name:       "O_timeStart",
+        type:       "time",
+        title:      "Run between (time)...",
+        required:   false
+    ]
+    
+    def inputTimeEndO = [
+        name:       "O_timeEnd",
+        type:       "time",
+        title:      "And (time)...",
         required:   false
     ]
     
@@ -2025,6 +2124,8 @@ section("Scene settings") {
             input inputLuxSensorsO
             input inputTurnOffO
             input inputModeO
+            input inputTimeStartO
+            input inputTimeEndO
             }
 
 section("Help") {
@@ -2170,7 +2271,7 @@ if(settings.O_contact) {
 
 def onEventA(evt) {
 
-if ((settings.A_mode == null) || (settings.A_mode.contains(location.mode))){
+if ((settings.A_mode==null || settings.A_mode.contains(location.mode)) && getTimeOk (A_timeStart, A_timeEnd)){
 if ((settings.A_luxSensors == null) || (settings.A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
 def A_levelOn = settings.A_level as Integer
 def delayA = settings.A_turnOff * 60
@@ -2209,7 +2310,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2220,7 +2321,7 @@ def delayTurnOffA(){
 
 def onEventB(evt) {
 
-if ((settings.B_mode == null) || (settings.B_mode.contains(location.mode))){
+if ((settings.B_mode==null || settings.B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_timeEnd)){
 if ((settings.B_luxSensors == null) || (settings.B_luxSensors.latestValue("illuminance") <= B_turnOnLux)){
 def B_levelOn = settings.B_level as Integer
 def delayB = settings.B_turnOff * 60
@@ -2259,7 +2360,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2272,7 +2373,7 @@ def delayTurnOffB(){
 def onEventC(evt) {
 
 
-if ((settings.C_mode == null) || (settings.C_mode.contains(location.mode))){
+if ((settings.C_mode==null || settings.C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_timeEnd)){
 if ((settings.C_luxSensors == null) || (settings.C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
 def C_levelOn = settings.C_level as Integer
 def delayC = settings.C_turnOff * 60
@@ -2311,7 +2412,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2323,7 +2424,7 @@ def delayTurnOffC(){
 
 def onEventD(evt) {
 
-if ((settings.D_mode == null) || (settings.D_mode.contains(location.mode))){
+if ((settings.D_mode==null || settings.D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_timeEnd)){
 if ((settings.D_luxSensors == null) || (settings.D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
 def D_levelOn = settings.D_level as Integer
 def delayD = settings.D_turnOff * 60
@@ -2362,7 +2463,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2374,7 +2475,7 @@ def delayTurnOffD(){
 
 def onEventE(evt) {
 
-if ((settings.E_mode == null) || (settings.E_mode.contains(location.mode))){
+if ((settings.E_mode==null || settings.E_mode.contains(location.mode)) && getTimeOk (E_timeStart, E_timeEnd)){
 if ((settings.E_luxSensors == null) || (settings.E_luxSensors.latestValue("illuminance") <= E_turnOnLux)){
 def E_levelOn = settings.E_level as Integer
 def delayE = settings.E_turnOff * 60
@@ -2413,7 +2514,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2424,7 +2525,7 @@ def delayTurnOffE(){
 
 def onEventF(evt) {
 
-if ((settings.F_mode == null) || (settings.F_mode.contains(location.mode))){
+if ((settings.F_mode==null || settings.F_mode.contains(location.mode)) && getTimeOk (F_timeStart, F_timeEnd)){
 if ((settings.F_luxSensors == null) || (settings.F_luxSensors.latestValue("illuminance") <= F_turnOnLux)){
 def F_levelOn = settings.F_level as Integer
 def delayF = settings.F_turnOff * 60
@@ -2463,7 +2564,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2475,7 +2576,7 @@ def delayTurnOffF(){
 
 def onEventG(evt) {
 
-if ((settings.G_mode == null) || (settings.G_mode.contains(location.mode))){
+if ((settings.G_mode==null || settings.G_mode.contains(location.mode)) && getTimeOk (G_timeStart, G_timeEnd)){
 if ((settings.G_luxSensors == null) || (settings.G_luxSensors.latestValue("illuminance") <= G_turnOnLux)){
 def G_levelOn = settings.G_level as Integer
 def delayG = settings.G_turnOff * 60
@@ -2514,7 +2615,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2525,7 +2626,7 @@ def delayTurnOffG(){
 
 def onEventH(evt) {
 
-if ((settings.H_mode == null) || (settings.H_mode.contains(location.mode))){
+if ((settings.H_mode==null || settings.H_mode.contains(location.mode)) && getTimeOk (H_timeStart, H_timeEnd)){
 if ((settings.H_luxSensors == null) || (settings.H_luxSensors.latestValue("illuminance") <= H_turnOnLux)){
 def H_levelOn = settings.H_level as Integer
 def delayH = settings.H_turnOff * 60
@@ -2564,7 +2665,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2575,7 +2676,7 @@ def delayTurnOffH(){
 
 def onEventI(evt) {
 
-if ((settings.I_mode == null) || (settings.I_mode.contains(location.mode))){
+if ((settings.I_mode==null || settings.I_mode.contains(location.mode)) && getTimeOk (I_timeStart, I_timeEnd)){
 if ((settings.I_luxSensors == null) || (settings.I_luxSensors.latestValue("illuminance") <= I_turnOnLux)){
 def I_levelOn = settings.I_level as Integer
 def delayI = settings.I_turnOff * 60
@@ -2614,7 +2715,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2625,7 +2726,7 @@ def delayTurnOffI(){
 
 def onEventJ(evt) {
 
-if ((settings.J_mode == null) || (settings.J_mode.contains(location.mode))){
+if ((settings.J_mode==null || settings.J_mode.contains(location.mode)) && getTimeOk (J_timeStart, J_timeEnd)){
 if ((settings.J_luxSensors == null) || (settings.J_luxSensors.latestValue("illuminance") <= J_turnOnLux)){
 def J_levelOn = settings.J_level as Integer
 def delayJ = settings.J_turnOff * 60
@@ -2664,7 +2765,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2675,7 +2776,7 @@ def delayTurnOffJ(){
 
 def onEventK(evt) {
 
-if ((settings.K_mode == null) || (settings.K_mode.contains(location.mode))){
+if ((settings.K_mode==null || settings.K_mode.contains(location.mode)) && getTimeOk (K_timeStart, K_timeEnd)){
 if ((settings.K_luxSensors == null) || (settings.K_luxSensors.latestValue("illuminance") <= K_turnOnLux)){
 def K_levelOn = settings.K_level as Integer
 def delayK = settings.K_turnOff * 60
@@ -2714,7 +2815,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2725,7 +2826,7 @@ def delayTurnOffK(){
 
 def onEventL(evt) {
 
-if ((settings.L_mode == null) || (settings.L_mode.contains(location.mode))){
+if ((settings.L_mode==null || settings.L_mode.contains(location.mode)) && getTimeOk (L_timeStart, L_timeEnd)){
 if ((settings.L_luxSensors == null) || (settings.L_luxSensors.latestValue("illuminance") <= L_turnOnLux)){
 def L_levelOn = settings.L_level as Integer
 def delayL = settings.L_turnOff * 60
@@ -2764,7 +2865,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2775,7 +2876,7 @@ def delayTurnOffL(){
 
 def onEventM(evt) {
 
-if ((settings.M_mode == null) || (settings.M_mode.contains(location.mode))){
+if ((settings.M_mode==null || settings.M_mode.contains(location.mode)) && getTimeOk (M_timeStart, M_timeEnd)){
 if ((settings.M_luxSensors == null) || (settings.M_luxSensors.latestValue("illuminance") <= M_turnOnLux)){
 def M_levelOn = settings.M_level as Integer
 def delayM = settings.M_turnOff * 60
@@ -2814,7 +2915,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2825,7 +2926,7 @@ def delayTurnOffM(){
 
 def onEventN(evt) {
 
-if ((settings.N_mode == null) || (settings.N_mode.contains(location.mode))){
+if ((settings.N_mode==null || settings.N_mode.contains(location.mode)) && getTimeOk (N_timeStart, N_timeEnd)){
 if ((settings.N_luxSensors == null) || (settings.N_luxSensors.latestValue("illuminance") <= N_turnOnLux)){
 def N_levelOn = settings.N_level as Integer
 def delayN = settings.N_turnOff * 60
@@ -2864,7 +2965,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2876,7 +2977,7 @@ def delayTurnOffN(){
 
 def onEventO(evt) {
 
-if ((settings.O_mode == null) || (settings.O_mode.contains(location.mode))){
+if ((settings.O_mode==null || settings.O_mode.contains(location.mode)) && getTimeOk (O_timeStart, O_timeEnd)){
 if ((settings.O_luxSensors == null) || (settings.O_luxSensors.latestValue("illuminance") <= O_turnOnLux)){
 def O_levelOn = settings.O_level as Integer
 def delayO = settings.O_turnOff * 60
@@ -2915,7 +3016,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -2928,15 +3029,44 @@ def delayTurnOffO(){
 private def helpText() {
 	def text =
     	"Select a motion sensor or contact sensors to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motion stops or doors close."
+        "Each scenario can control dimmers and switches but can also be " +
+        "restricted to modes or between certain times and turned off after "
+        "motion stops or doors close."
 	text
 }
 
-def greyOut(title){
-	def result = "complete"
-    if (title == "Empty") {
-    	result = ""
+def greyOut(scenario){
+	def result = ""
+    if (scenario) {
+    	result = "complete"	
     }
     result
+}
+
+def getTitle(scenario) {
+	def title = "Empty"
+	if (scenario) {
+		title = scenario
+    }
+	title
+}
+
+def getDesc(scenario) {
+	def desc = "Tap to create a scene"
+	if (scenario) {
+		desc = "Tap to edit scene"
+    }
+	desc	
+}
+
+private getTimeOk(startTime, endTime) {
+	def result = true
+	if (startTime && endTime) {
+		def currTime = now()
+		def start = timeToday(startTime).time
+		def stop = timeToday(endTime).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+	log.trace "timeOk = $result"
+	result
 }
