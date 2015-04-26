@@ -3,7 +3,8 @@
  *
  *  Version - 1.3
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
- * 
+ *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
+ *
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -45,8 +46,8 @@
 definition(
     name: "Lighting Director",
     namespace: "tslagle13",
-    author: "Tim Slagle",
-    description: "Control up to 15 sets (scenes) of lights based on motion activity and lux levels.",
+    author: "Tim Slagle & Michael Struck",
+    description: "Control up to 15 sets (scenes) of lights based on motion, door contacts and lux levels.",
     category: "Convenience",
     iconUrl: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector.png",
     iconX2Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png",
@@ -224,21 +225,21 @@ if (settings.ScenarioNameO == null) {
 
     return dynamicPage(pageProperties) {
         section("Setup Menu") {
-            href "pageSetupScenarioA", title:"${settings.ScenarioNameA}", description:"${settings.EditNameA}"
-            href "pageSetupScenarioB", title:"${settings.ScenarioNameB}", description:"${settings.EditNameB}"
-            href "pageSetupScenarioC", title:"${settings.ScenarioNameC}", description:"${settings.EditNameC}"
-            href "pageSetupScenarioD", title:"${settings.ScenarioNameD}", description:"${settings.EditNameD}"
-            href "pageSetupScenarioE", title:"${settings.ScenarioNameE}", description:"${settings.EditNameE}"
-            href "pageSetupScenarioF", title:"${settings.ScenarioNameF}", description:"${settings.EditNameF}"
-            href "pageSetupScenarioG", title:"${settings.ScenarioNameG}", description:"${settings.EditNameG}"
-            href "pageSetupScenarioH", title:"${settings.ScenarioNameH}", description:"${settings.EditNameH}"
-            href "pageSetupScenarioI", title:"${settings.ScenarioNameI}", description:"${settings.EditNameI}"
-            href "pageSetupScenarioJ", title:"${settings.ScenarioNameJ}", description:"${settings.EditNameJ}"
-            href "pageSetupScenarioK", title:"${settings.ScenarioNameK}", description:"${settings.EditNameK}"
-            href "pageSetupScenarioL", title:"${settings.ScenarioNameL}", description:"${settings.EditNameL}"
-            href "pageSetupScenarioM", title:"${settings.ScenarioNameM}", description:"${settings.EditNameM}"
-            href "pageSetupScenarioN", title:"${settings.ScenarioNameN}", description:"${settings.EditNameN}"
-            href "pageSetupScenarioO", title:"${settings.ScenarioNameO}", description:"${settings.EditNameO}"
+            href "pageSetupScenarioA", title:"${settings.ScenarioNameA}", description:"${settings.EditNameA}", state: greyOut(settings.ScenarioNameA)
+            href "pageSetupScenarioB", title:"${settings.ScenarioNameB}", description:"${settings.EditNameB}", state: greyOut(settings.ScenarioNameB)
+            href "pageSetupScenarioC", title:"${settings.ScenarioNameC}", description:"${settings.EditNameC}", state: greyOut(settings.ScenarioNameC)
+            href "pageSetupScenarioD", title:"${settings.ScenarioNameD}", description:"${settings.EditNameD}", state: greyOut(settings.ScenarioNameD)
+            href "pageSetupScenarioE", title:"${settings.ScenarioNameE}", description:"${settings.EditNameE}", state: greyOut(settings.ScenarioNameE)
+            href "pageSetupScenarioF", title:"${settings.ScenarioNameF}", description:"${settings.EditNameF}", state: greyOut(settings.ScenarioNameF)
+            href "pageSetupScenarioG", title:"${settings.ScenarioNameG}", description:"${settings.EditNameG}", state: greyOut(settings.ScenarioNameG)
+            href "pageSetupScenarioH", title:"${settings.ScenarioNameH}", description:"${settings.EditNameH}", state: greyOut(settings.ScenarioNameH)
+            href "pageSetupScenarioI", title:"${settings.ScenarioNameI}", description:"${settings.EditNameI}", state: greyOut(settings.ScenarioNameI)
+            href "pageSetupScenarioJ", title:"${settings.ScenarioNameJ}", description:"${settings.EditNameJ}", state: greyOut(settings.ScenarioNameJ)
+            href "pageSetupScenarioK", title:"${settings.ScenarioNameK}", description:"${settings.EditNameK}", state: greyOut(settings.ScenarioNameK)
+            href "pageSetupScenarioL", title:"${settings.ScenarioNameL}", description:"${settings.EditNameL}", state: greyOut(settings.ScenarioNameL)
+            href "pageSetupScenarioM", title:"${settings.ScenarioNameM}", description:"${settings.EditNameM}", state: greyOut(settings.ScenarioNameM)
+            href "pageSetupScenarioN", title:"${settings.ScenarioNameN}", description:"${settings.EditNameN}", state: greyOut(settings.ScenarioNameN)
+            href "pageSetupScenarioO", title:"${settings.ScenarioNameO}", description:"${settings.EditNameO}", state: greyOut(settings.ScenarioNameO)
             }
         section([title:"Options", mobileOnly:true]) {
             label title:"Assign a name", required:false
@@ -248,10 +249,6 @@ if (settings.ScenarioNameO == null) {
 
 // Show "pageSetupScenarioA" page
 def pageSetupScenarioA() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsA = [
         name:       "A_switches",
@@ -272,6 +269,14 @@ def pageSetupScenarioA() {
         name:       "A_motion",
         type:       "capability.motionSensor",
         title:      "Using these motion sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
+    def inputContactA = [
+        name:       "A_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
         multiple:   true,
         required:   false
     ]
@@ -312,7 +317,7 @@ def pageSetupScenarioA() {
     def inputTurnOffA = [
         name:       "A_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -333,8 +338,7 @@ def pageSetupScenarioA() {
     def pageProperties = [
         name:       "pageSetupScenarioA",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -344,6 +348,7 @@ section("Name your scene") {
 
 section("Devices included in the scene") {
             input inputMotionA
+            input inputContactA
             input inputLightsA
             input inputDimmersA
             }
@@ -357,16 +362,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioB() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsB = [
         name:       "B_switches",
@@ -407,6 +408,14 @@ def pageSetupScenarioB() {
         required:   false
     ]
     
+    def inputContactB = [
+        name:       "B_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeB = [
         name:       "B_mode",
         type:       "mode",
@@ -427,7 +436,7 @@ def pageSetupScenarioB() {
     def inputTurnOffB = [
         name:       "B_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -448,8 +457,7 @@ def pageSetupScenarioB() {
     def pageProperties = [
         name:       "pageSetupScenarioB",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -459,6 +467,7 @@ section("Name your scene") {
 
 section("Devices included in the scene") {
             input inputMotionB
+			input inputContactB
             input inputLightsB
             input inputDimmersB
             }
@@ -472,16 +481,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioC() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsC = [
         name:       "C_switches",
@@ -506,6 +511,14 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
+    def inputContactC = [
+        name:       "C_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeC = [
         name:       "C_mode",
         type:       "mode",
@@ -526,7 +539,7 @@ def pageSetupScenarioC() {
     def inputTurnOffC = [
         name:       "C_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -563,8 +576,7 @@ def pageSetupScenarioC() {
     def pageProperties = [
         name:       "pageSetupScenarioC",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -574,6 +586,7 @@ def pageSetupScenarioC() {
 
 section("Devices included in the scene") {
             input inputMotionC
+            input inputContactC
             input inputLightsC
             input inputDimmersC
             }
@@ -587,16 +600,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioD() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsD = [
         name:       "D_switches",
@@ -621,6 +630,14 @@ def pageSetupScenarioD() {
         required:   false
     ]
     
+    def inputContactD = [
+        name:       "D_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeD = [
         name:       "D_mode",
         type:       "mode",
@@ -641,7 +658,7 @@ def pageSetupScenarioD() {
     def inputTurnOffD = [
         name:       "D_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -678,8 +695,7 @@ def pageSetupScenarioD() {
     def pageProperties = [
         name:       "pageSetupScenarioD",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -689,6 +705,7 @@ def pageSetupScenarioD() {
 
 section("Devices included in the scene") {
             input inputMotionD
+          	input inputContactD
             input inputLightsD
             input inputDimmersD
             }
@@ -702,16 +719,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioE() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsE = [
         name:       "E_switches",
@@ -736,6 +749,14 @@ def pageSetupScenarioE() {
         required:   false
     ]
     
+    def inputContactE = [
+        name:       "E_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeE = [
         name:       "E_mode",
         type:       "mode",
@@ -756,7 +777,7 @@ def pageSetupScenarioE() {
     def inputTurnOffE = [
         name:       "E_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -793,8 +814,7 @@ def pageSetupScenarioE() {
     def pageProperties = [
         name:       "pageSetupScenarioE",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -804,6 +824,7 @@ def pageSetupScenarioE() {
 
 section("Devices included in the scene") {
             input inputMotionE
+            input inputContactE
             input inputLightsE
             input inputDimmersE
             }
@@ -817,16 +838,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioF() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsF = [
         name:       "F_switches",
@@ -851,6 +868,14 @@ def pageSetupScenarioF() {
         required:   false
     ]
     
+    def inputContactF = [
+        name:       "F_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeF = [
         name:       "F_mode",
         type:       "mode",
@@ -871,7 +896,7 @@ def pageSetupScenarioF() {
     def inputTurnOffF = [
         name:       "F_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -908,8 +933,7 @@ def pageSetupScenarioF() {
     def pageProperties = [
         name:       "pageSetupScenarioF",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -919,6 +943,7 @@ def pageSetupScenarioF() {
 
 section("Devices included in the scene") {
             input inputMotionF
+            input inputContactF
             input inputLightsF
             input inputDimmersF
             }
@@ -932,16 +957,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioG() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsG = [
         name:       "G_switches",
@@ -966,6 +987,14 @@ def pageSetupScenarioG() {
         required:   false
     ]
     
+    def inputContactG = [
+        name:       "G_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeG = [
         name:       "G_mode",
         type:       "mode",
@@ -986,7 +1015,7 @@ def pageSetupScenarioG() {
     def inputTurnOffG = [
         name:       "G_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1023,8 +1052,7 @@ def pageSetupScenarioG() {
     def pageProperties = [
         name:       "pageSetupScenarioG",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1034,6 +1062,7 @@ def pageSetupScenarioG() {
 
 section("Devices included in the scene") {
             input inputMotionG
+            input inputContactG
             input inputLightsG
             input inputDimmersG
             }
@@ -1047,16 +1076,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioH() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsH = [
         name:       "H_switches",
@@ -1081,6 +1106,14 @@ def pageSetupScenarioH() {
         required:   false
     ]
     
+    def inputContactH = [
+        name:       "H_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeH = [
         name:       "H_mode",
         type:       "mode",
@@ -1101,7 +1134,7 @@ def pageSetupScenarioH() {
     def inputTurnOffH = [
         name:       "H_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1138,8 +1171,7 @@ def pageSetupScenarioH() {
     def pageProperties = [
         name:       "pageSetupScenarioH",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1149,6 +1181,7 @@ def pageSetupScenarioH() {
 
 section("Devices included in the scene") {
             input inputMotionH
+            input inputContactH
             input inputLightsH
             input inputDimmersH
             }
@@ -1162,16 +1195,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioI() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsI = [
         name:       "I_switches",
@@ -1196,6 +1225,14 @@ def pageSetupScenarioI() {
         required:   false
     ]
     
+    def inputContactI = [
+        name:       "I_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeI = [
         name:       "I_mode",
         type:       "mode",
@@ -1216,7 +1253,7 @@ def pageSetupScenarioI() {
     def inputTurnOffI = [
         name:       "I_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1253,8 +1290,7 @@ def pageSetupScenarioI() {
     def pageProperties = [
         name:       "pageSetupScenarioI",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1264,6 +1300,7 @@ def pageSetupScenarioI() {
 
 section("Devices included in the scene") {
             input inputMotionI
+            input inputContactI
             input inputLightsI
             input inputDimmersI
             }
@@ -1277,16 +1314,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioJ() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsJ = [
         name:       "J_switches",
@@ -1311,6 +1344,14 @@ def pageSetupScenarioJ() {
         required:   false
     ]
     
+    def inputContactJ = [
+        name:       "J_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeJ = [
         name:       "J_mode",
         type:       "mode",
@@ -1331,7 +1372,7 @@ def pageSetupScenarioJ() {
     def inputTurnOffJ = [
         name:       "J_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1368,8 +1409,7 @@ def pageSetupScenarioJ() {
     def pageProperties = [
         name:       "pageSetupScenarioJ",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1379,6 +1419,7 @@ def pageSetupScenarioJ() {
 
 section("Devices included in the scene") {
             input inputMotionJ
+            input inputContactJ
             input inputLightsJ
             input inputDimmersJ
             }
@@ -1392,16 +1433,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioK() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsK = [
         name:       "K_switches",
@@ -1426,6 +1463,14 @@ def pageSetupScenarioK() {
         required:   false
     ]
     
+    def inputContactK = [
+        name:       "K_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeK = [
         name:       "K_mode",
         type:       "mode",
@@ -1446,7 +1491,7 @@ def pageSetupScenarioK() {
     def inputTurnOffK = [
         name:       "K_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1483,8 +1528,7 @@ def pageSetupScenarioK() {
     def pageProperties = [
         name:       "pageSetupScenarioK",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1494,6 +1538,7 @@ def pageSetupScenarioK() {
 
 section("Devices included in the scene") {
             input inputMotionK
+            input inputContactK
             input inputLightsK
             input inputDimmersK
             }
@@ -1507,16 +1552,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioL() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsL = [
         name:       "L_switches",
@@ -1541,6 +1582,14 @@ def pageSetupScenarioL() {
         required:   false
     ]
     
+    def inputContactL = [
+        name:       "L_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeL = [
         name:       "L_mode",
         type:       "mode",
@@ -1561,7 +1610,7 @@ def pageSetupScenarioL() {
     def inputTurnOffL = [
         name:       "L_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1598,8 +1647,7 @@ def pageSetupScenarioL() {
     def pageProperties = [
         name:       "pageSetupScenarioL",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1609,6 +1657,7 @@ def pageSetupScenarioL() {
 
 section("Devices included in the scene") {
             input inputMotionL
+            input inputContactL
             input inputLightsL
             input inputDimmersL
             }
@@ -1622,16 +1671,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioM() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsM = [
         name:       "M_switches",
@@ -1656,6 +1701,14 @@ def pageSetupScenarioM() {
         required:   false
     ]
     
+    def inputContactM = [
+        name:       "M_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeM = [
         name:       "M_mode",
         type:       "mode",
@@ -1676,7 +1729,7 @@ def pageSetupScenarioM() {
     def inputTurnOffM = [
         name:       "M_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1713,8 +1766,7 @@ def pageSetupScenarioM() {
     def pageProperties = [
         name:       "pageSetupScenarioM",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1724,6 +1776,7 @@ def pageSetupScenarioM() {
 
 section("Devices included in the scene") {
             input inputMotionM
+            input inputContactM
             input inputLightsM
             input inputDimmersM
             }
@@ -1737,16 +1790,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioN() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsN = [
         name:       "N_switches",
@@ -1771,6 +1820,14 @@ def pageSetupScenarioN() {
         required:   false
     ]
     
+    def inputContactN = [
+        name:       "N_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeN = [
         name:       "N_mode",
         type:       "mode",
@@ -1791,7 +1848,7 @@ def pageSetupScenarioN() {
     def inputTurnOffN = [
         name:       "N_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1828,8 +1885,7 @@ def pageSetupScenarioN() {
     def pageProperties = [
         name:       "pageSetupScenarioN",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1839,6 +1895,7 @@ def pageSetupScenarioN() {
 
 section("Devices included in the scene") {
             input inputMotionN
+            input inputContactN
             input inputLightsN
             input inputDimmersN
             }
@@ -1852,16 +1909,12 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
 
 def pageSetupScenarioO() {
-    def helpPage =
-        "Select a motion sensor to control a set of lights. " +
-        "Each scenario can control dimmers and switches but can " +
-        "also be restricted to mode and turned off after motions stops."
 
     def inputLightsO = [
         name:       "O_switches",
@@ -1886,6 +1939,14 @@ def pageSetupScenarioO() {
         required:   false
     ]
     
+    def inputContactO = [
+        name:       "O_contact",
+        type:       "capability.contactSensor",
+        title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeO = [
         name:       "O_mode",
         type:       "mode",
@@ -1906,7 +1967,7 @@ def pageSetupScenarioO() {
     def inputTurnOffO = [
         name:       "O_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops for (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -1943,8 +2004,7 @@ def pageSetupScenarioO() {
     def pageProperties = [
         name:       "pageSetupScenarioO",
         title:      "${pageName}",
-        nextPage:   "pageSetup",
-        uninstall:  true
+        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -1954,6 +2014,7 @@ def pageSetupScenarioO() {
 
 section("Devices included in the scene") {
             input inputMotionO
+            input inputContactO
             input inputLightsO
             input inputDimmersO
             }
@@ -1967,7 +2028,7 @@ section("Scene settings") {
             }
 
 section("Help") {
-            paragraph helpPage
+            paragraph helpText()
             }
     }
 }
@@ -1986,77 +2047,150 @@ def updated() {
 
 def initialize() {
 if(settings.A_motion) {
-	subscribe(settings.A_motion, "motion", onMotionA)
+	subscribe(settings.A_motion, "motion", onEventA)
+}
+
+if(settings.A_contact) {
+	subscribe(settings.A_contact, "contact", onEventA)
 }
 
 if(settings.B_motion) {
-	subscribe(settings.B_motion, "motion", onMotionB)
+	subscribe(settings.B_motion, "motion", onEventB)
+}
+
+if(settings.B_contact) {
+	subscribe(settings.B_contact, "contact", onEventB)
 }
 
 if(settings.C_motion) {
-	subscribe(settings.C_motion, "motion", onMotionC)
+	subscribe(settings.C_motion, "motion", onEventC)
+}
+
+if(settings.C_contact) {
+	subscribe(settings.C_contact, "contact", onEventC)
 }
 
 if(settings.D_motion) {
-	subscribe(settings.D_motion, "motion", onMotionD)
+	subscribe(settings.D_motion, "motion", onEventD)
+}
+
+if(settings.D_contact) {
+	subscribe(settings.D_contact, "contact", onEventD)
 }
 
 if(settings.E_motion) {
-	subscribe(settings.E_motion, "motion", onMotionE)
+	subscribe(settings.E_motion, "motion", onEventE)
+}
+
+if(settings.E_contact) {
+	subscribe(settings.E_contact, "contact", onEventE)
 }
 
 if(settings.F_motion) {
-	subscribe(settings.F_motion, "motion", onMotionF)
+	subscribe(settings.F_motion, "motion", onEventF)
+}
+
+if(settings.F_contact) {
+	subscribe(settings.F_contact, "contact", onEventF)
 }
 
 if(settings.G_motion) {
-	subscribe(settings.G_motion, "motion", onMotionG)
+	subscribe(settings.G_motion, "motion", onEventG)
+}
+
+if(settings.G_contact) {
+	subscribe(settings.G_contact, "contact", onEventG)
 }
 
 if(settings.H_motion) {
-	subscribe(settings.H_motion, "motion", onMotionH)
+	subscribe(settings.H_motion, "motion", onEventH)
+}
+
+if(settings.H_contact) {
+	subscribe(settings.H_contact, "contact", onEventH)
 }
 
 if(settings.I_motion) {
-	subscribe(settings.I_motion, "motion", onMotionI)
+	subscribe(settings.I_motion, "motion", onEventI)
+}
+
+if(settings.I_contact) {
+	subscribe(settings.I_contact, "contact", onEventI)
 }
 
 if(settings.J_motion) {
-	subscribe(settings.J_motion, "motion", onMotionJ)
+	subscribe(settings.J_motion, "motion", onEventJ)
+}
+
+if(settings.J_contact) {
+	subscribe(settings.J_contact, "contact", onEventJ)
 }
 
 if(settings.K_motion) {
-	subscribe(settings.K_motion, "motion", onMotionK)
+	subscribe(settings.K_motion, "motion", onEventK)
+}
+
+if(settings.K_contact) {
+	subscribe(settings.K_contact, "contact", onEventK)
 }
 
 if(settings.L_motion) {
-	subscribe(settings.L_motion, "motion", onMotionL)
+	subscribe(settings.L_motion, "motion", onEventL)
+}
+
+if(settings.L_contact) {
+	subscribe(settings.L_contact, "contact", onEventL)
 }
 
 if(settings.M_motion) {
-	subscribe(settings.M_motion, "motion", onMotionM)
+	subscribe(settings.M_motion, "motion", onEventM)
+}
+
+if(settings.M_contact) {
+	subscribe(settings.M_contact, "contact", onEventM)
 }
 
 if(settings.N_motion) {
-	subscribe(settings.N_motion, "motion", onMotionN)
+	subscribe(settings.N_motion, "motion", onEventN)
+}
+
+if(settings.N_contact) {
+	subscribe(settings.N_contact, "contact", onEventN)
 }
 
 if(settings.O_motion) {
-	subscribe(settings.O_motion, "motion", onMotionO)
-}
+	subscribe(settings.O_motion, "motion", onEventO)
 }
 
-def onMotionA(evt) {
-//def A_turnOnLuxTrigger = settings.A_turnOnLux as Integer
-//def currentLux = settings.A_luxSensors.latestValue("illuminance") as Integer
+if(settings.O_contact) {
+	subscribe(settings.O_contact, "contact", onEventO)
+}
+
+}
+
+def onEventA(evt) {
 
 if ((settings.A_mode == null) || (settings.A_mode.contains(location.mode))){
 if ((settings.A_luxSensors == null) || (settings.A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
 def A_levelOn = settings.A_level as Integer
 def delayA = settings.A_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.A_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Detected Running '${settings.ScenarioNameA}'")
+if (settings.A_motion) {
+	if (settings.A_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.A_contact) {
+	if (settings.A_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameA}'")
 		settings.A_dimmers?.setLevel(A_levelOn)
 		settings.A_switches?.on()
         unschedule(delayTurnOffA)
@@ -2075,7 +2209,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriciton.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2084,17 +2218,29 @@ def delayTurnOffA(){
 	settings.A_dimmers?.setLevel(0)
 }
 
-def onMotionB(evt) {
-//def B_turnOnLuxTrigger = settings.B_turnOnLux as Integer
-//def currentLux = settings.B_luxSensors.latestValue("illuminance") as Integer
+def onEventB(evt) {
 
 if ((settings.B_mode == null) || (settings.B_mode.contains(location.mode))){
 if ((settings.B_luxSensors == null) || (settings.B_luxSensors.latestValue("illuminance") <= B_turnOnLux)){
 def B_levelOn = settings.B_level as Integer
 def delayB = settings.B_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.B_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Detected Running '${settings.ScenarioNameB}'")
+if (settings.B_motion) {
+	if (settings.B_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.B_contact) {
+	if (settings.B_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameB}'")
 		settings.B_dimmers?.setLevel(B_levelOn)
 		settings.B_switches?.on()
         unschedule(delayTurnOffB)
@@ -2113,7 +2259,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2123,17 +2269,30 @@ def delayTurnOffB(){
 }
 
 
-def onMotionC(evt) {
-//def C_turnOnLuxTrigger = settings.C_turnOnLux as Integer
-//def currentLux = settings.C_luxSensors.latestValue("illuminance") as Integer
+def onEventC(evt) {
+
 
 if ((settings.C_mode == null) || (settings.C_mode.contains(location.mode))){
 if ((settings.C_luxSensors == null) || (settings.C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
 def C_levelOn = settings.C_level as Integer
 def delayC = settings.C_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.C_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Detected Running '${settings.ScenarioNameC}'")
+if (settings.C_motion) {
+	if (settings.C_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.C_contact) {
+	if (settings.C_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameC}'")
 		settings.C_dimmers?.setLevel(C_levelOn)
 		settings.C_switches?.on()
         unschedule(delayTurnOffC)
@@ -2152,7 +2311,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2162,17 +2321,29 @@ def delayTurnOffC(){
 }
 
 
-def onMotionD(evt) {
-//def D_turnOnLuxTrigger = settings.D_turnOnLux as Integer
-//def currentLux = settings.D_luxSensors.latestValue("illuminance") as Integer
+def onEventD(evt) {
 
 if ((settings.D_mode == null) || (settings.D_mode.contains(location.mode))){
 if ((settings.D_luxSensors == null) || (settings.D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
 def D_levelOn = settings.D_level as Integer
 def delayD = settings.D_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.D_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Detected Running '${settings.ScenarioNameD}'")
+if (settings.D_motion) {
+	if (settings.D_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.D_contact) {
+	if (settings.D_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameD}'")
 		settings.D_dimmers?.setLevel(D_levelOn)
 		settings.D_switches?.on()
         unschedule(delayTurnOffD)
@@ -2191,7 +2362,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2201,17 +2372,29 @@ def delayTurnOffD(){
 }
 
 
-def onMotionE(evt) {
-//def E_turnOnLuxTrigger = settings.E_turnOnLux as Integer
-//def currentLux = settings.E_luxSensors.latestValue("illuminance") as Integer
+def onEventE(evt) {
 
 if ((settings.E_mode == null) || (settings.E_mode.contains(location.mode))){
 if ((settings.E_luxSensors == null) || (settings.E_luxSensors.latestValue("illuminance") <= E_turnOnLux)){
 def E_levelOn = settings.E_level as Integer
 def delayE = settings.E_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.E_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Eetected Running '${settings.ScenarioNameE}'")
+if (settings.E_motion) {
+	if (settings.E_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.E_contact) {
+	if (settings.E_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameE}'")
 		settings.E_dimmers?.setLevel(E_levelOn)
 		settings.E_switches?.on()
         unschedule(delayTurnOffE)
@@ -2230,7 +2413,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2239,17 +2422,29 @@ def delayTurnOffE(){
 	settings.E_dimmers?.setLevel(0)
 }
 
-def onMotionF(evt) {
-//def F_turnOnLuxTrigger = settings.F_turnOnLux as Integer
-//def currentLux = settings.F_luxSensors.latestValue("illuminance") as Integer
+def onEventF(evt) {
 
 if ((settings.F_mode == null) || (settings.F_mode.contains(location.mode))){
 if ((settings.F_luxSensors == null) || (settings.F_luxSensors.latestValue("illuminance") <= F_turnOnLux)){
 def F_levelOn = settings.F_level as Integer
 def delayF = settings.F_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.F_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Fetected Running '${settings.ScenarioNameF}'")
+if (settings.F_motion) {
+	if (settings.F_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.F_contact) {
+	if (settings.F_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameF}'")
 		settings.F_dimmers?.setLevel(F_levelOn)
 		settings.F_switches?.on()
         unschedule(delayTurnOffF)
@@ -2268,7 +2463,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2278,17 +2473,29 @@ def delayTurnOffF(){
 }
 
 
-def onMotionG(evt) {
-//def G_turnOnLuxTrigger = settings.G_turnOnLux as Integer
-//def currentLux = settings.G_luxSensors.latestValue("illuminance") as Integer
+def onEventG(evt) {
 
 if ((settings.G_mode == null) || (settings.G_mode.contains(location.mode))){
 if ((settings.G_luxSensors == null) || (settings.G_luxSensors.latestValue("illuminance") <= G_turnOnLux)){
 def G_levelOn = settings.G_level as Integer
 def delayG = settings.G_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.G_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Getected Running '${settings.ScenarioNameG}'")
+if (settings.G_motion) {
+	if (settings.G_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.G_contact) {
+	if (settings.G_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameG}'")
 		settings.G_dimmers?.setLevel(G_levelOn)
 		settings.G_switches?.on()
         unschedule(delayTurnOffG)
@@ -2307,7 +2514,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2316,17 +2523,29 @@ def delayTurnOffG(){
 	settings.G_dimmers?.setLevel(0)
 }
 
-def onMotionH(evt) {
-//def H_turnOnLuxTrigger = settings.H_turnOnLux as Integer
-//def currentLux = settings.H_luxSensors.latestValue("illuminance") as Integer
+def onEventH(evt) {
 
 if ((settings.H_mode == null) || (settings.H_mode.contains(location.mode))){
 if ((settings.H_luxSensors == null) || (settings.H_luxSensors.latestValue("illuminance") <= H_turnOnLux)){
 def H_levelOn = settings.H_level as Integer
 def delayH = settings.H_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.H_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Hetected Running '${settings.ScenarioNameH}'")
+if (settings.H_motion) {
+	if (settings.H_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.H_contact) {
+	if (settings.H_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameH}'")
 		settings.H_dimmers?.setLevel(H_levelOn)
 		settings.H_switches?.on()
         unschedule(delayTurnOffH)
@@ -2345,7 +2564,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2354,17 +2573,29 @@ def delayTurnOffH(){
 	settings.H_dimmers?.setLevel(0)
 }
 
-def onMotionI(evt) {
-//def I_turnOnLuxTrigger = settings.I_turnOnLux as Integer
-//def currentLux = settings.I_luxSensors.latestValue("illuminance") as Integer
+def onEventI(evt) {
 
 if ((settings.I_mode == null) || (settings.I_mode.contains(location.mode))){
 if ((settings.I_luxSensors == null) || (settings.I_luxSensors.latestValue("illuminance") <= I_turnOnLux)){
 def I_levelOn = settings.I_level as Integer
 def delayI = settings.I_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.I_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Ietected Running '${settings.ScenarioNameI}'")
+if (settings.I_motion) {
+	if (settings.I_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.I_contact) {
+	if (settings.I_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameI}'")
 		settings.I_dimmers?.setLevel(I_levelOn)
 		settings.I_switches?.on()
         unschedule(delayTurnOffI)
@@ -2383,7 +2614,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2392,17 +2623,29 @@ def delayTurnOffI(){
 	settings.I_dimmers?.setLevel(0)
 }
 
-def onMotionJ(evt) {
-//def J_turnOnLuxTrigger = settings.J_turnOnLux as Integer
-//def currentLux = settings.J_luxSensors.latestValue("illuminance") as Integer
+def onEventJ(evt) {
 
 if ((settings.J_mode == null) || (settings.J_mode.contains(location.mode))){
 if ((settings.J_luxSensors == null) || (settings.J_luxSensors.latestValue("illuminance") <= J_turnOnLux)){
 def J_levelOn = settings.J_level as Integer
 def delayJ = settings.J_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.J_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Jetected Running '${settings.ScenarioNameJ}'")
+if (settings.J_motion) {
+	if (settings.J_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.J_contact) {
+	if (settings.J_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameJ}'")
 		settings.J_dimmers?.setLevel(J_levelOn)
 		settings.J_switches?.on()
         unschedule(delayTurnOffJ)
@@ -2421,7 +2664,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2430,17 +2673,29 @@ def delayTurnOffJ(){
 	settings.J_dimmers?.setLevel(0)
 }
 
-def onMotionK(evt) {
-//def K_turnOnLuxTrigger = settings.K_turnOnLux as Integer
-//def currentLux = settings.K_luxSensors.latestValue("illuminance") as Integer
+def onEventK(evt) {
 
 if ((settings.K_mode == null) || (settings.K_mode.contains(location.mode))){
 if ((settings.K_luxSensors == null) || (settings.K_luxSensors.latestValue("illuminance") <= K_turnOnLux)){
 def K_levelOn = settings.K_level as Integer
 def delayK = settings.K_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.K_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion detected Running '${settings.ScenarioNameK}'")
+if (settings.K_motion) {
+	if (settings.O_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.K_contact) {
+	if (settings.K_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameK}'")
 		settings.K_dimmers?.setLevel(K_levelOn)
 		settings.K_switches?.on()
         unschedule(delayTurnOffK)
@@ -2459,7 +2714,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2468,17 +2723,29 @@ def delayTurnOffK(){
 	settings.K_dimmers?.setLevel(0)
 }
 
-def onMotionL(evt) {
-//def L_turnOnLuxTrigger = settings.L_turnOnLux as Integer
-//def currentLux = settings.L_luxSensors.latestValue("illuminance") as Integer
+def onEventL(evt) {
 
 if ((settings.L_mode == null) || (settings.L_mode.contains(location.mode))){
 if ((settings.L_luxSensors == null) || (settings.L_luxSensors.latestValue("illuminance") <= L_turnOnLux)){
 def L_levelOn = settings.L_level as Integer
 def delayL = settings.L_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.L_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Letected Running '${settings.ScenarioNameL}'")
+if (settings.L_motion) {
+	if (settings.O_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.L_contact) {
+	if (settings.L_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameL}'")
 		settings.L_dimmers?.setLevel(L_levelOn)
 		settings.L_switches?.on()
         unschedule(delayTurnOffL)
@@ -2497,7 +2764,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2506,17 +2773,29 @@ def delayTurnOffL(){
 	settings.L_dimmers?.setLevel(0)
 }
 
-def onMotionM(evt) {
-//def M_turnOnLuxTrigger = settings.M_turnOnLux as Integer
-//def currentLux = settings.M_luxSensors.latestValue("illuminance") as Integer
+def onEventM(evt) {
 
 if ((settings.M_mode == null) || (settings.M_mode.contains(location.mode))){
 if ((settings.M_luxSensors == null) || (settings.M_luxSensors.latestValue("illuminance") <= M_turnOnLux)){
 def M_levelOn = settings.M_level as Integer
 def delayM = settings.M_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.M_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Detected Running '${settings.ScenarioNameM}'")
+if (settings.M_motion) {
+	if (settings.M_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.M_contact) {
+	if (settings.M_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameM}'")
 		settings.M_dimmers?.setLevel(M_levelOn)
 		settings.M_switches?.on()
         unschedule(delayTurnOffM)
@@ -2544,17 +2823,29 @@ def delayTurnOffM(){
 	settings.M_dimmers?.setLevel(0)
 }
 
-def onMotionN(evt) {
-//def N_turnOnLuxTrigger = settings.N_turnOnLux as Integer
-//def currentLux = settings.N_luxSensors.latestValue("illuminance") as Integer
+def onEventN(evt) {
 
 if ((settings.N_mode == null) || (settings.N_mode.contains(location.mode))){
 if ((settings.N_luxSensors == null) || (settings.N_luxSensors.latestValue("illuminance") <= N_turnOnLux)){
 def N_levelOn = settings.N_level as Integer
 def delayN = settings.N_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.N_motion.latestValue("motion").contains("active")) {
-		log.debug("Notion Detected Running '${settings.ScenarioNameN}'")
+if (settings.N_motion) {
+	if (settings.N_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.N_contact) {
+	if (settings.N_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameN}'")
 		settings.N_dimmers?.setLevel(N_levelOn)
 		settings.N_switches?.on()
         unschedule(delayTurnOffN)
@@ -2573,7 +2864,7 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
 
@@ -2582,17 +2873,30 @@ def delayTurnOffN(){
 	settings.N_dimmers?.setLevel(0)
 }
 
-def onMotionO(evt) {
-//def O_turnOnLuxTrigger = settings.O_turnOnLux as Integer
-//def currentLux = settings.O_luxSensors.latestValue("illuminance") as Integer
+
+def onEventO(evt) {
 
 if ((settings.O_mode == null) || (settings.O_mode.contains(location.mode))){
 if ((settings.O_luxSensors == null) || (settings.O_luxSensors.latestValue("illuminance") <= O_turnOnLux)){
 def O_levelOn = settings.O_level as Integer
 def delayO = settings.O_turnOff * 60
+def motionDetected = false
+def contactDetected = false
 
-if (settings.O_motion.latestValue("motion").contains("active")) {
-		log.debug("Motion Detected Running '${settings.ScenarioNameO}'")
+if (settings.O_motion) {
+	if (settings.O_motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (settings.O_contact) {
+	if (settings.O_contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (motionDetected || contactDetected) {
+		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameO}'")
 		settings.O_dimmers?.setLevel(O_levelOn)
 		settings.O_switches?.on()
         unschedule(delayTurnOffO)
@@ -2611,11 +2915,28 @@ else {
 }
 }
 else{
-log.debug("Motion detected outside of mode restriction.  Not running mode.")
+log.debug("Motion or Contact open detected outside of mode restriction.  Not running mode.")
 }
 }
+
 
 def delayTurnOffO(){
 	settings.O_switches?.off()
 	settings.O_dimmers?.setLevel(0)
+}
+
+private def helpText() {
+	def text =
+    	"Select a motion sensor or contact sensors to control a set of lights. " +
+        "Each scenario can control dimmers and switches but can " +
+        "also be restricted to mode and turned off after motion stops or doors close."
+	text
+}
+
+def greyOut(title){
+	def result = "complete"
+    if (title == "Empty") {
+    	result = ""
+    }
+    result
 }
