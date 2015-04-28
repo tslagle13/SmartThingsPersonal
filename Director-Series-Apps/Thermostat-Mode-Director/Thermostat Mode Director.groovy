@@ -1,7 +1,7 @@
 /**
  *  Thermostat Mode Director
  *
- *  Version 2.1
+ *  Version 2.1.1
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -158,31 +158,31 @@ def temperatureHandler(evt) {
 		if (doorsOk) {
 			def currentTemp = sensor.latestValue("temperature")
 			if (currentTemp < setLow) {
-            	if ((state.lastStatus == "${hot}two") || (state.lastStatus == "${neutral}three") || (state.lastStatus == null) || (state.lastStatus == "off")){
+            	if ((state.lastStatus == "two") || (state.lastStatus == "three") || (state.lastStatus == null) || (state.lastStatus == "off")){
 					//log.info "Setting thermostat mode to ${cold}"
 					def msg = "I changed your thermostat mode to ${cold} because temperature is below ${setLow}"
 					thermostat?."${cold}"()
                     sendMessage(msg)
                     }
-				state.lastStatus = "${cold}one"
+				state.lastStatus = "one"
 			}
 			if (currentTemp > setHigh) {
-            	if ((state.lastStatus == "${cold}one") || (state.lastStatus == "${neutral}three") || (state.lastStatus == null) || (state.lastStatus == "off")){
+            	if ((state.lastStatus == "one") || (state.lastStatus == "three") || (state.lastStatus == null) || (state.lastStatus == "off")){
 					//log.info "Setting thermostat mode to ${hot}"
 					def msg = "I changed your thermostat mode to ${hot} because temperature is above ${setHigh}"
 					thermostat?."${hot}"()
 					sendMessage(msg)
 				}
-				state.lastStatus = "${hot}two"
+				state.lastStatus = "two"
 			}
 			if (currentTemp > setLow && currentTemp < setHigh) {
-            	if ((state.lastStatus == "${hot}two") || (state.lastStatus == "${cold}one") || (state.lastStatus == null) || (state.lastStatus == "off")){
+            	if ((state.lastStatus == "two") || (state.lastStatus == "one") || (state.lastStatus == null) || (state.lastStatus == "off")){
 					//log.info "Setting thermostat mode to ${neutral}"
 					def msg = "I changed your thermostat mode to ${neutral} because temperature is neutral"
 					thermostat?."${neutral}"()
 					sendMessage(msg)
 				}
-				state.lastStatus = "${neutral}three"
+				state.lastStatus = "three"
 			}
 		}
         else{
