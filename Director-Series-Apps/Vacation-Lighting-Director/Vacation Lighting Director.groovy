@@ -53,7 +53,7 @@ definition(
 
 preferences {
  page(name: "Setup", title: "", nextPage:"Settings") { 
- section("Which mode changes triggers the simulator? (This app will only run in selected mode(s))") {
+ section("Which mode change triggers the simulator? (This app will only run in selected mode(s))") {
 		input "newMode", "mode", title: "Which?", multiple: true, required: false, refreshAfterSelection:true
 	}
   section("Light switches to turn on/off"){
@@ -62,7 +62,7 @@ preferences {
   section("How often to cycle the lights"){
     input "frequency_minutes", "number", title: "Minutes?"
   }
-  section("Number of actives lights at any given time"){
+  section("Number of active lights at any given time"){
     input "number_of_active_lights", "number", title: "Number of active lights"
   }
   section("People") {
@@ -79,9 +79,9 @@ preferences {
 		} 
         section("More options", refreshAfterSelection:true) {
 			href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : "incomplete", refreshAfterSelection:true
-			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false, refreshAfterSelection:true,
+			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-        }        
+		}
   }
 page(name: "timeIntervalInput", title: "Only during a certain time", refreshAfterSelection:true) {
 		section {
@@ -103,11 +103,10 @@ def updated() {
 }
 
 def initialize(){
-	runEvery1Hour(failSafe) //App keeps stalling.  This failsafe will check every hour to see if it should start the process again.  If the logic has ran in the last hour, or the hub is not in the right mode, the failsafe does nothing.
+
 	if (newMode != null) {
 		subscribe(location, modeChangeHandler)
     }
-    
 }
 
 def modeChangeHandler(evt) {
@@ -135,7 +134,7 @@ def modeChangeHandler(evt) {
 // Then run it again when the frequency demands it
 def scheduleCheck(evt) {
 if(allOk){
-log.debug("Running scheduleCheck")
+log.debug("Running")
   // turn off all the switches
   switches.off()
 
@@ -158,45 +157,30 @@ log.debug("Running scheduleCheck")
 
   // re-run again when the frequency demands it
   runIn(frequency_minutes * 60, scheduleCheck)
-  state[frequencyKey(evt)] = now()
 }
 //Check to see if mode is ok but not time/day.  If mode is still ok, check again after frequency period.
 else if (modeOk) {
-	delay = frequency_minutes * 60
-	log.debug("mode OK. Will check again in ${delay} miniutes")
-	runIn(delay, scheduleCheck)
-    state[frequencyKey(evt)] = now()
+	log.debug("mode OK.  Running again")
+	runIn(frequency_minutes * 60, scheduleCheck)
     switches.off()
 }
 //if none is ok turn off frequency check and turn off lights.
 else if(people){
     //don't turn off lights if anyone is home
 		if(anyoneIsHome()){
-		log.debug("Mode not ok but people are home.  Doing nothing")
-        state[frequencyKey(evt)] = now()
+		log.debug("Stopping Check for Light")
     	}
         else{
-    log.debug("Mode not OK.  House is empty.  Turning off all lights.")
+    log.debug("Stopping Check for Light and turning off all lights")
 	switches.off()
-    state[frequencyKey(evt)] = now()
     }
 }
 }    
 
-def failSafe(){
-
-	if(modeOk){
-		lastTime = state[frequencyKey(evt)]
-		if (lastTime == null || now() - lastTime >= 60000) {
-			scheduleCheck()
-		}
-	} 
-    
-}
 
 //below is used to check restrictions
 private getAllOk() {
-	modeOk && timeOk
+	modeOk && daysOk && timeOk
 }
 
 
@@ -259,8 +243,3 @@ private anyoneIsHome() {
 
   return result
 }
-
-private frequencyKey(evt) {
-	"lastActionTimeStamp"
-}
-
