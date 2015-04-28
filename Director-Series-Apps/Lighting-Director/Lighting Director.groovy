@@ -5,8 +5,9 @@
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
  *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
- *	Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
+ *  Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
  *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
+ *  Version - 2.2  Michael Struck - Added the ability to activate switches via the status locks and fixed some syntax issues
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -49,7 +50,7 @@ definition(
     name: "Lighting Director",
     namespace: "tslagle13",
     author: "Tim Slagle & Michael Struck",
-    description: "Control up to 15 sets (scenes) of lights based on motion, door contacts and lux levels.",
+    description: "Control up to 4 sets (scenes) of lights based on motion, door contacts and lux levels.",
     category: "Convenience",
     iconUrl: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector.png",
     iconX2Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png",
@@ -63,8 +64,7 @@ preferences {
     page name:"pageSetupScenarioB"
     page name:"pageSetupScenarioC"
     page name:"pageSetupScenarioD"
-    
-    
+
 }
 
 // Show setup page
@@ -121,6 +121,14 @@ def pageSetupScenarioA() {
         name:       "A_contact",
         type:       "capability.contactSensor",
         title:      "Or using these contact sensors...",
+        multiple:   true,
+        required:   false
+    ]
+    
+    def inputLockA = [
+        name:       "A_lock",
+        type:       "capability.lock",
+        title:      "Or using these locks...",
         multiple:   true,
         required:   false
     ]
@@ -193,6 +201,7 @@ section("Name your scene") {
 section("Devices included in the scene") {
             input inputMotionA
             input inputContactA
+            input inputLockA
             input inputLightsA
             input inputDimmersA
             }
@@ -263,6 +272,14 @@ def pageSetupScenarioB() {
         required:   false
     ]
     
+    def inputLockB = [
+        name:       "B_lock",
+        type:       "capability.lock",
+        title:      "Or using these locks...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeB = [
         name:       "B_mode",
         type:       "mode",
@@ -315,6 +332,7 @@ section("Name your scene") {
 section("Devices included in the scene") {
             input inputMotionB
 			input inputContactB
+            input inputLockB
             input inputLightsB
             input inputDimmersB
             }
@@ -367,6 +385,14 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
+    def inputLockC = [
+        name:       "C_lock",
+        type:       "capability.lock",
+        title:      "Or using these locks...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeC = [
         name:       "C_mode",
         type:       "mode",
@@ -374,8 +400,6 @@ def pageSetupScenarioC() {
         multiple:   true,
         required:   false
     ]
-    
-    
     
     def inputLevelC = [
         name:       "C_level",
@@ -437,6 +461,7 @@ def pageSetupScenarioC() {
 section("Devices included in the scene") {
             input inputMotionC
             input inputContactC
+            input inputLockC
             input inputLightsC
             input inputDimmersC
             }
@@ -489,6 +514,14 @@ def pageSetupScenarioD() {
         required:   false
     ]
     
+    def inputLockD = [
+        name:       "D_lock",
+        type:       "capability.lock",
+        title:      "Or using these locks...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputModeD = [
         name:       "D_mode",
         type:       "mode",
@@ -509,7 +542,7 @@ def pageSetupScenarioD() {
     def inputTurnOffD = [
         name:       "D_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops or doors close (minutes)...",
+        title:      "Turn off this scene after motion stops, doors close or lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -557,6 +590,7 @@ def pageSetupScenarioD() {
 section("Devices included in the scene") {
             input inputMotionD
           	input inputContactD
+            input inputLockD
             input inputLightsD
             input inputDimmersD
             }
@@ -597,12 +631,20 @@ if(settings.A_contact) {
 	subscribe(settings.A_contact, "contact", onEventA)
 }
 
+if(settings.A_lock) {
+	subscribe(settings.A_lock, "lock", onEventA)
+}
+
 if(settings.B_motion) {
 	subscribe(settings.B_motion, "motion", onEventB)
 }
 
 if(settings.B_contact) {
 	subscribe(settings.B_contact, "contact", onEventB)
+}
+
+if(settings.B_lock) {
+	subscribe(settings.B_lock, "lock", onEventB)
 }
 
 if(settings.C_motion) {
@@ -613,6 +655,10 @@ if(settings.C_contact) {
 	subscribe(settings.C_contact, "contact", onEventC)
 }
 
+if(settings.C_lock) {
+	subscribe(settings.C_lock, "lock", onEventC)
+}
+
 if(settings.D_motion) {
 	subscribe(settings.D_motion, "motion", onEventD)
 }
@@ -621,6 +667,9 @@ if(settings.D_contact) {
 	subscribe(settings.D_contact, "contact", onEventD)
 }
 
+if(settings.D_lock) {
+	subscribe(settings.D_lock, "lock", onEventD)
+}
 }
 
 def onEventA(evt) {
@@ -631,6 +680,7 @@ def A_levelOn = settings.A_level as Integer
 def delayA = settings.A_turnOff * 60
 def motionDetected = false
 def contactDetected = false
+def unlockDetected = false
 
 if (settings.A_motion) {
 	if (settings.A_motion.latestValue("motion").contains("active")) {
@@ -644,8 +694,14 @@ if (settings.A_contact) {
 	}
 }
 
-if (motionDetected || contactDetected) {
-		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameA}'")
+if (settings.A_lock) {
+	if (settings.A_lock.latestValue("lock").contains("unlocked")) {
+		unlockDetected = true
+	}
+}
+
+if (motionDetected || contactDetected || unlockDetected ) {
+		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameA}'")
 		settings.A_dimmers?.setLevel(A_levelOn)
 		settings.A_switches?.on()
         unschedule(delayTurnOffA)
@@ -664,7 +720,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -681,6 +737,7 @@ def B_levelOn = settings.B_level as Integer
 def delayB = settings.B_turnOff * 60
 def motionDetected = false
 def contactDetected = false
+def unlockDetected = false
 
 if (settings.B_motion) {
 	if (settings.B_motion.latestValue("motion").contains("active")) {
@@ -694,8 +751,14 @@ if (settings.B_contact) {
 	}
 }
 
-if (motionDetected || contactDetected) {
-		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameB}'")
+if (settings.B_lock) {
+	if (settings.B_lock.latestValue("lock").contains("unlocked")) {
+		unlockDetected = true
+	}
+}
+
+if (motionDetected || contactDetected || unlockDetected ) {
+		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameB}'")
 		settings.B_dimmers?.setLevel(B_levelOn)
 		settings.B_switches?.on()
         unschedule(delayTurnOffB)
@@ -714,7 +777,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -733,6 +796,7 @@ def C_levelOn = settings.C_level as Integer
 def delayC = settings.C_turnOff * 60
 def motionDetected = false
 def contactDetected = false
+def unlockDetected = false
 
 if (settings.C_motion) {
 	if (settings.C_motion.latestValue("motion").contains("active")) {
@@ -746,8 +810,14 @@ if (settings.C_contact) {
 	}
 }
 
-if (motionDetected || contactDetected) {
-		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameC}'")
+if (settings.C_lock) {
+	if (settings.C_lock.latestValue("lock").contains("unlocked")) {
+		unlockDetected = true
+	}
+}
+
+if (motionDetected || contactDetected || unlockDetected ) {
+		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameC}'")
 		settings.C_dimmers?.setLevel(C_levelOn)
 		settings.C_switches?.on()
         unschedule(delayTurnOffC)
@@ -766,7 +836,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -784,6 +854,7 @@ def D_levelOn = settings.D_level as Integer
 def delayD = settings.D_turnOff * 60
 def motionDetected = false
 def contactDetected = false
+def unlockDetected = false
 
 if (settings.D_motion) {
 	if (settings.D_motion.latestValue("motion").contains("active")) {
@@ -797,8 +868,14 @@ if (settings.D_contact) {
 	}
 }
 
-if (motionDetected || contactDetected) {
-		log.debug("Motion or Open Contact Detected Running '${settings.ScenarioNameD}'")
+if (settings.D_lock) {
+	if (settings.D_lock.latestValue("lock").contains("unlocked")) {
+		unlockDetected = true
+	}
+}
+
+if (motionDetected || contactDetected || unlockDetected ) {
+		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameD}'")
 		settings.D_dimmers?.setLevel(D_levelOn)
 		settings.D_switches?.on()
         unschedule(delayTurnOffD)
@@ -817,7 +894,7 @@ else {
 }
 }
 else{
-log.debug("Motion or Contact open detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
 }
 }
 
@@ -826,15 +903,12 @@ def delayTurnOffD(){
 	settings.D_dimmers?.setLevel(0)
 }
 
-
-
-
 private def helpText() {
 	def text =
-    	"Select a motion sensor or contact sensors to control a set of lights. " +
+    	"Select motion sensors, contact sensors or locks to control a set of lights. " +
         "Each scenario can control dimmers and switches but can also be " +
         "restricted to modes or between certain times and turned off after "
-        "motion stops or doors close."
+        "motion stops, doors close or lock."
 	text
 }
 
