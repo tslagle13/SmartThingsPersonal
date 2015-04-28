@@ -5,7 +5,8 @@
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
  *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
- *	Version - 1.5.0  Tim Slagle - moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
+ *	Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
+ *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -132,20 +133,6 @@ def pageSetupScenarioA() {
         required:   false
     ]
     
-    def inputTimeStartA = [
-        name:       "A_timeStart",
-        type:       "time",
-        title:      "Run between (time)...",
-        required:   false
-    ]
-    
-    def inputTimeEndA = [
-        name:       "A_timeEnd",
-        type:       "time",
-        title:      "And (time)...",
-        required:   false
-    ]
-    
     def inputLevelA = [
         name:       "A_level",
         type:       "enum",
@@ -216,14 +203,15 @@ section("Scene settings") {
             input inputLuxSensorsA
             input inputTurnOffA
             input inputModeA
-            input inputTimeStartA
-            input inputTimeEndA
+            href "timeIntervalInputA", title: "Only during a certain time", description: getTimeLabel(A_timeStart, A_timeEnd), state: greyedOutTime(A_timeStart, A_timeEnd), refreshAfterSelection:true
+            
             }
 
 section("Help") {
             paragraph helpText()
             }
     }
+    
 }
 
 def pageSetupScenarioB() {
@@ -282,19 +270,7 @@ def pageSetupScenarioB() {
         multiple:   true,
         required:   false
     ]
-    def inputTimeStartB = [
-        name:       "B_timeStart",
-        type:       "time",
-        title:      "Run between (time)...",
-        required:   false
-    ]
     
-    def inputTimeEndB = [
-        name:       "B_timeEnd",
-        type:       "time",
-        title:      "And (time)...",
-        required:   false
-    ]
     def inputLevelB = [
         name:       "B_level",
         type:       "enum",
@@ -349,8 +325,7 @@ section("Scene settings") {
             input inputLuxSensorsB
             input inputTurnOffB
             input inputModeB
-            input inputTimeStartB
-            input inputTimeEndB
+            href "timeIntervalInputB", title: "Only during a certain time", description: getTimeLabel(B_timeStart, B_timeEnd), state: greyedOutTime(B_timeStart, B_timeEnd), refreshAfterSelection:true
             }
 
 section("Help") {
@@ -400,19 +375,7 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
-    def inputTimeStartC = [
-        name:       "C_timeStart",
-        type:       "time",
-        title:      "Run between (time)...",
-        required:   false
-    ]
     
-    def inputTimeEndC = [
-        name:       "C_timeEnd",
-        type:       "time",
-        title:      "And (time)...",
-        required:   false
-    ]
     
     def inputLevelC = [
         name:       "C_level",
@@ -484,8 +447,7 @@ section("Scene settings") {
             input inputLuxSensorsC
             input inputTurnOffC
             input inputModeC
-            input inputTimeStartC
-            input inputTimeEndC
+            href "timeIntervalInputC", title: "Only during a certain time", description: getTimeLabel(C_timeStart, C_timeEnd), state: greyedOutTime(C_timeStart, C_timeEnd), refreshAfterSelection:true
             }
 
 section("Help") {
@@ -532,20 +494,6 @@ def pageSetupScenarioD() {
         type:       "mode",
         title:      "Only during the following modes...",
         multiple:   true,
-        required:   false
-    ]
-    
-    def inputTimeStartD = [
-        name:       "D_timeStart",
-        type:       "time",
-        title:      "Run between (time)...",
-        required:   false
-    ]
-    
-    def inputTimeEndD = [
-        name:       "D_timeEnd",
-        type:       "time",
-        title:      "And (time)...",
         required:   false
     ]
     
@@ -619,8 +567,7 @@ section("Scene settings") {
             input inputLuxSensorsD
             input inputTurnOffD
             input inputModeD
-            input inputTimeStartD
-            input inputTimeEndD
+            href "timeIntervalInputD", title: "Only during a certain time", description: getTimeLabel(D_timeStart, D_timeEnd), state: greyedOutTime(D_timeStart, D_timeEnd), refreshAfterSelection:true
             }
 
 section("Help") {
@@ -899,6 +846,14 @@ def greyOut(scenario){
     result
 }
 
+def greyedOutTime(start, end){
+	def result = ""
+    if (start || end) {
+    	result = "complete"	
+    }
+    result
+}
+
 def getTitle(scenario) {
 	def title = "Empty"
 	if (scenario) {
@@ -926,3 +881,52 @@ private getTimeOk(startTime, endTime) {
 	log.trace "timeOk = $result"
 	result
 }
+
+def getTimeLabel(start, end){
+	def timeLabel = "Tap to set"
+	
+    if(start && end){
+    	timeLabel = "Between" + " " + hhmm(start) + " "  + "and" + " " +  hhmm(end)
+    }
+    else if (start) {
+		timeLabel = "Start at" + " " + hhmm(start)
+    }
+    else if(end){
+    timeLabel = "End at" + hhmm(end)
+    }
+	timeLabel	
+}
+
+private hhmm(time, fmt = "h:mm a")
+{
+	def t = timeToday(time, location.timeZone)
+	def f = new java.text.SimpleDateFormat(fmt)
+	f.setTimeZone(location.timeZone ?: timeZone(time))
+	f.format(t)
+}
+
+
+page(name: "timeIntervalInputA", title: "Only during a certain time", refreshAfterSelection:true) {
+		section {
+			input "A_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
+			input "A_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+		}
+        }  
+page(name: "timeIntervalInputB", title: "Only during a certain time", refreshAfterSelection:true) {
+		section {
+			input "B_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
+			input "B_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+		}
+        }  
+page(name: "timeIntervalInputC", title: "Only during a certain time", refreshAfterSelection:true) {
+		section {
+			input "C_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
+			input "C_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+		}
+        }         
+page(name: "timeIntervalInputA", title: "Only during a certain time", refreshAfterSelection:true) {
+		section {
+			input "D_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
+			input "D_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+		}
+        }          
