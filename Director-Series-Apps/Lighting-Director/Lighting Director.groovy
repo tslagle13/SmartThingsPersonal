@@ -9,6 +9,7 @@
  *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
  *  Version - 2.2  Michael Struck - Added the ability to activate switches via the status locks and fixed some syntax issues
  *  Version - 2.5  Michael Struck - Changed the way the app unschedules re-triggered events
+ *  Version - 2.5.1 Tim Slagle - Fixed Time Logic
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
