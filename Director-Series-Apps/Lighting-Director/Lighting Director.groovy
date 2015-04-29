@@ -998,7 +998,7 @@ page(name: "timeIntervalInputC", title: "Only during a certain time", refreshAft
 			input "C_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
 		}
         }         
-page(name: "timeIntervalInputA", title: "Only during a certain time", refreshAfterSelection:true) {
+page(name: "timeIntervalInputD", title: "Only during a certain time", refreshAfterSelection:true) {
 		section {
 			input "D_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
 			input "D_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
