@@ -8,6 +8,7 @@
  *  Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
  *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
  *  Version - 2.2  Michael Struck - Added the ability to activate switches via the status locks and fixed some syntax issues
+ *  Version - 2.5  Michael Struck - Changed the way the app unschedules re-triggered events
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -623,6 +624,11 @@ def updated() {
 }
 
 def initialize() {
+settings.A_timerStart = false
+settings.B_timerStart = false
+settings.C_timerStart = false
+settings.D_timerStart = false
+
 if(settings.A_motion) {
 	subscribe(settings.A_motion, "motion", onEventA)
 }
@@ -704,11 +710,15 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameA}'")
 		settings.A_dimmers?.setLevel(A_levelOn)
 		settings.A_switches?.on()
-        unschedule(delayTurnOffA)
+        if (settings.A_timerStart){
+        	unschedule(delayTurnOffA)
+            settings.A_timerStart = false
+        }
 }
 else {
     	if (settings.A_turnOff) {
 		runIn(delayA, "delayTurnOffA")
+        settings.A_timerStart = true
         }
         
         else {
@@ -727,6 +737,7 @@ log.debug("Motion, Contact or Unlock detected outside of mode or time restrictio
 def delayTurnOffA(){
 	settings.A_switches?.off()
 	settings.A_dimmers?.setLevel(0)
+	settings.A_timerStart = false
 }
 
 def onEventB(evt) {
@@ -761,11 +772,15 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameB}'")
 		settings.B_dimmers?.setLevel(B_levelOn)
 		settings.B_switches?.on()
-        unschedule(delayTurnOffB)
+        if (settings.B_timerStart){
+        	unschedule(delayTurnOffB)
+            settings.B_timerStart = false
+        }
 }
 else {
     	if (settings.B_turnOff) {
 		runIn(delayB, "delayTurnOffB")
+        settings.B_timerStart = true
         }
         
         else {
@@ -784,6 +799,7 @@ log.debug("Motion, Contact or Unlock detected outside of mode or time restrictio
 def delayTurnOffB(){
 	settings.B_switches?.off()
 	settings.B_dimmers?.setLevel(0)
+	settings.B_timerStart = false
 }
 
 
@@ -820,11 +836,15 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameC}'")
 		settings.C_dimmers?.setLevel(C_levelOn)
 		settings.C_switches?.on()
-        unschedule(delayTurnOffC)
+        if (settings.C_timerStart){
+        	unschedule(delayTurnOffC) 
+            settings.C_timerStart = false
+        }
 }
 else {
     	if (settings.C_turnOff) {
 		runIn(delayC, "delayTurnOffC")
+        settinngs.C_timerStart = true
         }
         
         else {
@@ -843,6 +863,7 @@ log.debug("Motion, Contact or Unlock detected outside of mode or time restrictio
 def delayTurnOffC(){
 	settings.C_switches?.off()
 	settings.C_dimmers?.setLevel(0)
+	settinngs.C_timerStart = false
 }
 
 
@@ -878,16 +899,21 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameD}'")
 		settings.D_dimmers?.setLevel(D_levelOn)
 		settings.D_switches?.on()
-        unschedule(delayTurnOffD)
+        if (settings.D_timerStart){
+        	unschedule(delayTurnOffD) 
+            settings.D_timerStart = false
+        }
 }
 else {
     	if (settings.D_turnOff) {
 		runIn(delayD, "delayTurnOffD")
+        settings.D_timerStart = true
         }
         
         else {
         settings.D_switches?.off()
 		settings.D_dimmers?.setLevel(0)
+      
         }
 	
 }
@@ -901,6 +927,7 @@ log.debug("Motion, Contact or Unlock detected outside of mode or time restrictio
 def delayTurnOffD(){
 	settings.D_switches?.off()
 	settings.D_dimmers?.setLevel(0)
+	settinngs.D_timerStart = false
 }
 
 private def helpText() {
