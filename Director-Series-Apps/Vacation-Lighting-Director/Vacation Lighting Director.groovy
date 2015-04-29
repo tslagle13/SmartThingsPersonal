@@ -1,7 +1,7 @@
 /**
  *  Vacation Lighting Director
  *
- *  Version 1.1
+ *  Version 2.0 - Tim Slagle - Updated the time logic and made the GUI a little nicer.  Things will now turn green when you select them, like the time input!
  * 
  *  Copyright 2015 Tim Slagle
  *
@@ -46,50 +46,157 @@ definition(
     name: "Vacation Lighting Director",
     namespace: "tslagle13",
     author: "Tim Slagle",
-    description: "Randomly turn on/off lights to simulate the apperance of a occupied home while you are away.",
+    description: "Randomly turn on/off lights to simulate the appearance of a occupied home while you are away.",
     iconUrl: "http://icons.iconarchive.com/icons/custom-icon-design/mono-general-2/512/settings-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/custom-icon-design/mono-general-2/512/settings-icon.png"
 )
 
 preferences {
- page(name: "Setup", title: "", nextPage:"Settings") { 
- section("Which mode change triggers the simulator? (This app will only run in selected mode(s))") {
-		input "newMode", "mode", title: "Which?", multiple: true, required: false, refreshAfterSelection:true
-	}
-  section("Light switches to turn on/off"){
-    input "switches", "capability.switch", title: "Switches", multiple: true, required: true, refreshAfterSelection:true
-  }
-  section("How often to cycle the lights"){
-    input "frequency_minutes", "number", title: "Minutes?"
-  }
-  section("Number of active lights at any given time"){
-    input "number_of_active_lights", "number", title: "Number of active lights"
-  }
-  section("People") {
-			input "people", "capability.presenceSensor", title: "If these people are home do not change light status", required: false, multiple: true,  refreshAfterSelection:true
-		}
-  }
- page(name: "Settings", title: "", install:true, uninstall:true, refreshAfterSelection:true) { 
- section("Delay to start simulator... (defaults to 2 min)") {
-    	input "falseAlarmThreshold", "decimal", title: "Number of minutes", required: false
-  	}
+    page name:"pageSetup"
+    page name:"Setup"
+    page name:"Settings"
 
-   section([mobileOnly:true]) {
-			label title: "Assign a name", required: false
-		} 
-        section("More options", refreshAfterSelection:true) {
-			href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: timeLabel ? "complete" : "incomplete", refreshAfterSelection:true
-			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-		}
-  }
-page(name: "timeIntervalInput", title: "Only during a certain time", refreshAfterSelection:true) {
-		section {
-			input "starting", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
-			input "ending", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
-		}
-        }  
+}
 
+// Show setup page
+def pageSetup() {
+
+    def pageProperties = [
+        name:       "pageSetup",
+        title:      "Status",
+        nextPage:   null,
+        install:    true,
+        uninstall:  true
+    ]
+
+	return dynamicPage(pageProperties) {
+        section("Setup Menu") {
+            href "Setup", title: "Setup", description: "", state:greyedOut()
+            href "Settings", title: "Settings", description: "", state: greyedOutSettings()
+            }
+        section([title:"Options", mobileOnly:true]) {
+            label title:"Assign a name", required:false
+        }
+    }
+}
+
+// Show "Setup" page
+def Setup() {
+
+    def newMode = [
+        name:       "newMode",
+        type:       "mode",
+        title:      "Which?",
+        multiple:   true,
+        required:   true
+    ]
+    def switches = [
+        name:       "switches",
+        type:       "capability.switch",
+        title:      "Switches",
+        multiple:   true,
+        required:   true
+    ]
+    
+    def frequency_minutes = [
+        name:       "frequency_minutes",
+        type:       "number",
+        title:      "Minutes?"
+    ]
+    
+    def number_of_active_lights = [
+        name:       "number_of_active_lights",
+        type:       "number",
+        title:      "Number of active lights"
+    ]
+    
+    def people = [
+        name:       "people",
+        type:       "capability.presenceSensor",
+        title:      "If these people are home do not change light status",
+        required:	false,
+        multiple:	true
+    ]
+    
+    def pageName = "Setup"
+    
+    def pageProperties = [
+        name:       "Setup",
+        title:      "Setup",
+        nextPage:   "pageSetup"
+    ]
+
+    return dynamicPage(pageProperties) {
+
+
+section("Which mode change triggers the simulator? (This app will only run in selected mode(s))") {
+            input newMode
+            
+            }
+
+section("Light switches to turn on/off") {
+            input switches
+            
+            }
+section("How often to cycle the lights") {
+            input frequency_minutes
+            
+            }
+section("Number of active lights at any given time") {
+            input number_of_active_lights
+            
+            }    
+section("People") {
+            input people
+            
+            }             
+
+
+    }
+    
+}
+
+// Show "Setup" page
+def Settings() {
+
+    def falseAlarmThreshold = [
+        name:       "falseAlarmThreshold",
+        type:       "decimal",
+        title:      "Minutes?",
+        required:	false
+    ]
+    def days = [
+        name:       "days",
+        type:       "enum",
+        title:      "Only on certain days of the week",
+        multiple:   true,
+        required:   false,
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    ]
+    
+    def pageName = "Settings"
+    
+    def pageProperties = [
+        name:       "Settings",
+        title:      "Settings",
+        nextPage:   "pageSetup"
+    ]
+
+    return dynamicPage(pageProperties) {
+
+
+section("Delay to start simulator... (defaults to 2 min)") {
+            input falseAlarmThreshold
+            
+            }
+
+section("More options") {
+            href "timeIntervalInput", title: "Only during a certain time", description: getTimeLabel(starting, ending), state: greyedOutTime(starting, ending), refreshAfterSelection:true
+            input days
+            
+            }      
+    }
+    
 }
 
 def installed() {
@@ -213,10 +320,26 @@ private getTimeOk() {
 		def currTime = now()
 		def start = timeToday(starting).time
 		def stop = timeToday(ending).time
-		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start || currTime <= stop
 	}
 	log.trace "timeOk = $result"
 	result
+}
+
+def getTimeLabel(starting, ending){
+
+	def timeLabel = "Tap to set"
+	
+    if(starting && ending){
+    	timeLabel = "Between" + " " + hhmm(starting) + " "  + "and" + " " +  hhmm(ending)
+    }
+    else if (starting) {
+		timeLabel = "Start at" + " " + hhmm(starting)
+    }
+    else if(ending){
+    timeLabel = "End at" + hhmm(ending)
+    }
+	timeLabel
 }
 
 private hhmm(time, fmt = "h:mm a")
@@ -226,10 +349,28 @@ private hhmm(time, fmt = "h:mm a")
 	f.setTimeZone(location.timeZone ?: timeZone(time))
 	f.format(t)
 }
+def greyedOut(){
+	def result = ""
+    if (switches) {
+    	result = "complete"	
+    }
+    result
+}
 
-private getTimeLabel()
-{
-	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
+def greyedOutSettings(){
+	def result = ""
+    if (starting || ending || days || falseAlarmThreshold) {
+    	result = "complete"	
+    }
+    result
+}
+
+def greyedOutTime(starting, ending){
+	def result = ""
+    if (starting || ending) {
+    	result = "complete"	
+    }
+    result
 }
 
 private anyoneIsHome() {
@@ -243,3 +384,10 @@ private anyoneIsHome() {
 
   return result
 }
+
+page(name: "timeIntervalInput", title: "Only during a certain time", refreshAfterSelection:true) {
+		section {
+			input "starting", "time", title: "Starting (both are required)", required: false 
+			input "ending", "time", title: "Ending (both are required)", required: false 
+		}
+        }
