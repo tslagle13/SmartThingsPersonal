@@ -1012,7 +1012,7 @@ private getTimeOk(startTime, endTime) {
 		def currTime = now()
 		def start = timeToday(startTime).time
 		def stop = timeToday(endTime).time
-		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start || currTime <= stop
 	}
 	log.trace "timeOk = $result"
 	result
