@@ -1,7 +1,7 @@
 /**
  *  Thermostat Mode Director
  *
- *  Version 2.1.1
+ *  Version 2.1.2
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -144,8 +144,10 @@ def init(){
 	subscribe(app, appTouch)
 	subscribe(sensor, "temperature", temperatureHandler)
 	if(doors){
-		subscribe(doors, "contact", temperatureHandler)
+		subscribe(doors, "contact.open", temperatureHandler)
+        subscribe(doors, "contact.closed", doorCheck)
 	}
+    runIn(60, "temperatureHandler")
 }
 
 def temperatureHandler(evt) {
@@ -158,7 +160,7 @@ def temperatureHandler(evt) {
 		if (doorsOk) {
 			def currentTemp = sensor.latestValue("temperature")
 			if (currentTemp < setLow) {
-            	if ((state.lastStatus == "two") || (state.lastStatus == "three") || (state.lastStatus == null) || (state.lastStatus == "off")){
+            	if (state.lastStatus == "two" || state.lastStatus == "three" || state.lastStatus == null){
 					//log.info "Setting thermostat mode to ${cold}"
 					def msg = "I changed your thermostat mode to ${cold} because temperature is below ${setLow}"
 					thermostat?."${cold}"()
@@ -167,7 +169,7 @@ def temperatureHandler(evt) {
 				state.lastStatus = "one"
 			}
 			if (currentTemp > setHigh) {
-            	if ((state.lastStatus == "one") || (state.lastStatus == "three") || (state.lastStatus == null) || (state.lastStatus == "off")){
+            	if (state.lastStatus == "one" || state.lastStatus == "three" || state.lastStatus == null){
 					//log.info "Setting thermostat mode to ${hot}"
 					def msg = "I changed your thermostat mode to ${hot} because temperature is above ${setHigh}"
 					thermostat?."${hot}"()
@@ -176,7 +178,7 @@ def temperatureHandler(evt) {
 				state.lastStatus = "two"
 			}
 			if (currentTemp > setLow && currentTemp < setHigh) {
-            	if ((state.lastStatus == "two") || (state.lastStatus == "one") || (state.lastStatus == null) || (state.lastStatus == "off")){
+            	if (state.lastStatus == "two" || state.lastStatus == "one" || state.lastStatus == null){
 					//log.info "Setting thermostat mode to ${neutral}"
 					def msg = "I changed your thermostat mode to ${neutral} because temperature is neutral"
 					thermostat?."${neutral}"()
@@ -195,7 +197,6 @@ def temperatureHandler(evt) {
 
 def appTouch(evt) {
 if(thermostat1){
-	state.lastStatusDisabled = state.lastStatus
 	state.lastStatus = "disabled"
 	def currentCoolSetpoint = thermostat1.latestValue("coolingSetpoint") as String
     def currentHeatSetpoint = thermostat1.latestValue("heatingSetpoint") as String
@@ -210,15 +211,14 @@ if(thermostat1){
     	thermostat1.setHeatingSetpoint(heatingTemp)
         
     thermoShutOffTrigger()
-    log.debug("current coolingsetpoint is ${state.currentCoolSetpoint1}")
-    log.debug("current heatingsetpoint is ${state.currentHeatSetpoint1}")
-    log.debug("current mode is ${state.currentMode1}")
-    //thermostats.setCoolingSetpoint(currentCoolSetpoint)
+    //log.debug("current coolingsetpoint is ${state.currentCoolSetpoint1}")
+    //log.debug("current heatingsetpoint is ${state.currentHeatSetpoint1}")
+    //log.debug("current mode is ${state.currentMode1}")
 }    
 }
 
 def thermoShutOffTrigger() {
-    log.info("Starting timer to turn off thermostat")
+    //log.info("Starting timer to turn off thermostat")
     def delay = (turnOffDelay2 != null && turnOffDelay2 != "") ? turnOffDelay2 * 60 : 60 
     state.turnOffTime = now()
 	log.debug ("Turn off delay is ${delay}")
@@ -233,16 +233,17 @@ def thermoShutOff(){
     def heatSetpoint1 = heatSetpoint.replaceAll("\\]", "").replaceAll("\\[", "")
     def mode1 = mode.replaceAll("\\]", "").replaceAll("\\[", "")
     
-	state.lastStatus = state.lastStatusDisabled
-	log.info("Returning thermostat back to normal")
+	state.lastStatus = null
+	//log.info("Returning thermostat back to normal")
 	thermostat1.setCoolingSetpoint("${coolSetpoint1}")
     thermostat1.setHeatingSetpoint("${heatSetpoint1}")
     thermostat1."${mode1}"()
+    temperatureHandler()
 }
 
-def doorCheck(){
+def doorCheck(evt){
 	if (!doorsOk){
-		//log.debug("doors still open turning off ${thermostat}")
+		log.debug("doors still open turning off ${thermostat}")
 		def msg = "I changed your thermostat mode to off because some doors are open"
 		thermostat?.off()
 
@@ -253,8 +254,10 @@ def doorCheck(){
 	}
 
 	else{
-		temperatureHandler()
-		//log.debug("doors are actually closed checking stuff again")
+    	if (state.lastStatus == "off"){
+			state.lastStatus = null
+        }
+        temperatureHandler()
 	}
 }
 
@@ -306,7 +309,7 @@ private getTimeOk() {
 		def currTime = now()
 		def start = timeToday(starting).time
 		def stop = timeToday(ending).time
-		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start || currTime <= end
 	}
 	log.trace "timeOk = $result"
 	result
