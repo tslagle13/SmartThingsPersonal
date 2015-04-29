@@ -5,7 +5,7 @@
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
  *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
- *  Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
+ *	Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
  *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
  *  Version - 2.2  Michael Struck - Added the ability to activate switches via the status locks and fixed some syntax issues
  *  Version - 2.5  Michael Struck - Changed the way the app unschedules re-triggered events
@@ -142,6 +142,16 @@ def pageSetupScenarioA() {
         required:   false
     ]
     
+    def inputDayA = [
+        name:       "A_day",
+        type:       "enum",
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        title:      "Only on certain days of the week...",
+        multiple:   true,
+        required:   false
+    ]
+    
+    
     def inputLevelA = [
         name:       "A_level",
         type:       "enum",
@@ -170,7 +180,7 @@ def pageSetupScenarioA() {
     def inputTurnOffA = [
         name:       "A_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops or doors close (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -212,9 +222,9 @@ section("Scene settings") {
             input inputTurnOnLuxA
             input inputLuxSensorsA
             input inputTurnOffA
+            href "timeIntervalInputA", title: "Only during a certain time...", description: getTimeLabel(A_timeStart, A_timeEnd), state: greyedOutTime(A_timeStart, A_timeEnd), refreshAfterSelection:true
+            input inputDayA
             input inputModeA
-            href "timeIntervalInputA", title: "Only during a certain time", description: getTimeLabel(A_timeStart, A_timeEnd), state: greyedOutTime(A_timeStart, A_timeEnd), refreshAfterSelection:true
-            
             }
 
 section("Help") {
@@ -289,6 +299,15 @@ def pageSetupScenarioB() {
         required:   false
     ]
     
+    def inputDayB = [
+        name:       "B_day",
+        type:       "enum",
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        title:      "Only on certain days of the week...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputLevelB = [
         name:       "B_level",
         type:       "enum",
@@ -301,7 +320,7 @@ def pageSetupScenarioB() {
     def inputTurnOffB = [
         name:       "B_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops or doors close (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -343,8 +362,9 @@ section("Scene settings") {
             input inputTurnOnLuxB
             input inputLuxSensorsB
             input inputTurnOffB
+            href "timeIntervalInputB", title: "Only during a certain time...", description: getTimeLabel(B_timeStart, B_timeEnd), state: greyedOutTime(B_timeStart, B_timeEnd), refreshAfterSelection:true
+            input inputDayB
             input inputModeB
-            href "timeIntervalInputB", title: "Only during a certain time", description: getTimeLabel(B_timeStart, B_timeEnd), state: greyedOutTime(B_timeStart, B_timeEnd), refreshAfterSelection:true
             }
 
 section("Help") {
@@ -402,6 +422,15 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
+    def inputDayC = [
+        name:       "C_day",
+        type:       "enum",
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        title:      "Only on certain days of the week...",
+        multiple:   true,
+        required:   false
+    ]
+    
     def inputLevelC = [
         name:       "C_level",
         type:       "enum",
@@ -414,7 +443,7 @@ def pageSetupScenarioC() {
     def inputTurnOffC = [
         name:       "C_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops or doors close (minutes)...",
+        title:      "Turn off this scene after motion stops or doors close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -472,8 +501,9 @@ section("Scene settings") {
             input inputTurnOnLuxC
             input inputLuxSensorsC
             input inputTurnOffC
+            href "timeIntervalInputC", title: "Only during a certain time...", description: getTimeLabel(C_timeStart, C_timeEnd), state: greyedOutTime(C_timeStart, C_timeEnd), refreshAfterSelection:true
+            input inputDayC
             input inputModeC
-            href "timeIntervalInputC", title: "Only during a certain time", description: getTimeLabel(C_timeStart, C_timeEnd), state: greyedOutTime(C_timeStart, C_timeEnd), refreshAfterSelection:true
             }
 
 section("Help") {
@@ -531,6 +561,16 @@ def pageSetupScenarioD() {
         required:   false
     ]
     
+    def inputDayD = [
+        name:       "D_day",
+        type:       "enum",
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        title:      "Only on certain days of the week...",
+        multiple:   true,
+        required:   false
+    ]
+    
+    
     def inputLevelD = [
         name:       "D_level",
         type:       "enum",
@@ -543,7 +583,7 @@ def pageSetupScenarioD() {
     def inputTurnOffD = [
         name:       "D_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops, doors close or lock (minutes)...",
+        title:      "Turn off this scene after motion stops, doors close or close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -601,8 +641,9 @@ section("Scene settings") {
             input inputTurnOnLuxD
             input inputLuxSensorsD
             input inputTurnOffD
-            input inputModeD
             href "timeIntervalInputD", title: "Only during a certain time", description: getTimeLabel(D_timeStart, D_timeEnd), state: greyedOutTime(D_timeStart, D_timeEnd), refreshAfterSelection:true
+            input inputDayD
+            input inputModeD
             }
 
 section("Help") {
@@ -612,7 +653,6 @@ section("Help") {
 }
 
 def installed() {
-
     initialize()
 }
 
@@ -624,11 +664,7 @@ def updated() {
 }
 
 def initialize() {
-settings.A_timerStart = false
-settings.B_timerStart = false
-settings.C_timerStart = false
-settings.D_timerStart = false
-
+    
 if(settings.A_motion) {
 	subscribe(settings.A_motion, "motion", onEventA)
 }
@@ -680,7 +716,7 @@ if(settings.D_lock) {
 
 def onEventA(evt) {
 
-if ((settings.A_mode==null || settings.A_mode.contains(location.mode)) && getTimeOk (A_timeStart, A_timeEnd)){
+if ((settings.A_mode==null || settings.A_mode.contains(location.mode)) && getTimeOk (A_timeStart, A_timeEnd) && getDayOk(A_day)){
 if ((settings.A_luxSensors == null) || (settings.A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
 def A_levelOn = settings.A_level as Integer
 def delayA = settings.A_turnOff * 60
@@ -710,15 +746,15 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameA}'")
 		settings.A_dimmers?.setLevel(A_levelOn)
 		settings.A_switches?.on()
-        if (settings.A_timerStart){
-        	unschedule(delayTurnOffA)
-            settings.A_timerStart = false
+        if (state.A_timerStart){
+            unschedule(delayTurnOffA)
+            state.A_timerStart = false
         }
 }
 else {
     	if (settings.A_turnOff) {
 		runIn(delayA, "delayTurnOffA")
-        settings.A_timerStart = true
+        state.A_timerStart = true
         }
         
         else {
@@ -730,19 +766,19 @@ else {
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
 }
 }
 
 def delayTurnOffA(){
 	settings.A_switches?.off()
 	settings.A_dimmers?.setLevel(0)
-	settings.A_timerStart = false
+	state.A_timerStart = false
 }
 
 def onEventB(evt) {
 
-if ((settings.B_mode==null || settings.B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_timeEnd)){
+if ((settings.B_mode==null || settings.B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_timeEnd) && getDayOk(B_day)){
 if ((settings.B_luxSensors == null) || (settings.B_luxSensors.latestValue("illuminance") <= B_turnOnLux)){
 def B_levelOn = settings.B_level as Integer
 def delayB = settings.B_turnOff * 60
@@ -772,15 +808,15 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameB}'")
 		settings.B_dimmers?.setLevel(B_levelOn)
 		settings.B_switches?.on()
-        if (settings.B_timerStart){
+        if (state.B_timerStart){
         	unschedule(delayTurnOffB)
-            settings.B_timerStart = false
+            state.B_timerStart = false
         }
 }
 else {
     	if (settings.B_turnOff) {
 		runIn(delayB, "delayTurnOffB")
-        settings.B_timerStart = true
+        state.B_timerStart = true
         }
         
         else {
@@ -792,21 +828,21 @@ else {
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
 }
 }
 
 def delayTurnOffB(){
 	settings.B_switches?.off()
 	settings.B_dimmers?.setLevel(0)
-	settings.B_timerStart = false
+	state.B_timerStart = false
 }
 
 
 def onEventC(evt) {
 
 
-if ((settings.C_mode==null || settings.C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_timeEnd)){
+if ((settings.C_mode==null || settings.C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_timeEnd) && getDayOk(C_day)){
 if ((settings.C_luxSensors == null) || (settings.C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
 def C_levelOn = settings.C_level as Integer
 def delayC = settings.C_turnOff * 60
@@ -836,40 +872,39 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameC}'")
 		settings.C_dimmers?.setLevel(C_levelOn)
 		settings.C_switches?.on()
-        if (settings.C_timerStart){
+        if (state.C_timerStart){
         	unschedule(delayTurnOffC) 
-            settings.C_timerStart = false
+            state.C_timerStart = false
         }
 }
 else {
     	if (settings.C_turnOff) {
 		runIn(delayC, "delayTurnOffC")
-        settinngs.C_timerStart = true
+        state.C_timerStart = true
         }
         
         else {
         settings.C_switches?.off()
 		settings.C_dimmers?.setLevel(0)
         }
-	
 }
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
 }
 }
 
 def delayTurnOffC(){
 	settings.C_switches?.off()
 	settings.C_dimmers?.setLevel(0)
-	settinngs.C_timerStart = false
+	state.C_timerStart = false
 }
 
 
 def onEventD(evt) {
 
-if ((settings.D_mode==null || settings.D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_timeEnd)){
+if ((settings.D_mode==null || settings.D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_timeEnd) && getDayOk(D_day)){
 if ((settings.D_luxSensors == null) || (settings.D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
 def D_levelOn = settings.D_level as Integer
 def delayD = settings.D_turnOff * 60
@@ -899,15 +934,15 @@ if (motionDetected || contactDetected || unlockDetected ) {
 		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameD}'")
 		settings.D_dimmers?.setLevel(D_levelOn)
 		settings.D_switches?.on()
-        if (settings.D_timerStart){
+        if (state.D_timerStart){
         	unschedule(delayTurnOffD) 
-            settings.D_timerStart = false
+            state.D_timerStart = false
         }
 }
 else {
     	if (settings.D_turnOff) {
 		runIn(delayD, "delayTurnOffD")
-        settings.D_timerStart = true
+        state.D_timerStart = true
         }
         
         else {
@@ -920,14 +955,14 @@ else {
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
 }
 }
 
 def delayTurnOffD(){
 	settings.D_switches?.off()
 	settings.D_dimmers?.setLevel(0)
-	settinngs.D_timerStart = false
+	state.D_timerStart = false
 }
 
 private def helpText() {
@@ -1006,28 +1041,44 @@ private hhmm(time, fmt = "h:mm a")
 	f.format(t)
 }
 
+private getDayOk(dayList) {
+	def result = true
+    if (dayList) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = dayList.contains(day)
+	}
+    result
+}
+
 
 page(name: "timeIntervalInputA", title: "Only during a certain time", refreshAfterSelection:true) {
 		section {
-			input "A_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
-			input "A_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+			input "A_timeStart", "time", title: "Starting", required: false, refreshAfterSelection:true
+			input "A_timeEnd", "time", title: "Ending", required: false, refreshAfterSelection:true
 		}
         }  
 page(name: "timeIntervalInputB", title: "Only during a certain time", refreshAfterSelection:true) {
 		section {
-			input "B_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
-			input "B_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+			input "B_timeStart", "time", title: "Starting", required: false, refreshAfterSelection:true
+			input "B_timeEnd", "time", title: "Ending", required: false, refreshAfterSelection:true
 		}
         }  
 page(name: "timeIntervalInputC", title: "Only during a certain time", refreshAfterSelection:true) {
 		section {
-			input "C_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
-			input "C_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+			input "C_timeStart", "time", title: "Starting", required: false, refreshAfterSelection:true
+			input "C_timeEnd", "time", title: "Ending)", required: false, refreshAfterSelection:true
 		}
         }         
 page(name: "timeIntervalInputD", title: "Only during a certain time", refreshAfterSelection:true) {
 		section {
-			input "D_timeStart", "time", title: "Starting (both are required)", required: false, refreshAfterSelection:true
-			input "D_timeEnd", "time", title: "Ending (both are required)", required: false, refreshAfterSelection:true
+			input "D_timeStart", "time", title: "Starting", required: false, refreshAfterSelection:true
+			input "D_timeEnd", "time", title: "Ending", required: false, refreshAfterSelection:true
 		}
         }          
