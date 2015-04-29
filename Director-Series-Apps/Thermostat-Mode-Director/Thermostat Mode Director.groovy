@@ -245,9 +245,9 @@ def doorCheck(evt){
 	if (!doorsOk){
 		log.debug("doors still open turning off ${thermostat}")
 		def msg = "I changed your thermostat mode to off because some doors are open"
-		thermostat?.off()
-
-		if (state.lastStatus != "off"){
+		
+        if (state.lastStatus != "off"){
+        	thermostat?.off()
 			sendMessage(msg)
 		}
 		state.lastStatus = "off"
