@@ -5,12 +5,13 @@
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
  *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
- *	Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
+ *  Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
  *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
  *  Version - 2.2  Michael Struck - Added the ability to activate switches via the status locks and fixed some syntax issues
  *  Version - 2.5  Michael Struck - Changed the way the app unschedules re-triggered events
  *  Version - 2.5.1 Tim Slagle - Fixed Time Logic
  *  Version - 2.6 Michael Struck - Added the additional restriction of running triggers once per day and misc cleanup of code
+ *  Version - 2.7 Michael Struck - Added feature that turns off triggering if the physical switch is pressed.
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -53,13 +54,11 @@ definition(
     name: "Lighting Director",
     namespace: "tslagle13",
     author: "Tim Slagle & Michael Struck",
-    description: "Control up to 4 sets (scenes) of lights based on motion, door contacts and lux levels.",
+    description: "Control up to 4 sets (scenarios) of lights based on motion, door contacts and lux levels.",
     category: "Convenience",
     iconUrl: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector.png",
     iconX2Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png",
     iconX3Url: "https://raw.githubusercontent.com/MichaelStruck/SmartThings/master/Other-SmartApps/Lighting-Director/LightingDirector@2x.png")
-
-
 
 preferences {
     page name:"pageSetup"
@@ -67,7 +66,6 @@ preferences {
     page name:"pageSetupScenarioB"
     page name:"pageSetupScenarioC"
     page name:"pageSetupScenarioD"
-
 }
 
 // Show setup page
@@ -135,6 +133,13 @@ def pageSetupScenarioA() {
         defaultValue:false
     ]
     
+    def inputSwitchDisableA = [
+    	name:       "A_switchDisable",
+        type:       "bool",
+        title:      "Stop triggering if switches are pressed...",
+        defaultValue:false
+    ]
+    
     def inputLockA = [
         name:       "A_lock",
         type:       "capability.lock",
@@ -173,7 +178,7 @@ def pageSetupScenarioA() {
     def inputTurnOnLuxA = [
         name:       "A_turnOnLux",
         type:       "number",
-        title:      "Only run this scene if lux is below...",
+        title:      "Only run this scenario if lux is below...",
         multiple:   false,
         required:   false
     ]
@@ -189,7 +194,7 @@ def pageSetupScenarioA() {
     def inputTurnOffA = [
         name:       "A_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops or doors close/lock (minutes)...",
+        title:      "Turn off this scenario after motion stops or doors close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -214,11 +219,11 @@ def pageSetupScenarioA() {
     ]
 
     return dynamicPage(pageProperties) {
-section("Name your scene") {
+section("Name your scenario") {
             input inputScenarioNameA
         }
 
-section("Devices included in the scene") {
+section("Devices included in the scenario") {
             input inputMotionA
             input inputContactA
             input inputLockA
@@ -226,15 +231,16 @@ section("Devices included in the scene") {
             input inputDimmersA
             }
 
-section("Scene settings") {
+section("Scenario settings") {
             input inputLevelA
             input inputTurnOnLuxA
             input inputLuxSensorsA
             input inputTurnOffA
             }
             
-section("Scene restrictions") {            
+section("Scenario restrictions") {            
             input inputTriggerOnceA
+            input inputSwitchDisableA
             href "timeIntervalInputA", title: "Only during a certain time...", description: getTimeLabel(A_timeStart, A_timeEnd), state: greyedOutTime(A_timeStart, A_timeEnd), refreshAfterSelection:true
             input inputDayA
             input inputModeA
@@ -267,7 +273,7 @@ def pageSetupScenarioB() {
     def inputTurnOnLuxB = [
         name:       "B_turnOnLux",
         type:       "number",
-        title:      "Only run this scene if lux is below...",
+        title:      "Only run this scenario if lux is below...",
         multiple:   false,
         required:   false
     ]
@@ -300,6 +306,13 @@ def pageSetupScenarioB() {
     	name:       "B_triggerOnce",
         type:       "bool",
         title:      "Trigger only once per day...",
+        defaultValue:false
+    ]
+    
+    def inputSwitchDisableB = [
+    	name:       "B_switchDisable",
+        type:       "bool",
+        title:      "Stop triggering if switches are pressed...",
         defaultValue:false
     ]
     
@@ -340,7 +353,7 @@ def pageSetupScenarioB() {
     def inputTurnOffB = [
         name:       "B_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops or doors close/lock (minutes)...",
+        title:      "Turn off this scenario after motion stops or doors close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -365,11 +378,11 @@ def pageSetupScenarioB() {
     ]
 
     return dynamicPage(pageProperties) {
-section("Name your scene") {
+section("Name your scenario") {
             input inputScenarioNameB
         }
 
-section("Devices included in the scene") {
+section("Devices included in the scenario") {
             input inputMotionB
 			input inputContactB
             input inputLockB
@@ -377,15 +390,16 @@ section("Devices included in the scene") {
             input inputDimmersB
             }
 
-section("Scene settings") {
+section("Scenario settings") {
             input inputLevelB
             input inputTurnOnLuxB
             input inputLuxSensorsB
             input inputTurnOffB
             }
             
-section("Scene restrictions") {    
+section("Scenario restrictions") {    
 			input inputTriggerOnceB
+            input inputSwitchDisableB
             href "timeIntervalInputB", title: "Only during a certain time...", description: getTimeLabel(B_timeStart, B_timeEnd), state: greyedOutTime(B_timeStart, B_timeEnd), refreshAfterSelection:true
             input inputDayB
             input inputModeB
@@ -437,6 +451,13 @@ def pageSetupScenarioC() {
         defaultValue:false
     ]
     
+    def inputSwitchDisableC = [
+    	name:       "C_switchDisable",
+        type:       "bool",
+        title:      "Stop triggering if switches are pressed...",
+        defaultValue:false
+    ]
+    
     def inputLockC = [
         name:       "C_lock",
         type:       "capability.lock",
@@ -474,7 +495,7 @@ def pageSetupScenarioC() {
     def inputTurnOffC = [
         name:       "C_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops or doors close/lock (minutes)...",
+        title:      "Turn off this scenario after motion stops or doors close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -491,7 +512,7 @@ def pageSetupScenarioC() {
     def inputTurnOnLuxC = [
         name:       "C_turnOnLux",
         type:       "number",
-        title:      "Only run this scene if lux is below...",
+        title:      "Only run this scenario if lux is below...",
         multiple:   false,
         required:   false
     ]
@@ -515,11 +536,11 @@ def pageSetupScenarioC() {
     ]
 
     return dynamicPage(pageProperties) {
-        section("Name your scene") {
+        section("Name your scenario") {
             input inputScenarioNameC
         }
 
-section("Devices included in the scene") {
+section("Devices included in the scenario") {
             input inputMotionC
             input inputContactC
             input inputLockC
@@ -527,15 +548,16 @@ section("Devices included in the scene") {
             input inputDimmersC
             }
 
-section("Scene settings") {
+section("Scenario settings") {
             input inputLevelC
             input inputTurnOnLuxC
             input inputLuxSensorsC
             input inputTurnOffC
 			}
             
-section("Scene restrictions") { 
+section("Scenario restrictions") { 
 			input inputTriggerOnceC
+            input inputSwitchDisableC
             href "timeIntervalInputC", title: "Only during a certain time...", description: getTimeLabel(C_timeStart, C_timeEnd), state: greyedOutTime(C_timeStart, C_timeEnd), refreshAfterSelection:true
             input inputDayC
             input inputModeC
@@ -603,6 +625,13 @@ def pageSetupScenarioD() {
         defaultValue:false
     ]
     
+    def inputSwitchDisableD = [
+    	name:       "D_switchDisable",
+        type:       "bool",
+        title:      "Stop triggering if switches are pressed...",
+        defaultValue:false
+    ]
+    
     def inputDayD = [
         name:       "D_day",
         type:       "enum",
@@ -625,7 +654,7 @@ def pageSetupScenarioD() {
     def inputTurnOffD = [
         name:       "D_turnOff",
         type:       "number",
-        title:      "Turn off this scene after motion stops, doors close or close/lock (minutes)...",
+        title:      "Turn off this scenario after motion stops, doors close or close/lock (minutes)...",
         multiple:   false,
         required:   false
     ]
@@ -642,7 +671,7 @@ def pageSetupScenarioD() {
     def inputTurnOnLuxD = [
         name:       "D_turnOnLux",
         type:       "number",
-        title:      "Only run this scene if lux is below...",
+        title:      "Only run this scenario if lux is below...",
         multiple:   false,
         required:   false
     ]
@@ -666,11 +695,11 @@ def pageSetupScenarioD() {
     ]
 
     return dynamicPage(pageProperties) {
-        section("Name your scene") {
+        section("Name your scenario") {
             input inputScenarioNameD
         }
 
-section("Devices included in the scene") {
+section("Devices included in the scenario") {
             input inputMotionD
           	input inputContactD
             input inputLockD
@@ -678,15 +707,16 @@ section("Devices included in the scene") {
             input inputDimmersD
             }
 
-section("Scene settings") {
+section("Scenario settings") {
             input inputLevelD
             input inputTurnOnLuxD
             input inputLuxSensorsD
             input inputTurnOffD
 			}
             
-section("Scene restrictions") {    
+section("Scenario restrictions") {    
 			input inputTriggerOnceD
+            input inputSwitchDisableD
             href "timeIntervalInputD", title: "Only during a certain time", description: getTimeLabel(D_timeStart, D_timeEnd), state: greyedOutTime(D_timeStart, D_timeEnd), refreshAfterSelection:true
             input inputDayD
             input inputModeD
@@ -713,52 +743,68 @@ def initialize() {
 
 midNightReset()
 
-if(settings.A_motion) {
+if(A_motion) {
 	subscribe(settings.A_motion, "motion", onEventA)
 }
 
-if(settings.A_contact) {
+if(A_contact) {
 	subscribe(settings.A_contact, "contact", onEventA)
 }
 
-if(settings.A_lock) {
+if(A_lock) {
 	subscribe(settings.A_lock, "lock", onEventA)
 }
 
-if(settings.B_motion) {
+if(A_switchDisable) {
+	subscribe(A_switches, "switch", onPressA)
+}
+
+if(B_motion) {
 	subscribe(settings.B_motion, "motion", onEventB)
 }
 
-if(settings.B_contact) {
+if(B_contact) {
 	subscribe(settings.B_contact, "contact", onEventB)
 }
 
-if(settings.B_lock) {
+if(B_lock) {
 	subscribe(settings.B_lock, "lock", onEventB)
 }
 
-if(settings.C_motion) {
+if(B_switchDisable) {
+	subscribe(B_switches, "switch", onPressB)
+}
+
+if(C_motion) {
 	subscribe(settings.C_motion, "motion", onEventC)
 }
 
-if(settings.C_contact) {
+if(C_contact) {
 	subscribe(settings.C_contact, "contact", onEventC)
 }
 
-if(settings.C_lock) {
+if(C_lock) {
 	subscribe(settings.C_lock, "lock", onEventC)
 }
 
-if(settings.D_motion) {
+if(C_switchDisable) {
+	subscribe(C_switches, "switch", onPressC)
+}
+
+if(D_motion) {
 	subscribe(settings.D_motion, "motion", onEventD)
 }
 
-if(settings.D_contact) {
+if(D_contact) {
 	subscribe(settings.D_contact, "contact", onEventD)
 }
 
-if(settings.D_lock) {
+if(D_lock) {
 	subscribe(settings.D_lock, "lock", onEventD)
+}
+
+if(D_switchDisable) {
+	subscribe(D_switches, "switch", onPressD)
 }
 }
 
@@ -769,8 +815,8 @@ if ((!A_luxSensors) || (A_luxSensors.latestValue("illuminance") <= A_turnOnLux))
 def A_levelOn = A_level as Integer
 
 if (getInputOk(A_motion, A_contact, A_lock)) {
-         if (!A_triggerOnce || (A_triggerOnce && !state.A_triggered)) {
-        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameA}'")
+         if ((!A_triggerOnce || (A_triggerOnce && !state.A_triggered)) && (!A_switchDisable || (A_switchDisable && !state.A_triggered))) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameA}'")
             settings.A_dimmers?.setLevel(A_levelOn)
             settings.A_switches?.on()
             if (A_triggerOnce){
@@ -802,7 +848,7 @@ else {
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scenario.")
 }
 }
 
@@ -816,6 +862,14 @@ def delayTurnOffA(){
 
 }
 
+def onPressA(evt) {
+	if (evt.physical){
+    	state.A_triggered = true
+        unschedule(delayTurnOffA)
+        log.debug "Physical switch in '${ScenarioNameA}' pressed. Triggers for this scenario disabled."
+	}
+}
+
 def onEventB(evt) {
 
 if ((!B_mode ||B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_timeEnd) && getDayOk(B_day)) {
@@ -823,8 +877,8 @@ if ((!B_luxSensors) || (B_luxSensors.latestValue("illuminance") <= B_turnOnLux))
 def B_levelOn = B_level as Integer
 
 if (getInputOk(B_motion, B_contact, B_lock)) {
-		if (!B_triggerOnce || (B_triggerOnce && !state.B_triggered)) {
-        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameB}'")
+		if ((!B_triggerOnce || (B_triggerOnce && !state.B_triggered)) && (!B_switchDisable || (B_switchDisable && !state.B_triggered))) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameB}'")
 			settings.B_dimmers?.setLevel(B_levelOn)
             settings.B_switches?.on()
             if (B_triggerOnce){
@@ -857,7 +911,7 @@ else {
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scenario.")
 }
 }
 
@@ -870,16 +924,23 @@ def delayTurnOffB(){
 	}
 }
 
-def onEventC(evt) {
+def onPressB(evt) {
+	if (evt.physical){
+    	state.B_triggered = true
+        unschedule(delayTurnOffB)
+        log.debug "Physical switch in '${ScenarioNameB}' pressed. Triggers for this scenario disabled."
+	}
+}
 
+def onEventC(evt) {
 
 if ((!C_mode || C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_timeEnd) && getDayOk(C_day) && !state.C_triggered){
 if ((!C_luxSensors) || (C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
 def C_levelOn = settings.C_level as Integer
 
 if (getInputOk(C_motion, C_contact, C_lock)) {
-        if (!C_triggerOnce || (C_triggerOnce && !state.C_triggered)) {
-        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameC}'")
+        if ((!C_triggerOnce || (C_triggerOnce && !state.C_triggered)) && (!C_switchDisable || (C_switchDisable && !state.C_triggered))) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameC}'")
             settings.C_dimmers?.setLevel(C_levelOn)
             settings.C_switches?.on()
             if (C_triggerOnce){
@@ -911,7 +972,7 @@ else {
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scenario.")
 }
 }
 
@@ -925,6 +986,14 @@ def delayTurnOffC(){
 
 }
 
+def onPressC(evt) {
+	if (evt.physical){
+    	state.C_triggered = true
+        unschedule(delayTurnOffC)
+        log.debug "Physical switch in '${ScenarioNameC}' pressed. Triggers for this scenario disabled."
+	}
+}
+
 def onEventD(evt) {
 
 if ((!D_mode || D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_timeEnd) && getDayOk(D_day) && !state.D_triggered){
@@ -932,8 +1001,8 @@ if ((!D_luxSensors) || (D_luxSensors.latestValue("illuminance") <= D_turnOnLux))
 def D_levelOn = D_level as Integer
 
 if (getInputOk(D_motion, D_contact, D_lock)) {
-         if (!D_triggerOnce || (D_triggerOnce && !state.D_triggered)) {
-        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameD}'")
+         if ((!D_triggerOnce || (D_triggerOnce && !state.D_triggered)) && (!D_switchDisable || (D_switchDisable && !state.D_triggered))) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameD}'")
             settings.D_dimmers?.setLevel(D_levelOn)
             settings.D_switches?.on()
             if (D_triggerOnce){
@@ -964,7 +1033,7 @@ else {
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scenario.")
 }
 }
 
@@ -978,6 +1047,16 @@ def delayTurnOffD(){
 
 }
 
+def onPressD(evt) {
+	if (evt.physical){
+    	state.D_triggered = true
+        unschedule(delayTurnOffD)
+        log.debug "Physical switch in '${ScenarioNameD}' pressed. Triggers for this scenario disabled."
+	}
+}
+
+//Common Methods
+
 def midNightReset() {
 	state.A_triggered = false
     state.B_triggered = false
@@ -990,7 +1069,8 @@ private def helpText() {
     	"Select motion sensors, contact sensors or locks to control a set of lights. " +
         "Each scenario can control dimmers and switches but can also be " +
         "restricted to modes or between certain times and turned off after " +
-        "motion stops, doors close or lock."
+        "motion stops, doors close or lock. Scenarios can also be limited to  " +
+        "running once or to stop running if the physical switches are pressed."
 	text
 }
 
@@ -1019,9 +1099,9 @@ def getTitle(scenario) {
 }
 
 def getDesc(scenario) {
-	def desc = "Tap to create a scene"
+	def desc = "Tap to create a scenario"
 	if (scenario) {
-		desc = "Tap to edit scene"
+		desc = "Tap to edit scenario"
     }
 	desc	
 }
@@ -1136,4 +1216,3 @@ page(name: "timeIntervalInputD", title: "Only during a certain time", refreshAft
 			input "D_timeEnd", "time", title: "Ending", required: false, refreshAfterSelection:true
 		}
         }          
-
