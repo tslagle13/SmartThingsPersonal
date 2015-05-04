@@ -5,12 +5,12 @@
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
  *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
- *  Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
+ *	Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
  *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
  *  Version - 2.2  Michael Struck - Added the ability to activate switches via the status locks and fixed some syntax issues
  *  Version - 2.5  Michael Struck - Changed the way the app unschedules re-triggered events
  *  Version - 2.5.1 Tim Slagle - Fixed Time Logic
- *  Version - 2.5.2 Michael Struck - Removed extra ) from 3rd scenario time restriction
+ *  Version - 2.6 Michael Struck - Added the additional restriction of running triggers once per day and misc cleanup of code
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -128,6 +128,13 @@ def pageSetupScenarioA() {
         required:   false
     ]
     
+    def inputTriggerOnceA = [
+    	name:       "A_triggerOnce",
+        type:       "bool",
+        title:      "Trigger only once per day...",
+        defaultValue:false
+    ]
+    
     def inputLockA = [
         name:       "A_lock",
         type:       "capability.lock",
@@ -224,6 +231,10 @@ section("Scene settings") {
             input inputTurnOnLuxA
             input inputLuxSensorsA
             input inputTurnOffA
+            }
+            
+section("Scene restrictions") {            
+            input inputTriggerOnceA
             href "timeIntervalInputA", title: "Only during a certain time...", description: getTimeLabel(A_timeStart, A_timeEnd), state: greyedOutTime(A_timeStart, A_timeEnd), refreshAfterSelection:true
             input inputDayA
             input inputModeA
@@ -283,6 +294,13 @@ def pageSetupScenarioB() {
         title:      "Or using these contact sensors...",
         multiple:   true,
         required:   false
+    ]
+    
+    def inputTriggerOnceB = [
+    	name:       "B_triggerOnce",
+        type:       "bool",
+        title:      "Trigger only once per day...",
+        defaultValue:false
     ]
     
     def inputLockB = [
@@ -364,6 +382,10 @@ section("Scene settings") {
             input inputTurnOnLuxB
             input inputLuxSensorsB
             input inputTurnOffB
+            }
+            
+section("Scene restrictions") {    
+			input inputTriggerOnceB
             href "timeIntervalInputB", title: "Only during a certain time...", description: getTimeLabel(B_timeStart, B_timeEnd), state: greyedOutTime(B_timeStart, B_timeEnd), refreshAfterSelection:true
             input inputDayB
             input inputModeB
@@ -406,6 +428,13 @@ def pageSetupScenarioC() {
         title:      "Or using these contact sensors...",
         multiple:   true,
         required:   false
+    ]
+    
+    def inputTriggerOnceC = [
+    	name:       "C_triggerOnce",
+        type:       "bool",
+        title:      "Trigger only once per day...",
+        defaultValue:false
     ]
     
     def inputLockC = [
@@ -503,6 +532,10 @@ section("Scene settings") {
             input inputTurnOnLuxC
             input inputLuxSensorsC
             input inputTurnOffC
+			}
+            
+section("Scene restrictions") { 
+			input inputTriggerOnceC
             href "timeIntervalInputC", title: "Only during a certain time...", description: getTimeLabel(C_timeStart, C_timeEnd), state: greyedOutTime(C_timeStart, C_timeEnd), refreshAfterSelection:true
             input inputDayC
             input inputModeC
@@ -561,6 +594,13 @@ def pageSetupScenarioD() {
         title:      "Only during the following modes...",
         multiple:   true,
         required:   false
+    ]
+    
+    def inputTriggerOnceD = [
+    	name:       "D_triggerOnce",
+        type:       "bool",
+        title:      "Trigger only once per day...",
+        defaultValue:false
     ]
     
     def inputDayD = [
@@ -643,6 +683,10 @@ section("Scene settings") {
             input inputTurnOnLuxD
             input inputLuxSensorsD
             input inputTurnOffD
+			}
+            
+section("Scene restrictions") {    
+			input inputTriggerOnceD
             href "timeIntervalInputD", title: "Only during a certain time", description: getTimeLabel(D_timeStart, D_timeEnd), state: greyedOutTime(D_timeStart, D_timeEnd), refreshAfterSelection:true
             input inputDayD
             input inputModeD
@@ -666,7 +710,9 @@ def updated() {
 }
 
 def initialize() {
-    
+
+midNightReset()
+
 if(settings.A_motion) {
 	subscribe(settings.A_motion, "motion", onEventA)
 }
@@ -718,57 +764,45 @@ if(settings.D_lock) {
 
 def onEventA(evt) {
 
-if ((settings.A_mode==null || settings.A_mode.contains(location.mode)) && getTimeOk (A_timeStart, A_timeEnd) && getDayOk(A_day)){
-if ((settings.A_luxSensors == null) || (settings.A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
-def A_levelOn = settings.A_level as Integer
-def delayA = settings.A_turnOff * 60
-def motionDetected = false
-def contactDetected = false
-def unlockDetected = false
+if ((!A_mode || A_mode.contains(location.mode)) && getTimeOk (A_timeStart, A_timeEnd) && getDayOk(A_day)) {
+if ((!A_luxSensors) || (A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
+def A_levelOn = A_level as Integer
 
-if (settings.A_motion) {
-	if (settings.A_motion.latestValue("motion").contains("active")) {
-		motionDetected = true
-	}
-}
-
-if (settings.A_contact) {
-	if (settings.A_contact.latestValue("contact").contains("open")) {
-		contactDetected = true
-	}
-}
-
-if (settings.A_lock) {
-	if (settings.A_lock.latestValue("lock").contains("unlocked")) {
-		unlockDetected = true
-	}
-}
-
-if (motionDetected || contactDetected || unlockDetected ) {
-		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameA}'")
-		settings.A_dimmers?.setLevel(A_levelOn)
-		settings.A_switches?.on()
-        if (state.A_timerStart){
-            unschedule(delayTurnOffA)
-            state.A_timerStart = false
+if (getInputOk(A_motion, A_contact, A_lock)) {
+         if (!A_triggerOnce || (A_triggerOnce && !state.A_triggered)) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameA}'")
+            settings.A_dimmers?.setLevel(A_levelOn)
+            settings.A_switches?.on()
+            if (A_triggerOnce){
+            	state.A_triggered = true
+                if (!A_turnOff) {
+					runOnce (getMidnight(), midNightReset)
+                }
+            }
+        	if (state.A_timerStart){
+            	unschedule(delayTurnOffA)
+            	state.A_timerStart = false
+        	}
         }
 }
 else {
     	if (settings.A_turnOff) {
-		runIn(delayA, "delayTurnOffA")
+		runIn(A_turnOff * 60, "delayTurnOffA")
         state.A_timerStart = true
         }
-        
         else {
         settings.A_switches?.off()
 		settings.A_dimmers?.setLevel(0)
+        	if (state.A_triggered) {
+    			runOnce (getMidnight(), midNightReset)
+    		}
         }
 	
 }
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
 }
 }
 
@@ -776,61 +810,54 @@ def delayTurnOffA(){
 	settings.A_switches?.off()
 	settings.A_dimmers?.setLevel(0)
 	state.A_timerStart = false
+	if (state.A_triggered) {
+    	runOnce (getMidnight(), midNightReset)
+    }
+
 }
 
 def onEventB(evt) {
 
-if ((settings.B_mode==null || settings.B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_timeEnd) && getDayOk(B_day)){
-if ((settings.B_luxSensors == null) || (settings.B_luxSensors.latestValue("illuminance") <= B_turnOnLux)){
-def B_levelOn = settings.B_level as Integer
-def delayB = settings.B_turnOff * 60
-def motionDetected = false
-def contactDetected = false
-def unlockDetected = false
+if ((!B_mode ||B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_timeEnd) && getDayOk(B_day)) {
+if ((!B_luxSensors) || (B_luxSensors.latestValue("illuminance") <= B_turnOnLux)) {
+def B_levelOn = B_level as Integer
 
-if (settings.B_motion) {
-	if (settings.B_motion.latestValue("motion").contains("active")) {
-		motionDetected = true
-	}
-}
-
-if (settings.B_contact) {
-	if (settings.B_contact.latestValue("contact").contains("open")) {
-		contactDetected = true
-	}
-}
-
-if (settings.B_lock) {
-	if (settings.B_lock.latestValue("lock").contains("unlocked")) {
-		unlockDetected = true
-	}
-}
-
-if (motionDetected || contactDetected || unlockDetected ) {
-		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameB}'")
-		settings.B_dimmers?.setLevel(B_levelOn)
-		settings.B_switches?.on()
-        if (state.B_timerStart){
-        	unschedule(delayTurnOffB)
-            state.B_timerStart = false
+if (getInputOk(B_motion, B_contact, B_lock)) {
+		if (!B_triggerOnce || (B_triggerOnce && !state.B_triggered)) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameB}'")
+			settings.B_dimmers?.setLevel(B_levelOn)
+            settings.B_switches?.on()
+            if (B_triggerOnce){
+            	state.B_triggered = true
+                if (!B_turnOff) {
+					runOnce (getMidnight(), midNightReset)
+                }
+            }
+        	if (state.B_timerStart) {
+            	unschedule(delayTurnOffB)
+            	state.B_timerStart = false
+        	}
         }
 }
 else {
     	if (settings.B_turnOff) {
-		runIn(delayB, "delayTurnOffB")
-        state.B_timerStart = true
+			runIn(B_turnOff * 60, "delayTurnOffB")
+        	state.B_timerStart = true
         }
         
         else {
-        settings.B_switches?.off()
-		settings.B_dimmers?.setLevel(0)
+        	settings.B_switches?.off()
+			settings.B_dimmers?.setLevel(0)
+            if (state.B_triggered) {
+    			runOnce (getMidnight(), midNightReset)
+    		}
         }
 	
 }
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
 }
 }
 
@@ -838,62 +865,53 @@ def delayTurnOffB(){
 	settings.B_switches?.off()
 	settings.B_dimmers?.setLevel(0)
 	state.B_timerStart = false
+    if (state.B_triggered) {
+    	runOnce (getMidnight(), midNightReset) 
+	}
 }
-
 
 def onEventC(evt) {
 
 
-if ((settings.C_mode==null || settings.C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_timeEnd) && getDayOk(C_day)){
-if ((settings.C_luxSensors == null) || (settings.C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
+if ((!C_mode || C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_timeEnd) && getDayOk(C_day) && !state.C_triggered){
+if ((!C_luxSensors) || (C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
 def C_levelOn = settings.C_level as Integer
-def delayC = settings.C_turnOff * 60
-def motionDetected = false
-def contactDetected = false
-def unlockDetected = false
 
-if (settings.C_motion) {
-	if (settings.C_motion.latestValue("motion").contains("active")) {
-		motionDetected = true
-	}
-}
-
-if (settings.C_contact) {
-	if (settings.C_contact.latestValue("contact").contains("open")) {
-		contactDetected = true
-	}
-}
-
-if (settings.C_lock) {
-	if (settings.C_lock.latestValue("lock").contains("unlocked")) {
-		unlockDetected = true
-	}
-}
-
-if (motionDetected || contactDetected || unlockDetected ) {
-		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameC}'")
-		settings.C_dimmers?.setLevel(C_levelOn)
-		settings.C_switches?.on()
-        if (state.C_timerStart){
-        	unschedule(delayTurnOffC) 
-            state.C_timerStart = false
+if (getInputOk(C_motion, C_contact, C_lock)) {
+        if (!C_triggerOnce || (C_triggerOnce && !state.C_triggered)) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameC}'")
+            settings.C_dimmers?.setLevel(C_levelOn)
+            settings.C_switches?.on()
+            if (C_triggerOnce){
+            	state.C_triggered = true
+                if (!C_turnOff) {
+					runOnce (getMidnight(), midNightReset)
+                }
+            }
+        	if (state.C_timerStart){
+            	unschedule(delayTurnOffC)
+            	state.C_timerStart = false
+        	}
         }
 }
 else {
     	if (settings.C_turnOff) {
-		runIn(delayC, "delayTurnOffC")
+		runIn(C_turnOff * 60, "delayTurnOffC")
         state.C_timerStart = true
         }
-        
         else {
         settings.C_switches?.off()
 		settings.C_dimmers?.setLevel(0)
+        	if (state.C_triggered) {
+    			runOnce (getMidnight(), midNightReset)
+    		}
         }
+	
 }
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
 }
 }
 
@@ -901,63 +919,52 @@ def delayTurnOffC(){
 	settings.C_switches?.off()
 	settings.C_dimmers?.setLevel(0)
 	state.C_timerStart = false
-}
+	if (state.C_triggered) {
+    	runOnce (getMidnight(), midNightReset)
+    }
 
+}
 
 def onEventD(evt) {
 
-if ((settings.D_mode==null || settings.D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_timeEnd) && getDayOk(D_day)){
-if ((settings.D_luxSensors == null) || (settings.D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
-def D_levelOn = settings.D_level as Integer
-def delayD = settings.D_turnOff * 60
-def motionDetected = false
-def contactDetected = false
-def unlockDetected = false
+if ((!D_mode || D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_timeEnd) && getDayOk(D_day) && !state.D_triggered){
+if ((!D_luxSensors) || (D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
+def D_levelOn = D_level as Integer
 
-if (settings.D_motion) {
-	if (settings.D_motion.latestValue("motion").contains("active")) {
-		motionDetected = true
-	}
-}
-
-if (settings.D_contact) {
-	if (settings.D_contact.latestValue("contact").contains("open")) {
-		contactDetected = true
-	}
-}
-
-if (settings.D_lock) {
-	if (settings.D_lock.latestValue("lock").contains("unlocked")) {
-		unlockDetected = true
-	}
-}
-
-if (motionDetected || contactDetected || unlockDetected ) {
-		log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameD}'")
-		settings.D_dimmers?.setLevel(D_levelOn)
-		settings.D_switches?.on()
-        if (state.D_timerStart){
-        	unschedule(delayTurnOffD) 
-            state.D_timerStart = false
+if (getInputOk(D_motion, D_contact, D_lock)) {
+         if (!D_triggerOnce || (D_triggerOnce && !state.D_triggered)) {
+        	log.debug("Motion, Door Open or Unlock Detected Running '${settings.ScenarioNameD}'")
+            settings.D_dimmers?.setLevel(D_levelOn)
+            settings.D_switches?.on()
+            if (D_triggerOnce){
+            	state.D_triggered = true
+                if (!D_turnOff) {
+					runOnce (getMidnight(), midNightReset)
+                }
+            }
+        	if (state.D_timerStart){
+            	unschedule(delayTurnOffD)
+            	state.D_timerStart = false
+        	}
         }
 }
 else {
     	if (settings.D_turnOff) {
-		runIn(delayD, "delayTurnOffD")
+		runIn(D_turnOff * 60, "delayTurnOffD")
         state.D_timerStart = true
         }
-        
         else {
         settings.D_switches?.off()
 		settings.D_dimmers?.setLevel(0)
-      
+        	if (state.D_triggered) {
+    			runOnce (getMidnight(), midNightReset)
+    		}
         }
-	
 }
 }
 }
 else{
-log.debug("Motion, Contact or Unlock detected outside of mode or time/date restriction.  Not running mode.")
+log.debug("Motion, Contact or Unlock detected outside of mode or time/date/trigger restriction.  Not running scene.")
 }
 }
 
@@ -965,13 +972,24 @@ def delayTurnOffD(){
 	settings.D_switches?.off()
 	settings.D_dimmers?.setLevel(0)
 	state.D_timerStart = false
+	if (state.D_triggered) {
+    	runOnce (getMidnight(), midNightReset)
+    }
+
+}
+
+def midNightReset() {
+	state.A_triggered = false
+    state.B_triggered = false
+    state.C_triggered = false
+    state.D_triggered = false
 }
 
 private def helpText() {
 	def text =
     	"Select motion sensors, contact sensors or locks to control a set of lights. " +
         "Each scenario can control dimmers and switches but can also be " +
-        "restricted to modes or between certain times and turned off after "
+        "restricted to modes or between certain times and turned off after " +
         "motion stops, doors close or lock."
 	text
 }
@@ -1008,6 +1026,41 @@ def getDesc(scenario) {
 	desc	
 }
 
+def getMidnight() {
+	def midnightToday = timeToday("2000-01-01T23:59:59.999-0000", location.timeZone)
+	midnightToday
+}
+
+private getInputOk(motion, contact, lock) {
+
+def motionDetected = false
+def contactDetected = false
+def unlockDetected = false
+def result = false
+
+if (motion) {
+	if (motion.latestValue("motion").contains("active")) {
+		motionDetected = true
+	}
+}
+
+if (contact) {
+	if (contact.latestValue("contact").contains("open")) {
+		contactDetected = true
+	}
+}
+
+if (lock) {
+	if (lock.latestValue("lock").contains("unlocked")) {
+		unlockDetected = true
+	}
+}
+
+result = motionDetected || contactDetected || unlockDetected 
+result
+
+}
+
 private getTimeOk(startTime, endTime) {
 	def result = true
 	if (startTime && endTime) {
@@ -1016,7 +1069,6 @@ private getTimeOk(startTime, endTime) {
 		def stop = timeToday(endTime).time
 		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start || currTime <= stop
 	}
-	log.trace "timeOk = $result"
 	result
 }
 
@@ -1084,3 +1136,4 @@ page(name: "timeIntervalInputD", title: "Only during a certain time", refreshAft
 			input "D_timeEnd", "time", title: "Ending", required: false, refreshAfterSelection:true
 		}
         }          
+
