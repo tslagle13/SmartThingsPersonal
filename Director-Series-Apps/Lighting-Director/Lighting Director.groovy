@@ -5,11 +5,12 @@
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
  *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
- *	Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
+ *  Version - 2.0  Tim Slagle - Moved to only have 4 slots.  Code was to heavy and needed to be trimmed.
  *  Version - 2.1  Tim Slagle - Moved time interval inputs inline with STs design.
  *  Version - 2.2  Michael Struck - Added the ability to activate switches via the status locks and fixed some syntax issues
  *  Version - 2.5  Michael Struck - Changed the way the app unschedules re-triggered events
  *  Version - 2.5.1 Tim Slagle - Fixed Time Logic
+ *  Version - 2.5.2 Michael Struck - Removed extra ) from 3rd scenario time restriction
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -1074,7 +1075,7 @@ page(name: "timeIntervalInputB", title: "Only during a certain time", refreshAft
 page(name: "timeIntervalInputC", title: "Only during a certain time", refreshAfterSelection:true) {
 		section {
 			input "C_timeStart", "time", title: "Starting", required: false, refreshAfterSelection:true
-			input "C_timeEnd", "time", title: "Ending)", required: false, refreshAfterSelection:true
+			input "C_timeEnd", "time", title: "Ending", required: false, refreshAfterSelection:true
 		}
         }         
 page(name: "timeIntervalInputD", title: "Only during a certain time", refreshAfterSelection:true) {
