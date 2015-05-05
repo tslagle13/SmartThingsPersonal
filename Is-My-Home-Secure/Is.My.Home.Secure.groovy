@@ -1,7 +1,7 @@
 /**
  *  Is my home secure?
  *  
- *  Version 1.1
+ *  Version 1.2
  * 
  *  Copyright 2014 Tim Slagle
  *
@@ -28,11 +28,13 @@ definition(
 
 preferences {
 	section("Which mode changes trigger the check?") {
-		input "newMode", "mode", title: "Which?", multiple: true, required: false
+		input "modes", "mode", title: "Which?", multiple: true, required: false
 	}
     section("Which doors, windows, and locks should I check?"){
 		input "contacts", "capability.contactSensor", title: "Which door(s)?", multiple: true, required: true
         input "locks", "capability.lock", title: "Which lock?", multiple: true, required: false
+        input "contactsNonSecure", "capability.contactSensor", title: "These doors/windows should be checked but do not effect security.", multiple: true, required: false
+        
     }
     section("When should I check? (once per day)") {
     	input "timeToCheck", "time", title: "When?(Optional)", required: false
@@ -45,7 +47,7 @@ preferences {
   	}
     section("Add SMS alerts?"){
     input "phone", "phone", title: "Phone number (For SMS - Optional)", required: false
-		input "pushAndPhone", "enum", title: "Send push message too?", required: false, options: ["Yes","No"]
+	input "pushAndPhone", "enum", title: "Send push message too?", required: false, options: ["Yes","No"]
         
 	}
     section("Settings"){
@@ -56,7 +58,7 @@ preferences {
     section(title: "More options", hidden: hideOptionsSection()) {
 			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
 				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
+			
             
 		}
 }
@@ -77,7 +79,7 @@ def updated() {
 
 def initialize(){
 
-	if (newMode != null) {
+	if (modes != null) {
 		subscribe(location, modeChangeHandler)
     }
     if (timeToCheck != null) {
@@ -101,7 +103,8 @@ if (timeToCheckVacation){
 def modeChangeHandler(evt) {
 	log.debug "Mode change to: ${evt.value}"
     // Have to handle when they select one mode or multiple
-    if (newMode.any{ it == evt.value } || newMode == evt.value) {
+    if (modes.any{ it == evt.value } || modes == evt.value) {
+    log.debug("scheduling check")
 	def delay = (falseAlarmThreshold != null && falseAlarmThreshold != "") ? falseAlarmThreshold * 60 : 2 * 60 
     runIn(delay, "checkDoor")
     }
@@ -113,6 +116,7 @@ if(allOk){
 log.debug("checkDoor")
     def openContacts = contacts.findAll { it?.latestValue("contact") == 'open' }
     def openLocks = locks.findAll { it?.latestValue("lock") == 'unlocked' }
+    def openContactsNonSecure = contactsNonSecure.findAll { it?.latestValue("contact") == 'open' }
 
    	if (openContacts || openLocks){
     	if (openContacts && openLocks){
@@ -134,8 +138,13 @@ log.debug("checkDoor")
         }
     }
 
-    else if (!openContacts && !openLocks){
-    	def message = "All doors, windows, and locks are secure"
+	else if (!openContacts && !openLocks && openContactsNonSecure){
+    	def message = "Your home is secure but ${openContactsNonSecure.join(', ')} left open."
+        sendSecure(message)
+   }    
+
+    else if (!openContacts && !openLocks && !openContactsNonSecure){
+    	def message = "All doors, windows, and locks are secure."
         sendSecure(message)
    }    
 }  
@@ -257,7 +266,6 @@ private getTimeIntervalLabel()
 private hideOptionsSection() {
 	(starting || ending || days || modes) ? false : true
 }
-
 
 
 
