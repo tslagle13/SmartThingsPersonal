@@ -12,7 +12,7 @@
  *  Version - 2.5.1 Tim Slagle - Fixed Time Logic
  *  Version - 2.6 Michael Struck - Added the additional restriction of running triggers once per day and misc cleanup of code
  *  Version - 2.7 Michael Struck - Added feature that turns off triggering if the physical switch is pressed.
- *  Version - 2.8 Michael Struck - Fixed an issue with dimmers not stopping light action
+ *  Version - 2.81 Michael Struck - Fixed an issue with dimmers not stopping light action
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -137,7 +137,7 @@ def pageSetupScenarioA() {
     def inputSwitchDisableA = [
     	name:       "A_switchDisable",
         type:       "bool",
-        title:      "Stop triggering if switches are pressed...",
+        title:      "Stop triggering if physical switches/dimmers are turned off...",
         defaultValue:false
     ]
     
@@ -313,7 +313,7 @@ def pageSetupScenarioB() {
     def inputSwitchDisableB = [
     	name:       "B_switchDisable",
         type:       "bool",
-        title:      "Stop triggering if switches are pressed...",
+        title:      "Stop triggering if physical switches/dimmers are turned off...",
         defaultValue:false
     ]
     
@@ -455,7 +455,7 @@ def pageSetupScenarioC() {
     def inputSwitchDisableC = [
     	name:       "C_switchDisable",
         type:       "bool",
-        title:      "Stop triggering if switches are pressed...",
+        title:      "Stop triggering if physical switches/dimmers are turned off...",
         defaultValue:false
     ]
     
@@ -629,7 +629,7 @@ def pageSetupScenarioD() {
     def inputSwitchDisableD = [
     	name:       "D_switchDisable",
         type:       "bool",
-        title:      "Stop triggering if switches are pressed...",
+        title:      "Stop triggering if physical switches/dimmers are turned off...",
         defaultValue:false
     ]
     
@@ -757,8 +757,8 @@ if(A_lock) {
 }
 
 if(A_switchDisable) {
-	subscribe(A_switches, "switch", onPressA)
-    subscribe(A_dimmers, "switch", onPressA)
+	subscribe(A_switches, "switch.off", onPressA)
+    subscribe(A_dimmers, "switch.off", onPressA)
 }
 
 if(B_motion) {
@@ -774,8 +774,8 @@ if(B_lock) {
 }
 
 if(B_switchDisable) {
-	subscribe(B_switches, "switch", onPressB)
-    subscribe(B_dimmers, "switch", onPressB)
+	subscribe(B_switches, "switch.off", onPressB)
+    subscribe(B_dimmers, "switch.off", onPressB)
 }
 
 if(C_motion) {
@@ -791,8 +791,8 @@ if(C_lock) {
 }
 
 if(C_switchDisable) {
-	subscribe(C_switches, "switch", onPressC)
-    subscribe(C_dimmers, "switch", onPressC)
+	subscribe(C_switches, "switch.off", onPressC)
+    subscribe(C_dimmers, "switch.off", onPressC)
 }
 
 if(D_motion) {
@@ -808,8 +808,8 @@ if(D_lock) {
 }
 
 if(D_switchDisable) {
-	subscribe(D_switches, "switch", onPressD)
-    subscribe(D_dimmers, "switch", onPressD)
+	subscribe(D_switches, "switch.off", onPressD)
+    subscribe(D_dimmers, "switch.off", onPressD)
 }
 }
 
@@ -868,7 +868,7 @@ def delayTurnOffA(){
 }
 
 def onPressA(evt) {
-	f (evt.physical || !evt.physical){
+    if (evt.physical){
     	state.A_triggered = true
         unschedule(delayTurnOffA)
         runOnce (getMidnight(), midNightReset)
@@ -931,7 +931,7 @@ def delayTurnOffB(){
 }
 
 def onPressB(evt) {
-    if (evt.physical || !evt.physical){
+    if (evt.physical){
     	state.B_triggered = true
         unschedule(delayTurnOffB)
         runOnce (getMidnight(), midNightReset)
@@ -994,7 +994,7 @@ def delayTurnOffC(){
 }
 
 def onPressC(evt) {
-	if (evt.physical || !evt.physical){
+	if (evt.physical){
     	state.C_triggered = true
         unschedule(delayTurnOffC)
         runOnce (getMidnight(), midNightReset)
@@ -1056,7 +1056,7 @@ def delayTurnOffD(){
 }
 
 def onPressD(evt) {
-	if (evt.physical || !evt.physical){
+	if (evt.physical){
     	state.D_triggered = true
         unschedule(delayTurnOffD)
         runOnce (getMidnight(), midNightReset)
