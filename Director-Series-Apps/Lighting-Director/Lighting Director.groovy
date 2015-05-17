@@ -12,6 +12,7 @@
  *  Version - 2.5.1 Tim Slagle - Fixed Time Logic
  *  Version - 2.6 Michael Struck - Added the additional restriction of running triggers once per day and misc cleanup of code
  *  Version - 2.7 Michael Struck - Added feature that turns off triggering if the physical switch is pressed.
+ *  Version - 2.8 Michael Struck - Fixed an issue with dimmers not stopping light action
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -757,6 +758,7 @@ if(A_lock) {
 
 if(A_switchDisable) {
 	subscribe(A_switches, "switch", onPressA)
+    subscribe(A_dimmers, "switch", onPressA)
 }
 
 if(B_motion) {
@@ -773,6 +775,7 @@ if(B_lock) {
 
 if(B_switchDisable) {
 	subscribe(B_switches, "switch", onPressB)
+    subscribe(B_dimmers, "switch", onPressB)
 }
 
 if(C_motion) {
@@ -789,6 +792,7 @@ if(C_lock) {
 
 if(C_switchDisable) {
 	subscribe(C_switches, "switch", onPressC)
+    subscribe(C_dimmers, "switch", onPressC)
 }
 
 if(D_motion) {
@@ -805,6 +809,7 @@ if(D_lock) {
 
 if(D_switchDisable) {
 	subscribe(D_switches, "switch", onPressD)
+    subscribe(D_dimmers, "switch", onPressD)
 }
 }
 
@@ -863,9 +868,10 @@ def delayTurnOffA(){
 }
 
 def onPressA(evt) {
-	if (evt.physical){
+	f (evt.physical || !evt.physical){
     	state.A_triggered = true
         unschedule(delayTurnOffA)
+        runOnce (getMidnight(), midNightReset)
         log.debug "Physical switch in '${ScenarioNameA}' pressed. Triggers for this scenario disabled."
 	}
 }
@@ -925,9 +931,10 @@ def delayTurnOffB(){
 }
 
 def onPressB(evt) {
-	if (evt.physical){
+    if (evt.physical || !evt.physical){
     	state.B_triggered = true
         unschedule(delayTurnOffB)
+        runOnce (getMidnight(), midNightReset)
         log.debug "Physical switch in '${ScenarioNameB}' pressed. Triggers for this scenario disabled."
 	}
 }
@@ -987,9 +994,10 @@ def delayTurnOffC(){
 }
 
 def onPressC(evt) {
-	if (evt.physical){
+	if (evt.physical || !evt.physical){
     	state.C_triggered = true
         unschedule(delayTurnOffC)
+        runOnce (getMidnight(), midNightReset)
         log.debug "Physical switch in '${ScenarioNameC}' pressed. Triggers for this scenario disabled."
 	}
 }
@@ -1048,9 +1056,10 @@ def delayTurnOffD(){
 }
 
 def onPressD(evt) {
-	if (evt.physical){
+	if (evt.physical || !evt.physical){
     	state.D_triggered = true
         unschedule(delayTurnOffD)
+        runOnce (getMidnight(), midNightReset)
         log.debug "Physical switch in '${ScenarioNameD}' pressed. Triggers for this scenario disabled."
 	}
 }
