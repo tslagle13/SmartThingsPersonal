@@ -15,6 +15,7 @@
  *  Version - 2.81 Michael Struck - Fixed an issue with dimmers not stopping light action
  *  Version - 2.9 Michael Struck - Fixed issue where button presses outside of the time restrictions prevent the tri
  *  Version - 2.9.1 Tim Slagle - Further enhanced time interval logic.  
+ *  Version - 2.9.2 Brandon Gordon - Added support for acceleration sensors.
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -120,6 +121,13 @@ def pageSetupScenarioA() {
         required:   false
     ]
     
+	def inputAccelerationA = [
+		name:       "A_acceleration",
+		type:       "capability.accelerationSensor",
+		title:      "Using these acceleration sensors...",
+		multiple:   true,
+		required:   false
+	]
     def inputContactA = [
         name:       "A_contact",
         type:       "capability.contactSensor",
@@ -221,6 +229,7 @@ section("Name your scenario") {
 
 section("Devices included in the scenario") {
             input inputMotionA
+			input inputAccelerationA
             input inputContactA
             input inputLockA
             input inputLightsA
@@ -290,6 +299,13 @@ def pageSetupScenarioB() {
         required:   false
     ]
     
+	def inputAccelerationB = [
+		name:       "B_acceleration",
+		type:       "capability.accelerationSensor",
+		title:      "Using these acceleration sensors...",
+		multiple:   true,
+		required:   false
+	]
     def inputContactB = [
         name:       "B_contact",
         type:       "capability.contactSensor",
@@ -374,6 +390,7 @@ section("Name your scenario") {
 
 section("Devices included in the scenario") {
             input inputMotionB
+			input inputAccelerationB
 			input inputContactB
             input inputLockB
             input inputLightsB
@@ -426,6 +443,13 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
+	def inputAccelerationC = [
+		name:       "C_acceleration",
+		type:       "capability.accelerationSensor",
+		title:      "Using these acceleration sensors...",
+		multiple:   true,
+		required:   false
+	]
     def inputContactC = [
         name:       "C_contact",
         type:       "capability.contactSensor",
@@ -526,6 +550,7 @@ def pageSetupScenarioC() {
 
 section("Devices included in the scenario") {
             input inputMotionC
+			input inputAccelerationC
             input inputContactC
             input inputLockC
             input inputLightsC
@@ -578,6 +603,13 @@ def pageSetupScenarioD() {
         required:   false
     ]
     
+	def inputAccelerationD = [
+		name:       "D_acceleration",
+		type:       "capability.accelerationSensor",
+		title:      "Using these acceleration sensors...",
+		multiple:   true,
+		required:   false
+	]
     def inputContactD = [
         name:       "D_contact",
         type:       "capability.contactSensor",
@@ -679,6 +711,7 @@ def pageSetupScenarioD() {
 
 section("Devices included in the scenario") {
             input inputMotionD
+			input inputAccelerationD
           	input inputContactD
             input inputLockD
             input inputLightsD
@@ -724,6 +757,10 @@ if(A_motion) {
 	subscribe(settings.A_motion, "motion", onEventA)
 }
 
+if(A_acceleration) {
+	subscribe(settings.A_acceleration, "acceleration", onEventA)
+}
+
 if(A_contact) {
 	subscribe(settings.A_contact, "contact", onEventA)
 }
@@ -739,6 +776,10 @@ if(A_switchDisable) {
 
 if(B_motion) {
 	subscribe(settings.B_motion, "motion", onEventB)
+}
+
+if(B_acceleration) {
+	subscribe(settings.B_acceleration, "acceleration", onEventB)
 }
 
 if(B_contact) {
@@ -758,6 +799,10 @@ if(C_motion) {
 	subscribe(settings.C_motion, "motion", onEventC)
 }
 
+if(C_acceleration) {
+	subscribe(settings.C_acceleration, "acceleration", onEventC)
+}
+
 if(C_contact) {
 	subscribe(settings.C_contact, "contact", onEventC)
 }
@@ -773,6 +818,10 @@ if(C_switchDisable) {
 
 if(D_motion) {
 	subscribe(settings.D_motion, "motion", onEventD)
+}
+
+if(D_acceleration) {
+	subscribe(settings.D_acceleration, "acceleration", onEventD)
 }
 
 if(D_contact) {
@@ -795,7 +844,7 @@ if ((!A_mode || A_mode.contains(location.mode)) && getTimeOk (A_timeStart, A_tim
 if ((!A_luxSensors) || (A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
 def A_levelOn = A_level as Integer
 
-if (getInputOk(A_motion, A_contact, A_lock)) {
+if (getInputOk(A_motion, A_contact, A_lock, A_acceleration)) {
          if ((!A_triggerOnce || (A_triggerOnce && !state.A_triggered)) && (!A_switchDisable || (A_switchDisable && !state.A_triggered))) {
         	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameA}'")
             settings.A_dimmers?.setLevel(A_levelOn)
@@ -862,7 +911,7 @@ if ((!B_mode ||B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_time
 if ((!B_luxSensors) || (B_luxSensors.latestValue("illuminance") <= B_turnOnLux)) {
 def B_levelOn = B_level as Integer
 
-if (getInputOk(B_motion, B_contact, B_lock)) {
+if (getInputOk(B_motion, B_contact, B_lock, B_acceleration)) {
 		if ((!B_triggerOnce || (B_triggerOnce && !state.B_triggered)) && (!B_switchDisable || (B_switchDisable && !state.B_triggered))) {
         	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameB}'")
 			settings.B_dimmers?.setLevel(B_levelOn)
@@ -929,7 +978,7 @@ if ((!C_mode || C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_tim
 if ((!C_luxSensors) || (C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
 def C_levelOn = settings.C_level as Integer
 
-if (getInputOk(C_motion, C_contact, C_lock)) {
+if (getInputOk(C_motion, C_contact, C_lock, C_acceleration)) {
         if ((!C_triggerOnce || (C_triggerOnce && !state.C_triggered)) && (!C_switchDisable || (C_switchDisable && !state.C_triggered))) {
         	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameC}'")
             settings.C_dimmers?.setLevel(C_levelOn)
@@ -996,7 +1045,7 @@ if ((!D_mode || D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_tim
 if ((!D_luxSensors) || (D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
 def D_levelOn = D_level as Integer
 
-if (getInputOk(D_motion, D_contact, D_lock)) {
+if (getInputOk(D_motion, D_contact, D_lock, D_acceleration)) {
          if ((!D_triggerOnce || (D_triggerOnce && !state.D_triggered)) && (!D_switchDisable || (D_switchDisable && !state.D_triggered))) {
         	log.debug("Motion, Door Open or Unlock Detected Running '${ScenarioNameD}'")
             settings.D_dimmers?.setLevel(D_levelOn)
@@ -1067,7 +1116,7 @@ def midNightReset() {
 
 private def helpText() {
 	def text =
-    	"Select motion sensors, contact sensors or locks to control a set of lights. " +
+		"Select motion sensors, acceleration sensors, contact sensors or locks to control a set of lights. " +
         "Each scenario can control dimmers and switches but can also be " +
         "restricted to modes or between certain times and turned off after " +
         "motion stops, doors close or lock. Scenarios can also be limited to  " +
@@ -1112,9 +1161,10 @@ def getMidnight() {
 	midnightToday
 }
 
-private getInputOk(motion, contact, lock) {
+private getInputOk(motion, contact, lock, acceleration) {
 
 def motionDetected = false
+def accelerationDetected = false
 def contactDetected = false
 def unlockDetected = false
 def result = false
@@ -1122,6 +1172,12 @@ def result = false
 if (motion) {
 	if (motion.latestValue("motion").contains("active")) {
 		motionDetected = true
+	}
+}
+
+if (acceleration) {
+	if (acceleration.latestValue("acceleration").contains("active")) {
+		accelerationDetected = true
 	}
 }
 
@@ -1137,7 +1193,7 @@ if (lock) {
 	}
 }
 
-result = motionDetected || contactDetected || unlockDetected 
+result = motionDetected || contactDetected || unlockDetected || accelerationDetected
 result
 
 }
