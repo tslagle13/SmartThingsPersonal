@@ -13,7 +13,8 @@
  *  Version - 2.6 Michael Struck - Added the additional restriction of running triggers once per day and misc cleanup of code
  *  Version - 2.7 Michael Struck - Added feature that turns off triggering if the physical switch is pressed.
  *  Version - 2.81 Michael Struck - Fixed an issue with dimmers not stopping light action
- *  Version - 2.9 Michael Struck - Fixed issue where button presses outside of the time restrictions prevent the triggers from firing and code optimization
+ *  Version - 2.9 Michael Struck - Fixed issue where button presses outside of the time restrictions prevent the tri
+ *  Version - 2.9.1 Tim Slagle - Further enhanced time interval logic.  
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -1141,14 +1142,23 @@ result
 
 }
 
-private getTimeOk(startTime, endTime) {
+private getTimeOk(starting, ending) {
 	def result = true
-	if (startTime && endTime) {
+	if (starting && ending) {
 		def currTime = now()
-		def start = timeToday(startTime).time
-		def stop = timeToday(endTime).time
-		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start || currTime <= stop
+		def start = timeToday(starting).time
+		def stop = timeToday(ending).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
+    
+    else if (starting){
+    	result = currTime >= start
+    }
+    else if (ending){
+    	result = currTime <= stop
+    }
+    
+	log.trace "timeOk = $result"
 	result
 }
 
