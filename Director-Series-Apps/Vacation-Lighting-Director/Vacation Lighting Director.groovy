@@ -1,7 +1,7 @@
 /**
  *  Vacation Lighting Director
  *
- *  Version 2.0 - Tim Slagle - Updated the time logic and made the GUI a little nicer.  Things will now turn green when you select them, like the time input!
+ *  Version 2.1 - Tim Slagle - Updated the time logic and made the GUI a little nicer.  Things will now turn green when you select them, like the time input!
  * 
  *  Copyright 2015 Tim Slagle
  *
@@ -320,8 +320,16 @@ private getTimeOk() {
 		def currTime = now()
 		def start = timeToday(starting).time
 		def stop = timeToday(ending).time
-		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start || currTime <= stop
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
+    
+    else if (starting){
+    	result = currTime >= start
+    }
+    else if (ending){
+    	result = currTime <= stop
+    }
+    
 	log.trace "timeOk = $result"
 	result
 }
