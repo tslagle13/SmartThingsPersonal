@@ -13,6 +13,7 @@
  *  Version - 2.6 Michael Struck - Added the additional restriction of running triggers once per day and misc cleanup of code
  *  Version - 2.7 Michael Struck - Added feature that turns off triggering if the physical switch is pressed.
  *  Version - 2.81 Michael Struck - Fixed an issue with dimmers not stopping light action
+ *  Version - 2.9 Michael Struck - Fixed issue where button presses outside of the time restrictions prevent the triggers from firing and code optimization
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -74,7 +75,6 @@ def pageSetup() {
 
     def pageProperties = [
         name:       "pageSetup",
-        title:      "Status",
         nextPage:   null,
         install:    true,
         uninstall:  true
@@ -209,14 +209,8 @@ def pageSetupScenarioA() {
         defaultValue: empty
     ]
     
-    def pageName = ""
-    if (settings.ScenarioNameA) {
-        	pageName = settings.ScenarioNameA
-   		}
     def pageProperties = [
         name:       "pageSetupScenarioA",
-        title:      "${pageName}",
-        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -368,14 +362,8 @@ def pageSetupScenarioB() {
         defaultValue: empty
     ]
     
-    def pageName = ""
-    if (settings.ScenarioNameB) {
-        	pageName = settings.ScenarioNameB
-   		}
     def pageProperties = [
         name:       "pageSetupScenarioB",
-        title:      "${pageName}",
-        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -526,14 +514,8 @@ def pageSetupScenarioC() {
         required:   false
     ]
     
-    def pageName = ""
-    if (settings.ScenarioNameC) {
-        	pageName = settings.ScenarioNameC
-   		}
     def pageProperties = [
         name:       "pageSetupScenarioC",
-        title:      "${pageName}",
-        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -684,15 +666,9 @@ def pageSetupScenarioD() {
         multiple:   false,
         required:   false
     ]
-    
-    def pageName = ""
-    if (settings.ScenarioNameD) {
-        	pageName = settings.ScenarioNameD
-   		}
+
     def pageProperties = [
         name:       "pageSetupScenarioD",
-        title:      "${pageName}",
-        nextPage:   "pageSetup"
     ]
 
     return dynamicPage(pageProperties) {
@@ -734,7 +710,6 @@ def installed() {
 }
 
 def updated() {
-
     unschedule()
     unsubscribe()
     initialize()
@@ -868,6 +843,9 @@ def delayTurnOffA(){
 }
 
 def onPressA(evt) {
+if ((!A_mode || A_mode.contains(location.mode)) && getTimeOk (A_timeStart, A_timeEnd) && getDayOk(A_day)) {
+if ((!A_luxSensors) || (A_luxSensors.latestValue("illuminance") <= A_turnOnLux)){
+if ((!A_triggerOnce || (A_triggerOnce && !state.A_triggered)) && (!A_switchDisable || (A_switchDisable && !state.A_triggered))) {    
     if (evt.physical){
     	state.A_triggered = true
         unschedule(delayTurnOffA)
@@ -875,6 +853,7 @@ def onPressA(evt) {
         log.debug "Physical switch in '${ScenarioNameA}' pressed. Triggers for this scenario disabled."
 	}
 }
+}}}
 
 def onEventB(evt) {
 
@@ -931,13 +910,17 @@ def delayTurnOffB(){
 }
 
 def onPressB(evt) {
-    if (evt.physical){
+if ((!B_mode ||B_mode.contains(location.mode)) && getTimeOk (B_timeStart, B_timeEnd) && getDayOk(B_day)) {
+if ((!B_luxSensors) || (B_luxSensors.latestValue("illuminance") <= B_turnOnLux)) {
+if ((!B_triggerOnce || (B_triggerOnce && !state.B_triggered)) && (!B_switchDisable || (B_switchDisable && !state.B_triggered))) {
+	if (evt.physical){
     	state.B_triggered = true
         unschedule(delayTurnOffB)
         runOnce (getMidnight(), midNightReset)
         log.debug "Physical switch in '${ScenarioNameB}' pressed. Triggers for this scenario disabled."
 	}
 }
+}}}
 
 def onEventC(evt) {
 
@@ -994,6 +977,9 @@ def delayTurnOffC(){
 }
 
 def onPressC(evt) {
+if ((!C_mode || C_mode.contains(location.mode)) && getTimeOk (C_timeStart, C_timeEnd) && getDayOk(C_day) && !state.C_triggered){
+if ((!C_luxSensors) || (C_luxSensors.latestValue("illuminance") <= C_turnOnLux)){
+if ((!C_triggerOnce || (C_triggerOnce && !state.C_triggered)) && (!C_switchDisable || (C_switchDisable && !state.C_triggered))) {
 	if (evt.physical){
     	state.C_triggered = true
         unschedule(delayTurnOffC)
@@ -1001,6 +987,7 @@ def onPressC(evt) {
         log.debug "Physical switch in '${ScenarioNameC}' pressed. Triggers for this scenario disabled."
 	}
 }
+}}}
 
 def onEventD(evt) {
 
@@ -1056,6 +1043,9 @@ def delayTurnOffD(){
 }
 
 def onPressD(evt) {
+if ((!D_mode || D_mode.contains(location.mode)) && getTimeOk (D_timeStart, D_timeEnd) && getDayOk(D_day) && !state.D_triggered){
+if ((!D_luxSensors) || (D_luxSensors.latestValue("illuminance") <= D_turnOnLux)){
+if ((!D_triggerOnce || (D_triggerOnce && !state.D_triggered)) && (!D_switchDisable || (D_switchDisable && !state.D_triggered))) {
 	if (evt.physical){
     	state.D_triggered = true
         unschedule(delayTurnOffD)
@@ -1063,6 +1053,7 @@ def onPressD(evt) {
         log.debug "Physical switch in '${ScenarioNameD}' pressed. Triggers for this scenario disabled."
 	}
 }
+}}}
 
 //Common Methods
 
@@ -1079,7 +1070,7 @@ private def helpText() {
         "Each scenario can control dimmers and switches but can also be " +
         "restricted to modes or between certain times and turned off after " +
         "motion stops, doors close or lock. Scenarios can also be limited to  " +
-        "running once or to stop running if the physical switches are pressed."
+        "running once or to stop running if the physical switches are turned off."
 	text
 }
 
