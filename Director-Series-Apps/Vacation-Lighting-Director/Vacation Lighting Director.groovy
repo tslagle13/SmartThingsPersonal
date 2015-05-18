@@ -1,7 +1,7 @@
 /**
  *  Vacation Lighting Director
  *
- *  Version 2.1 - Tim Slagle - Updated the time logic and made the GUI a little nicer.  Things will now turn green when you select them, like the time input!
+ *  Version 2.2 - Tim Slagle - Updated the time logic and made the GUI a little nicer.  Things will now turn green when you select them, like the time input!
  * 
  *  Copyright 2015 Tim Slagle
  *
