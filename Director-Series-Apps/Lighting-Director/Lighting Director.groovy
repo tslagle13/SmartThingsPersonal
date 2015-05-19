@@ -1,11 +1,11 @@
 /**
  *  Lighting Director
  *
- * 	Current Version: 2.9.4
+ *  Current Version: 2.9.4
  *
  *
- *	Changelog:
- *	Version - 1.3
+ *  Changelog:
+ *  Version - 1.3
  *  Version - 1.30.1 Modification by Michael Struck - Fixed syntax of help text and titles of scenarios, along with a new icon
  *  Version - 1.40.0 Modification by Michael Struck - Code optimization and added door contact sensor capability		
  *  Version - 1.41.0 Modification by Michael Struck - Code optimization and added time restrictions to each scenario
