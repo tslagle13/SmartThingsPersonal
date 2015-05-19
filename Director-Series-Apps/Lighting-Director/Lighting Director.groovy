@@ -16,6 +16,7 @@
  *  Version - 2.9 Michael Struck - Fixed issue where button presses outside of the time restrictions prevent the tri
  *  Version - 2.9.1 Tim Slagle - Further enhanced time interval logic.  
  *  Version - 2.9.2 Brandon Gordon - Added support for acceleration sensors.
+ *  Version - 2.9.3 Brandon Gordon - Added mode change subscriptions.
  *
  *  Copyright 2015 Tim Slagle & Michael Struck
  *
@@ -124,7 +125,7 @@ def pageSetupScenarioA() {
 	def inputAccelerationA = [
 		name:       "A_acceleration",
 		type:       "capability.accelerationSensor",
-		title:      "Using these acceleration sensors...",
+		title:      "Or using these acceleration sensors...",
 		multiple:   true,
 		required:   false
 	]
@@ -302,7 +303,7 @@ def pageSetupScenarioB() {
 	def inputAccelerationB = [
 		name:       "B_acceleration",
 		type:       "capability.accelerationSensor",
-		title:      "Using these acceleration sensors...",
+		title:      "Or using these acceleration sensors...",
 		multiple:   true,
 		required:   false
 	]
@@ -446,7 +447,7 @@ def pageSetupScenarioC() {
 	def inputAccelerationC = [
 		name:       "C_acceleration",
 		type:       "capability.accelerationSensor",
-		title:      "Using these acceleration sensors...",
+		title:      "Or using these acceleration sensors...",
 		multiple:   true,
 		required:   false
 	]
@@ -606,7 +607,7 @@ def pageSetupScenarioD() {
 	def inputAccelerationD = [
 		name:       "D_acceleration",
 		type:       "capability.accelerationSensor",
-		title:      "Using these acceleration sensors...",
+		title:      "Or using these acceleration sensors...",
 		multiple:   true,
 		required:   false
 	]
@@ -774,6 +775,10 @@ if(A_switchDisable) {
     subscribe(A_dimmers, "switch.off", onPressA)
 }
 
+if(A_mode) {
+    subscribe(location, onEventA)
+}
+
 if(B_motion) {
 	subscribe(settings.B_motion, "motion", onEventB)
 }
@@ -793,6 +798,10 @@ if(B_lock) {
 if(B_switchDisable) {
 	subscribe(B_switches, "switch.off", onPressB)
     subscribe(B_dimmers, "switch.off", onPressB)
+}
+
+if(B_mode) {
+    subscribe(location, onEventB)
 }
 
 if(C_motion) {
@@ -816,6 +825,10 @@ if(C_switchDisable) {
     subscribe(C_dimmers, "switch.off", onPressC)
 }
 
+if(C_mode) {
+    subscribe(location, onEventC)
+}
+
 if(D_motion) {
 	subscribe(settings.D_motion, "motion", onEventD)
 }
@@ -836,6 +849,11 @@ if(D_switchDisable) {
 	subscribe(D_switches, "switch.off", onPressD)
     subscribe(D_dimmers, "switch.off", onPressD)
 }
+
+if(D_mode) {
+    subscribe(location, onEventD)
+}
+
 }
 
 def onEventA(evt) {
