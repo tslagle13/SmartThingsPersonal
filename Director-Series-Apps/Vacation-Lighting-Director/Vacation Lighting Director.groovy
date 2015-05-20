@@ -243,8 +243,6 @@ def modeChangeHandler(evt) {
 def scheduleCheck(evt) {
 if(allOk){
 log.debug("Running")
-  // turn off all the switches
-  switches.off()
 
   // grab a random switch
   def random = new Random()
@@ -262,6 +260,8 @@ log.debug("Running")
     // then remove that switch from the pool off switches that can be turned on
     inactive_switches.remove(random_int)
   }
+  // turn off remaining switches
+  inactive_switches.off()
 
   // re-run again when the frequency demands it
   runIn(frequency_minutes * 60, scheduleCheck)
