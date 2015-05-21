@@ -46,6 +46,7 @@ definition(
     name: "Vacation Lighting Director",
     namespace: "tslagle13",
     author: "Tim Slagle",
+    category: "My Apps",
     description: "Randomly turn on/off lights to simulate the appearance of a occupied home while you are away.",
     iconUrl: "http://icons.iconarchive.com/icons/custom-icon-design/mono-general-2/512/settings-icon.png",
     iconX2Url: "http://icons.iconarchive.com/icons/custom-icon-design/mono-general-2/512/settings-icon.png"
@@ -242,8 +243,6 @@ def modeChangeHandler(evt) {
 def scheduleCheck(evt) {
 if(allOk){
 log.debug("Running")
-  // turn off all the switches
-  switches.off()
 
   // grab a random switch
   def random = new Random()
@@ -261,6 +260,8 @@ log.debug("Running")
     // then remove that switch from the pool off switches that can be turned on
     inactive_switches.remove(random_int)
   }
+  // turn off remaining switches
+  inactive_switches.off()
 
   // re-run again when the frequency demands it
   runIn(frequency_minutes * 60, scheduleCheck)
@@ -272,16 +273,14 @@ else if (modeOk) {
     switches.off()
 }
 //if none is ok turn off frequency check and turn off lights.
-else if(people){
+else if(people && anyoneIsHome()){
     //don't turn off lights if anyone is home
-		if(anyoneIsHome()){
-		log.debug("Stopping Check for Light")
-    	}
-        else{
+	log.debug("Stopping Check for Light")
+}
+else{
     log.debug("Stopping Check for Light and turning off all lights")
 	switches.off()
-    }
-}
+}    
 }    
 
 
