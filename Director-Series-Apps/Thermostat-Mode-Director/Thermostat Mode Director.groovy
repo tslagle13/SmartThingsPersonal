@@ -1,7 +1,11 @@
 /**
  *  Thermostat Mode Director
  *
- *  Version 2.1.2
+ *  Version 3.0
+ *
+ *  Changelog:
+ *	2015-05-25
+ *	--Updated UI to make it look pretty.
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -52,82 +56,294 @@ definition(
 )
 
 preferences {
-	page( name:"Sensor", title:"Setup", nextPage:"directorSettings", uninstall:true, install:false ) {
+    page name:"pageSetup"
+    page name:"directorSettings"
+    page name:"ThermostatandDoors"
+    page name:"ThermostatBoost"
+    page name:"Settings"
+
+}
+
+// Show setup page
+def pageSetup() {
+
+    def pageProperties = [
+        name:       "pageSetup",
+        title:      "Status",
+        nextPage:   null,
+        install:    true,
+        uninstall:  true
+    ]
+
+	return dynamicPage(pageProperties) {
     	section("About 'Thermostat Mode Director'"){
         	paragraph "Changes mode of your thermostat based on the temperature range of a specified temperature sensor and shuts off the thermostat if any windows/doors are open."
         }
+        section("Setup Menu") {
+            href "directorSettings", title: "Director Settings", description: "", state:greyedOut()
+            href "ThermostatandDoors", title: "Thermostat and Doors", description: "", state: greyedOutTherm()
+            href "ThermostatBoost", title: "Thermostat Boost", description: "", state: greyedOutTherm1()
+            href "Settings", title: "Settings", description: "", state: greyedOutSettings()
+            }
+        section([title:"Options", mobileOnly:true]) {
+            label title:"Assign a name", required:false
+        }
+    }
+}
+
+// Show "Setup" page
+def directorSettings() {
+
+    def sensor = [
+        name:       "sensor",
+        type:       "capability.temperatureMeasurement",
+        title:      "Which?",
+        multiple:   false,
+        required:   true
+    ]
+    def setLow = [
+        name:       "setLow",
+        type:       "decimal",
+        title:      "Low temp?",
+        required:   true
+    ]
+    
+    def cold = [
+        name:       "cold",
+        type:       "enum",
+        title:		"Mode?",
+        metadata:   [values:["auto", "heat", "cool", "off"]]
+    ]
+    
+    def setHigh = [
+        name:       "setHigh",
+        type:       "decimal",
+        title:      "High temp?",
+        required:   true
+    ]
+    
+    def hot = [
+        name:       "hot",
+        type:       "enum",
+        title:		"Mode?",
+        metadata:   [values:["auto", "heat", "cool", "off"]]
+    ]
+    
+    def neutral = [
+        name:       "neutral",
+        type:       "enum",
+        title:		"Mode?",
+        metadata:   [values:["auto", "heat", "cool", "off"]]
+    ]
+    
+    def pageName = "Setup"
+    
+    def pageProperties = [
+        name:       "directorSettings",
+        title:      "Setup",
+        nextPage:   "pageSetup"
+    ]
+
+    return dynamicPage(pageProperties) {
+
 		section("Which temperature sensor will control your thermostat?"){
-			input "sensor", "capability.temperatureMeasurement", title: "Sensor", multiple:false
+			input sensor
 		}
-	}
-	page( name:"directorSettings", title:"Director Settings", nextPage:"ThermostatandDoors", uninstall:true, install:false ) {
-    	section(""){
+        section(""){
         	paragraph "Here you will setup the upper and lower thresholds for the temperature sensor that will send commands to your thermostat."
         }
 		section("When the temperature falls below this tempurature set mode to..."){
-			input "setLow", "decimal", title: "Low temp?"
-			input "cold", "enum", title: "Mode?", metadata:[values:["auto", "heat", "cool", "off"]], required:false
+			input setLow
+			input cold
 		}
         section("When the temperature goes above this tempurature set mode to..."){
-			input "setHigh", "decimal", title: "High temp?"
-			input "hot", "enum", title: "Mode?", metadata:[values:["auto", "heat", "cool", "off"]], required:false
+			input setHigh
+			input hot
 		}
         section("When temperature is between the previous temperatures, change mode to..."){
-			input "neutral", "enum", title: "Mode?", metadata:[values:["auto", "heat", "cool", "off"]], required:false
+			input neutral
 		}
-	}
-	page( name:"ThermostatandDoors", title:"Thermostat and Doors", nextPage:"ThermostatBoost", uninstall:true, install:false ) {
+    }
+    
+}
+
+def ThermostatandDoors() {
+
+    def thermostat = [
+        name:       "thermostat",
+        type:       "capability.thermostat",
+        title:      "Which?",
+        multiple:   true,
+        required:   true
+    ]
+    def doors = [
+        name:       "doors",
+        type:       "capability.contactSensor",
+        title:      "Low temp?",
+        multiple:	true,
+        required:   true
+    ]
+    
+    def turnOffDelay = [
+        name:       "turnOffDelay",
+        type:       "decimal",
+        title:		"Number of minutes",
+        required:	false
+    ]
+    
+    def pageName = "Thermostat and Doors"
+    
+    def pageProperties = [
+        name:       "ThermostatandDoors",
+        title:      "Thermostat and Doors",
+        nextPage:   "pageSetup"
+    ]
+
+    return dynamicPage(pageProperties) {
+
 		section(""){
         	paragraph "If any of the doors selected here are open the thermostat will automatically be turned off and this app will be 'disabled' until all the doors are closed. (This is optional)"
         }
         section("Choose thermostat...") {
-			input "thermostat", "capability.thermostat", multiple: true
+			input thermostat
 		}
         section("If these doors/windows are open turn off thermostat regardless of outdoor temperature") {
-			input "doors", "capability.contactSensor", multiple: true, required:false
+			input doors
 		}
 		section("Wait this long before turning the thermostat off (defaults to 1 minute)") {
-			input "turnOffDelay", "decimal", title: "Number of minutes", required: false
+			input turnOffDelay
 		}
-	}
-    page( name:"ThermostatBoost", title:"Thermostat Boost", nextPage:"Settings", uninstall:true, install:false ) {
-    	section(""){
+    }
+    
+}
+
+def ThermostatBoost() {
+
+    def thermostat1 = [
+        name:       "thermostat1",
+        type:       "capability.thermostat",
+        title:      "Which?",
+        multiple:   true,
+        required:   true
+    ]
+    def turnOnTherm = [
+        name: 		"turnOnTherm", 
+        type:		"enum", 
+        metadata: 	[values: ["cool", "heat"]], 
+        required: 	false
+    ]
+    
+    def coolingTemp = [
+        name:       "coolingTemp",
+        type:       "decimal",
+        title:		"Cooling Temp?",
+        required:	false
+    ]
+    
+    def heatingTemp = [
+        name:       "heatingTemp",
+        type:       "decimal",
+        title:		"Heating Temp?",
+        required:	false
+    ]
+    
+    def turnOffDelay2 = [
+        name:       "turnOffDelay2",
+        type:       "decimal",
+        title:		"Number of minutes",
+        required:	false,
+        defaultValue:30
+    ]
+    
+    def pageName = "Thermostat Boost"
+    
+    def pageProperties = [
+        name:       "ThermostatBoost",
+        title:      "Thermostat Boost",
+        nextPage:   "pageSetup"
+    ]
+
+    return dynamicPage(pageProperties) {
+
+		section(""){
         	paragraph "Here you can setup the ability to 'boost' your thermostat.  In the event that your thermostat is 'off'" +
             " and you need to heat or cool your your home for a little bit you can 'touch' the app in the 'My Apps' section to boost your thermostat."
         }
 		section("Choose a thermostats to boost") {
-   			input "thermostat1", "capability.thermostat", multiple: true
+   			input thermostat1
         }
         section("If thermostat is off switch to which mode?") {
-    		input "turnOnTherm", "enum", metadata: [values: ["cool", "heat"]], required: false
+    		input turnOnTherm
   		}
         section("Set the thermostat to the following temps") {
-    		input "coolingTemp", "decimal", title: "Cooling temp?", required: false
-    		input "heatingTemp", "decimal", title: "Heating temp?", required: false
+    		input coolingTemp
+    		input heatingTemp
   		}
   		section("For how long?") {
-    		input "turnOffDelay2", "decimal", defaultValue:30
+    		input turnOffDelay2
   		}
-	}
-   	
-	
-	page( name:"Settings", title:"Settings", uninstall:false, install:true ) {
+    }
+    
+}
+
+// Show "Setup" page
+def Settings() {
+
+    def sendPushMessage = [
+        name: 		"sendPushMessage",
+        type: 		"enum", 
+        title: 		"Send a push notification?", 
+        metadata:	[values:["Yes","No"]], 
+        required:	true, 
+        defaultValue: "Yes"
+    ]
+    
+    def phoneNumber = [
+        name: 		"phoneNumber", 
+        type:		"phone", 
+        title: 		"Send SMS notifications to?", 
+        required: 	false
+    ]
+    
+    def days = [
+        name:       "days",
+        type:       "enum",
+        title:      "Only on certain days of the week",
+        multiple:   true,
+        required:   false,
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    ]
+    
+    def modes = [
+        name:		"modes", 
+        type:		"mode", 
+        title: 		"Only when mode is", 
+        multiple: 	true, 
+        required: 	false
+    ]
+    
+    def pageName = "Settings"
+    
+    def pageProperties = [
+        name:       "Settings",
+        title:      "Settings",
+        nextPage:   "pageSetup"
+    ]
+
+    return dynamicPage(pageProperties) {
+
+
 		section( "Notifications" ) {
-			input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:true, defaultValue: "Yes"
-			input "phoneNumber", "phone", title: "Send SMS notifications to?", required: false
+			input sendPushMessage
+			input phoneNumber
 		}
-		section("Settings") {
-			label title: "Assign a name", required: false
-		}
-		section(title: "More options", hidden: hideOptionsSection(), hideable: true) {
-			def timeLabel = timeIntervalLabel()
-
-			input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
-				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-
-			input "modes", "mode", title: "Only when mode is", multiple: true, required: false
-		}
-	}
+		section(title: "More options", hideable: true) {
+			href "timeIntervalInput", title: "Only during a certain time", description: getTimeLabel(starting, ending), state: greyedOutTime(starting, ending), refreshAfterSelection:true
+			input days
+			input modes
+		}    
+    }
+    
 }
 
 def installed(){
@@ -309,10 +525,34 @@ private getTimeOk() {
 		def currTime = now()
 		def start = timeToday(starting).time
 		def stop = timeToday(ending).time
-		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start || currTime <= end
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
 	}
+    
+    else if (starting){
+    	result = currTime >= start
+    }
+    else if (ending){
+    	result = currTime <= stop
+    }
+    
 	log.trace "timeOk = $result"
 	result
+}
+
+def getTimeLabel(starting, ending){
+
+	def timeLabel = "Tap to set"
+	
+    if(starting && ending){
+    	timeLabel = "Between" + " " + hhmm(starting) + " "  + "and" + " " +  hhmm(ending)
+    }
+    else if (starting) {
+		timeLabel = "Start at" + " " + hhmm(starting)
+    }
+    else if(ending){
+    timeLabel = "End at" + hhmm(ending)
+    }
+	timeLabel
 }
 
 private hhmm(time, fmt = "h:mm a")
@@ -322,11 +562,61 @@ private hhmm(time, fmt = "h:mm a")
 	f.setTimeZone(location.timeZone ?: timeZone(time))
 	f.format(t)
 }
-
-private hideOptionsSection() {
-	(starting || ending || days || modes) ? false : true
+def greyedOut(){
+	def result = ""
+    if (sensor) {
+    	result = "complete"	
+    }
+    result
 }
 
-private timeIntervalLabel() {
-	(starting && ending) ? hhmm(starting) + "-" + hhmm(ending, "h:mm a z") : ""
+def greyedOutTherm(){
+	def result = ""
+    if (thermostat) {
+    	result = "complete"	
+    }
+    result
 }
+
+def greyedOutTherm1(){
+	def result = ""
+    if (thermostat1) {
+    	result = "complete"	
+    }
+    result
+}
+
+def greyedOutSettings(){
+	def result = ""
+    if (starting || ending || days || modes || sendPushMessage) {
+    	result = "complete"	
+    }
+    result
+}
+
+def greyedOutTime(starting, ending){
+	def result = ""
+    if (starting || ending) {
+    	result = "complete"	
+    }
+    result
+}
+
+private anyoneIsHome() {
+  def result = false
+
+  if(people.findAll { it?.currentPresence == "present" }) {
+    result = true
+  }
+
+  log.debug("anyoneIsHome: ${result}")
+
+  return result
+}
+
+page(name: "timeIntervalInput", title: "Only during a certain time", refreshAfterSelection:true) {
+		section {
+			input "starting", "time", title: "Starting (both are required)", required: false 
+			input "ending", "time", title: "Ending (both are required)", required: false 
+		}
+        }
