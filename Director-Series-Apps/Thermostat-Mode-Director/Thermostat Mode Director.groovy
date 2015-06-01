@@ -6,6 +6,8 @@
  *  Changelog:
  *	2015-05-25
  *	--Updated UI to make it look pretty.
+ *	2015-06-01
+ *  	--Added option for modes to trigger thermostat boost.
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -233,6 +235,14 @@ def ThermostatBoost() {
         required: 	false
     ]
     
+    def modes1 = [
+        name:		"modes1", 
+        type:		"mode", 
+        title: 		"Put thermostat into boost mode when mode is...", 
+        multiple: 	true, 
+        required: 	false
+    ]
+    
     def coolingTemp = [
         name:       "coolingTemp",
         type:       "decimal",
@@ -282,6 +292,9 @@ def ThermostatBoost() {
   		section("For how long?") {
     		input turnOffDelay2
   		}
+        section("In addtion to 'app touch' the following modes will also boost the thermostat") {
+   			input modes1
+        }
     }
     
 }
@@ -358,12 +371,15 @@ def updated(){
 def init(){
 	state.lastStatus = null
 	subscribe(app, appTouch)
-	subscribe(sensor, "temperature", temperatureHandler)
+    runIn(60, "temperatureHandler")
+    subscribe(sensor, "temperature", temperatureHandler)
+    if(modes1){
+    	subscribe(location, modeBoostChange)
+    }
 	if(doors){
 		subscribe(doors, "contact.open", temperatureHandler)
         subscribe(doors, "contact.closed", doorCheck)
 	}
-    runIn(60, "temperatureHandler")
 }
 
 def temperatureHandler(evt) {
@@ -433,6 +449,30 @@ if(thermostat1){
 }    
 }
 
+def modeBoostChange(evt) {
+	if(thermostat1 && modes1.contains(location.mode)){
+		state.lastStatus = "disabled"
+		def currentCoolSetpoint = thermostat1.latestValue("coolingSetpoint") as String
+    	def currentHeatSetpoint = thermostat1.latestValue("heatingSetpoint") as String
+    	def currentMode = thermostat1.latestValue("thermostatMode") as String
+		def mode = turnOnTherm
+    	state.currentCoolSetpoint1 = currentCoolSetpoint
+    	state.currentHeatSetpoint1 = currentHeatSetpoint
+    	state.currentMode1 = currentMode
+    
+    		thermostat1."${mode}"()
+    		thermostat1.setCoolingSetpoint(coolingTemp)
+    		thermostat1.setHeatingSetpoint(heatingTemp)
+        
+    	log.debug("current coolingsetpoint is ${state.currentCoolSetpoint1}")
+    	log.debug("current heatingsetpoint is ${state.currentHeatSetpoint1}")
+    	log.debug("current mode is ${state.currentMode1}")
+	}
+	else{
+		thermoShutOff()
+    }    
+}
+
 def thermoShutOffTrigger() {
     //log.info("Starting timer to turn off thermostat")
     def delay = (turnOffDelay2 != null && turnOffDelay2 != "") ? turnOffDelay2 * 60 : 60 
@@ -442,19 +482,21 @@ def thermoShutOffTrigger() {
   }
 
 def thermoShutOff(){
-	def coolSetpoint = state.currentCoolSetpoint1
-    def heatSetpoint = state.currentHeatSetpoint1
-	def mode = state.currentMode1
-    def coolSetpoint1 = coolSetpoint.replaceAll("\\]", "").replaceAll("\\[", "")
-    def heatSetpoint1 = heatSetpoint.replaceAll("\\]", "").replaceAll("\\[", "")
-    def mode1 = mode.replaceAll("\\]", "").replaceAll("\\[", "")
+	if(state.lastStatus == "disabled"){
+		def coolSetpoint = state.currentCoolSetpoint1
+    	def heatSetpoint = state.currentHeatSetpoint1
+		def mode = state.currentMode1
+    	def coolSetpoint1 = coolSetpoint.replaceAll("\\]", "").replaceAll("\\[", "")
+    	def heatSetpoint1 = heatSetpoint.replaceAll("\\]", "").replaceAll("\\[", "")
+    	def mode1 = mode.replaceAll("\\]", "").replaceAll("\\[", "")
     
-	state.lastStatus = null
-	//log.info("Returning thermostat back to normal")
-	thermostat1.setCoolingSetpoint("${coolSetpoint1}")
-    thermostat1.setHeatingSetpoint("${heatSetpoint1}")
-    thermostat1."${mode1}"()
-    temperatureHandler()
+		state.lastStatus = null
+		//log.info("Returning thermostat back to normal")
+		thermostat1.setCoolingSetpoint("${coolSetpoint1}")
+    	thermostat1.setHeatingSetpoint("${heatSetpoint1}")
+    	thermostat1."${mode1}"()
+    	temperatureHandler()
+    }
 }
 
 def doorCheck(evt){
