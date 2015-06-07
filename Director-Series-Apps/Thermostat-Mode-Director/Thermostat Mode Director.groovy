@@ -1,5 +1,6 @@
 /**
  *  Thermostat Mode Director
+ *  Source: https://github.com/tslagle13/SmartThings/blob/master/Director-Series-Apps/Thermostat-Mode-Director/Thermostat%20Mode%20Director.groovy
  *
  *  Version 3.0
  *
