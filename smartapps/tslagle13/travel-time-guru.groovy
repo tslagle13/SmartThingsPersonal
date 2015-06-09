@@ -405,9 +405,6 @@ result
 }
 
 def totalTravelTime(evt){
-	def location1Fixed = location1.replaceAll(" ", "%20")
-	def location2Fixed = location2.replaceAll(" ", "%20")
-	def result = ""
 	try {
 			httpGet("http://dev.virtualearth.net/REST/v1/Routes?wayPoint.1=${location1Fixed}&waypoint.2=${location2Fixed}&key=${apiKey}") { resp ->
             	resp.headers.each {
