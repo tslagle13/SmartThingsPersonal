@@ -1,7 +1,7 @@
 /**
  *  Travel Time Guru
  *
- *  BETA 1.1
+ *  BETA 1.11
  * 
  *  Copyright 2015 Tim Slagle
  *
@@ -61,311 +61,336 @@ preferences {
 }
 
 def mainPage() { 
-dynamicPage(name: "mainPage") {
-	section("About"){
-    	paragraph "This app will lookup and notify you of when you need to leave for work.  Provide it with two way points and it will automatically check traffic every 5 minutes.  As it gets closer to the the time you need to leave in order to arrive on time it will begin to alert you based on the alert thresholds you set.  (This does require a Bing Maps API key from bingmapsportal.com)"
-    }
-    section("Current travel time. (Touch the app button to update)") {
-    	paragraph travelParagraph()
-    }
-	section("Setup") {
-    	href "apiKey", title: "Bing Maps API Key", state: greyOutApi()
-        href "wayPoints", title: "Select Way Points", state: greyOutWayPoints()
-        href "triggers", title: "Setup App Triggers", state: greyOutTriggers()
-        href "setupTimes", title: "Select Start Time", state: greyOutTimes()
-        href "notificationSettings", title: "Notification Settings", state: greyOutNotifications()
-        href "appRestrictions", title: "App Restrictions", state: greyOutRestrictions()
-    }
-    section([title:"Options", mobileOnly:true]) {
-    	label title:"Assign a name", required:false
-    }
-}   
+    dynamicPage(name: "mainPage") {
+        section("About"){
+            paragraph "This app will lookup and notify you of when you need to leave for work.  Provide it with two way points and it will automatically check traffic every 5 minutes.  As it gets closer to the the time you need to leave in order to arrive on time it will begin to alert you based on the alert thresholds you set.  (This does require a Bing Maps API key from bingmapsportal.com)"
+        }
+        section("Current travel time. (Touch the app button to update)") {
+            paragraph travelParagraph()
+        }
+        section("Setup") {
+            href "apiKey", title: "Bing Maps API Key", state: greyOutApi()
+            href "wayPoints", title: "Select Way Points", state: greyOutWayPoints()
+            href "triggers", title: "Setup App Triggers", state: greyOutTriggers()
+            href "setupTimes", title: "Select Start Time", state: greyOutTimes()
+            href "notificationSettings", title: "Notification Settings", state: greyOutNotifications()
+            href "appRestrictions", title: "App Restrictions", state: greyOutRestrictions()
+        }
+        section([title:"Options", mobileOnly:true]) {
+            label title:"Assign a name", required:false
+        }
+    }   
 }
 
 def wayPoints(){
-dynamicPage(name: "wayPoints") {
-	section("About"){
-    	paragraph "Please set your home address and work address to calculate travel time between them. Ex. 85 Challenger Road, Ridgefield Park, NJ or  Samsung Electronics"
+    dynamicPage(name: "wayPoints") {
+        section("About"){
+            paragraph "Please set your home address and work address to calculate travel time between them. Ex. 85 Challenger Road, Ridgefield Park, NJ or  Samsung Electronics"
+        }
+        section("Way Points"){	
+            input "location1", "text", title: "Home address", required: True
+            input "location2", "text", title: "Office address", required: True
+        }	  
     }
-	section("Way Points"){	
-    	input "location1", "text", title: "Home address", required: True
-        input "location2", "text", title: "Office address", required: True
-    }	  
-}
 }
 
 def triggers(){
-dynamicPage(name: "triggers") {
-	section("About"){
-    	paragraph "Select what events will trigger the app to start running in the morning."
+    dynamicPage(name: "triggers") {
+        section("About"){
+            paragraph "Select what events will trigger the app to start running in the morning."
+        }
+        section("Trigger the app to start when..."){
+            input "motions", "capability.motionSensor", title: "Motion is sensed here", required: false
+            input "contactOpen", "capability.contactSensor", title: "The following are opened", required: false
+            input "contactClosed", "capability.contactSensor", title: "The following are closed", required: false
+        }	  
     }
-	section("Trigger the app to start when..."){
-    	input "motions", "capability.motionSensor", title: "Motion is sensed here", required: false
-        input "contactOpen", "capability.contactSensor", title: "The following are opened", required: false
-        input "contactClosed", "capability.contactSensor", title: "The following are closed", required: false
-    }	  
-}
 }
 
 def setupTimes(){
-dynamicPage(name: "setupTimes") {
-	section("About"){
-    	paragraph "Setup the time you want to arrive at work as well as when the app should start to notify you that you need to leave."
+    dynamicPage(name: "setupTimes") {
+        section("About"){
+            paragraph "Setup the time you want to arrive at work as well as when the app should start to notify you that you need to leave."
+        }
+        section("Start Time"){
+            input "mytime", "time", title: "When do you want to arrive at work?", required: true
+        }
+        section("Notify Settings"){
+            input "notifyLead", "number", title: "How many minutes before your first notification to leave? (default: 15 min)", required: True, defaultValue: 15
+            input "notifyLeadWarn", "number", title: "How many minutes before your second notification to leave? (default: 10 min)", required: True, defaultValue: 10
+            input "notifyLeadEmergency", "number", title: "How many minutes before your last notification to leave? (default: 5 min)", required: True, defaultValue: 5
+        }	  
     }
-	section("Start Time"){
-    	input "mytime", "time", title: "When do you want to arrive at work?", required: true
-    }
-    section("Notify Settings"){
-    	input "notifyLead", "number", title: "How many minutes before your first notification to leave? (default: 15 min)", required: True, defaultValue: 15
-    	input "notifyLeadWarn", "number", title: "How many minutes before your second notification to leave? (default: 10 min)", required: True, defaultValue: 10
-    	input "notifyLeadEmergency", "number", title: "How many minutes before your last notification to leave? (default: 5 min)", required: True, defaultValue: 5
-    }	  
-}
 }
 
 def notificationSettings(){
-dynamicPage(name: "notificationSettings") {
-	section("About"){
-    	paragraph "Select the way you want to be notified when a notification is sent."
+    dynamicPage(name: "notificationSettings") {
+        section("About"){
+            paragraph "Select the way you want to be notified when a notification is sent."
+        }
+        section("Alert Settings"){
+            input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
+            input "sonos", "capability.musicPlayer", title:"Speak message via: (optional) ", multiple: true, required: false
+            input "volume", "enum", title: "at this volume...", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
+            input "resumePlaying", "bool", title: "Resume currently playing music after alert?", required: false, defaultValue: true
+        } 
+        section("Hues"){
+            input "hues", "capability.colorControl", title: "Change the color of these bulbs for each warning... (optional)", required:false, multiple:true
+            input "colorNotify", "enum", title: "Change to this color on the first warning", required: false, options: [["White":"White"],["Daylight":"Daylight"],["Blue":"Blue"],["Green":"Green"],["Yellow":"Yellow"],["Orange":"Orange"],["Purple":"Purple"],["Pink":"Pink"],["Red":"Red"]]
+            input "colorWarn", "enum", title: "Change to this color on the second warning", required: false, options: [["White":"White"],["Daylight":"Daylight"],["Blue":"Blue"],["Green":"Green"],["Yellow":"Yellow"],["Orange":"Orange"],["Purple":"Purple"],["Pink":"Pink"],["Red":"Red"]]
+            input "colorEmergency", "enum", title: "Change to this color on the last warning", required: false, options: [["White":"White"],["Daylight":"Daylight"],["Blue":"Blue"],["Green":"Green"],["Yellow":"Yellow"],["Orange":"Orange"],["Purple":"Purple"],["Pink":"Pink"],["Red":"Red"]]
+        }	  
     }
-	section("Alert Settings"){
-        input "sendPushMessage", "enum", title: "Send a push notification?", metadata:[values:["Yes","No"]], required:false
-        input "sonos", "capability.musicPlayer", title:"Speak message via: (optional) ", multiple: true, required: false
-    	input "volume", "enum", title: "at this volume...", required: false, options: [[10:"10%"],[20:"20%"],[30:"30%"],[40:"40%"],[50:"50%"],[60:"60%"],[70:"70%"],[80:"80%"],[90:"90%"],[100:"100%"]]
-        input "resumePlaying", "bool", title: "Resume currently playing music after alert?", required: false, defaultValue: true
-    } 
-    section("Hues"){
-    	input "hues", "capability.colorControl", title: "Change the color of these bulbs for each warning... (optional)", required:false, multiple:true
-        input "colorNotify", "enum", title: "Change to this color on the first warning", required: false, options: [["White":"White"],["Daylight":"Daylight"],["Blue":"Blue"],["Green":"Green"],["Yellow":"Yellow"],["Orange":"Orange"],["Purple":"Purple"],["Pink":"Pink"],["Red":"Red"]]
-        input "colorWarn", "enum", title: "Change to this color on the second warning", required: false, options: [["White":"White"],["Daylight":"Daylight"],["Blue":"Blue"],["Green":"Green"],["Yellow":"Yellow"],["Orange":"Orange"],["Purple":"Purple"],["Pink":"Pink"],["Red":"Red"]]
-        input "colorEmergency", "enum", title: "Change to this color on the last warning", required: false, options: [["White":"White"],["Daylight":"Daylight"],["Blue":"Blue"],["Green":"Green"],["Yellow":"Yellow"],["Orange":"Orange"],["Purple":"Purple"],["Pink":"Pink"],["Red":"Red"]]
-    }	  
-}
 }
 
 def apiKey(){
-dynamicPage(name: "apiKey") {
-	section("About"){
-    	paragraph "Here you will need to provide the Bing Maps API key you got from the bingmapsportal.  You will need to go to bingmapsportal.com and sign up for a dev account which will provide you with a secret key you can use to acccess their API"
+    dynamicPage(name: "apiKey") {
+        section("About"){
+            paragraph "Here you will need to provide the Bing Maps API key you got from the bingmapsportal.  You will need to go to bingmapsportal.com and sign up for a dev account which will provide you with a secret key you can use to acccess their API"
+        }
+        section("Bing Maps API Key"){
+            input "apiKey", "text", title: "Microsoft API Secret Key", required: True
+        }	  
     }
-	section("Bing Maps API Key"){
-    	input "apiKey", "text", title: "Microsoft API Secret Key", required: True
-    }	  
-}
 }
 
 def appRestrictions(){
-dynamicPage(name: "appRestrictions") {
-	section("About"){
-    	paragraph "Select when the app will stop running. If you don't select any of these the app will continue to run indefinitely.  (Pro Tip: You want to restrict it in some way.)"
+    dynamicPage(name: "appRestrictions") {
+        section("About"){
+            paragraph "Select when the app will stop running. If you don't select any of these the app will continue to run indefinitely.  (Pro Tip: You want to restrict it in some way.)"
+        }
+        section("Stop running this app when..."){
+            input "people", "capability.presenceSensor", title: "These people are gone", required: false
+            input "modes", "mode", title: "and/or the current mode is", required: false, multiple: true
+        }	  
     }
-	section("Stop running this app when..."){
-    	input "people", "capability.presenceSensor", title: "These people are gone", required: false
-        input "modes", "mode", title: "and/or the current mode is", required: false, multiple: true
-    }	  
-}
 }
 
 def installed() {
-initialize()
-}
-
-def updated() {
-unsubscribe()
-initialize()
-unschedule(trafficCheck)
-}
-
-def initialize(){
 	subscribe(app, totalTravelTime)
+    
 	if(motions){
     	subscribe(motions, "motion.active", trafficCheck)
     }
+    
     if(contactOpen){
     	subscribe(contactOpen, "contact.open", trafficCheck)
     }
+    
     if(contactClosed){
     	subscribe(contactClosed, "contact.open", trafficCheck)
     }
+    log.debug "installed with settings: $settings"
+}
+
+def updated() {
+    unsubscribe()
+    unschedule(trafficCheck)
     state.clear()
+    subscribe(app, totalTravelTime)
+    
+	if(motions){
+    	subscribe(motions, "motion.active", trafficCheck)
+    }
+    
+    if(contactOpen){
+    	subscribe(contactOpen, "contact.open", trafficCheck)
+    }
+    
+    if(contactClosed){
+    	subscribe(contactClosed, "contact.open", trafficCheck)
+    }
     log.debug "installed with settings: $settings"
 }
 
 def trafficCheck(evt){
-if(getModeOk() && anyoneIsHome()){
-	int timeLeft = getTimeLeft()
-    if(timeLeft <= 0){
-    	def timeLeftFixed = -1 * timeLeft
-    	def msg = "Attention: With current traffic conditions you will be ${timeLeftFixed} minutes late for work."
-    		if(sonos){
-            	if(resumePlaying){
-    				loadText(msg)
-					sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
-            	}
-                else{
-                	sonos.playText(msg)
-                }    
+	if(getModeOk() && anyoneIsHome()){
+		if(state.travelTimeTraffic){
+            int timeLeft = getTimeLeft()
+            if(timeLeft <= 0){
+            	if(state.notifyNow != "true"){
+                def timeLeftFixed = -1 * timeLeft
+                def msg = "Attention: With current traffic conditions you will be ${timeLeftFixed} minutes late for work."
+                    if(sonos){
+                        if(resumePlaying){
+                            loadText(msg)
+                            sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
+                        }
+                        else{
+                            sonos.playText(msg)
+                        }    
+                    }
+                    if(sendPushMessage == "Yes"){
+                        sendPush(msg)
+                    }    
+                    state.check = null
+                    state.notify = null
+                    state.notifyWarn = null
+                    state.notifyEmergency = null
+                    state.notifyNow = "true"
+                    if(hues){
+                        sendcolor(colorEmergency)
+                    }
+                    if(state.trafficCheck != true){
+                        runEvery5Minutes(trafficCheck)
+                        state.trafficCheck = true
+                    }
+            	}       
             }
-            if(sendPushMessage == "Yes"){
-            	sendPush(msg)
+            else if(timeLeft <= notifyLeadEmergency){
+                def msg = "You have ${timeLeft} minutes until you need to leave for work"
+                if (state.notifyEmergency != "true"){
+                    if(sonos){
+                        if(resumePlaying){
+                            loadText(msg)
+                            sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
+                        }
+                        else{
+                            sonos.playText(msg)
+                        }    
+                    }
+                    if(sendPushMessage == "Yes"){
+                        sendPush(msg)
+                    }
+                    state.check = null
+                    state.notify = null
+                    state.notifyWarn = null
+                    state.notifyNow = null
+                    state.notifyEmergency = "true"
+                    if(hues){
+                        sendcolor(colorEmergency)
+                    }
+                    if(state.trafficCheck != true){
+                        runEvery5Minutes(trafficCheck)
+                        state.trafficCheck = true
+                    } 
+                }
+            }
+            else if(timeLeft <= notifyLeadWarn){
+                def msg = "You have ${timeLeft} minutes until you need to leave for work"
+                if (state.notifyWarn != "true"){
+                    if(sonos){
+                        if(resumePlaying){
+                            loadText(msg)
+                            sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
+                        }
+                        else{
+                            sonos.playText(msg)
+                        }    
+                    }
+                    if(sendPushMessage == "Yes"){
+                        sendPush(msg)
+                    }
+                    state.check = null
+                    state.notify = null
+                    state.notifyNow = null
+                    state.notifyWarn = "true"
+                    state.notifyEmergency = null
+                    if(hues){
+                        sendcolor(colorWarn)
+                    }
+                    if(state.trafficCheck != true){
+                        runEvery5Minutes(trafficCheck)
+                        state.trafficCheck = true
+                    } 
+                }
+            }
+            else if(timeLeft <= notifyLead){
+                def msg = "You have ${timeLeft} minutes until you need to leave for work"
+                if (state.notify != "true"){
+                    if(sonos){
+                        if(resumePlaying){
+                            loadText(msg)
+                            sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
+                        }
+                        else{
+                            sonos.playText(msg)
+                        }    
+                    }
+                    if(sendPushMessage == "Yes"){
+                        sendPush(msg)
+                    }
+                    state.check = null
+                    state.notify = "true"
+                    state.notifyWarn = null
+                    state.notifyNow = null
+                    state.notifyEmergency = null
+                    if(hues){
+                        sendcolor(colorNotify)
+                    }
+                    if(state.trafficCheck != true){
+                        runEvery5Minutes(trafficCheck)
+                        state.trafficCheck = true
+                    } 
+                }
+            }
+            else if((state.notify == "true" || state.notifyWarn == "true" || state.notifyEmergency == "true") && state.check != "true"){
+                def msg = "Traffic conditions seem to have improved.  You now have ${timeLeft} minutes to leave for work."
+                if(sonos){
+                        if(resumePlaying){
+                            loadText(msg)
+                            sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
+                        }
+                        else{
+                            sonos.playText(msg)
+                        }    
+                }
+                if(sendPushMessage == "Yes"){
+                        sendPush(msg)
+                }    
+                state.check = "true"
+                state.notify = null
+                state.notifyWarn = null
+                state.notifyNow = null
+                state.notifyEmergency = null
+                sendcolor(colorNormal)
+                if(hues){
+                    hues.off([delay:5000])
+                }
+                if(state.trafficCheck != true){
+                    runEvery5Minutes(trafficCheck)
+                    state.trafficCheck = true
+                } 
             }    
-        	state.check = null
-        	state.notify = null
-        	state.notifyWarn = null
-        	state.notifyEmergency = null
-            if(hues){
-            	sendcolor(colorEmergency)
-            }
-            if(state.trafficCheck != true){
-        		runEvery5Minutes(trafficCheck)
-        		state.trafficCheck = true
-        	} 
-	}
-	else if(timeLeft <= notifyLeadEmergency){
-    	def msg = "You have ${timeLeft} minutes until you need to leave for work"
-    	if (state.notifyEmergency != "true"){
-        	if(sonos){
-            	if(resumePlaying){
-    				loadText(msg)
-					sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
-            	}
-                else{
-                	sonos.playText(msg)
+            else{
+                if (state.check != "greeting"){
+                def msg = "Good morning.  You have ${timeLeft} minutes to leave for work."
+                if(sonos){
+                        if(resumePlaying){
+                            loadText(msg)
+                            sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
+                        }
+                        else{
+                            sonos.playText(msg)
+                        }    
+                }
+                if(sendPushMessage == "Yes"){
+                        sendPush(msg)
+                    }
+                state.check = "greeting"
+                state.notify = null
+                state.notifyWarn = null
+                state.notifyEmergency = null
+                state.notifyNow = null
+                if(state.trafficCheck != true){
+                    runEvery5Minutes(trafficCheck)
+                    state.trafficCheck = true
                 }    
+                }
             }
-            if(sendPushMessage == "Yes"){
-            	sendPush(msg)
-            }
-        	state.check = null
-        	state.notify = null
-        	state.notifyWarn = null
-        	state.notifyEmergency = "true"
-            if(hues){
-            	sendcolor(colorEmergency)
-            }
-            if(state.trafficCheck != true){
-        		runEvery5Minutes(trafficCheck)
-        		state.trafficCheck = true
-        	} 
-       	}
-	}
-    else if(timeLeft <= notifyLeadWarn){
-    	def msg = "You have ${timeLeft} minutes until you need to leave for work"
-    	if (state.notifyWarn != "true"){
-    		if(sonos){
-            	if(resumePlaying){
-    				loadText(msg)
-					sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
-            	}
-                else{
-                	sonos.playText(msg)
-                }    
-            }
-            if(sendPushMessage == "Yes"){
-            	sendPush(msg)
-            }
-        	state.check = null
-        	state.notify = null
-        	state.notifyWarn = "true"
-        	state.notifyEmergency = null
-            if(hues){
-            	sendcolor(colorWarn)
-            }
-            if(state.trafficCheck != true){
-        		runEvery5Minutes(trafficCheck)
-        		state.trafficCheck = true
-        	} 
-       	}
-	}
-    else if(timeLeft <= notifyLead){
-    	def msg = "You have ${timeLeft} minutes until you need to leave for work"
-    	if (state.notify != "true"){
-    		if(sonos){
-            	if(resumePlaying){
-    				loadText(msg)
-					sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
-            	}
-                else{
-                	sonos.playText(msg)
-                }    
-            }
-            if(sendPushMessage == "Yes"){
-            	sendPush(msg)
-            }
-        	state.check = null
-        	state.notify = "true"
-        	state.notifyWarn = null
-        	state.notifyEmergency = null
-            if(hues){
-            	sendcolor(colorNotify)
-            }
-            if(state.trafficCheck != true){
-        		runEvery5Minutes(trafficCheck)
-        		state.trafficCheck = true
-        	} 
-       	}
-	}
-    else if((state.notify == "true" || state.notifyWarn == "true" || state.notifyEmergency == "true") && state.check != "true"){
-    	def msg = "Traffic conditions seem to have improved.  You now have ${timeLeft} minutes to leave for work."
-    	if(sonos){
-            	if(resumePlaying){
-    				loadText(msg)
-					sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
-            	}
-                else{
-                	sonos.playText(msg)
-                }    
         }
-        if(sendPushMessage == "Yes"){
-            	sendPush(msg)
+        else{
+    		log.debug "I do not have a travel time so I will check again in 5 minutes."
+        	if(state.trafficCheck != true){
+        		runEvery5Minutes(trafficCheck)
+        		state.trafficCheck = true
+        	}
         }    
-        state.check = "true"
-        state.notify = null
-        state.notifyWarn = null
-        state.notifyEmergency = null
-        sendcolor(colorNormal)
-        if(hues){
-        	hues.off([delay:5000])
-        }
-        if(state.trafficCheck != true){
-        	runEvery5Minutes(trafficCheck)
-        	state.trafficCheck = true
-        } 
-    }    
+	}
     else{
-    	if (state.check != "greeting"){
-        def msg = "Good morning.  You have ${timeLeft} minutes to leave for work."
-    	if(sonos){
-            	if(resumePlaying){
-    				loadText(msg)
-					sonos.playTrackAndResume(state.sound.uri, state.sound.duration, volume)
-            	}
-                else{
-                	sonos.playText(msg)
-                }    
-        }
-        if(sendPushMessage == "Yes"){
-            	sendPush(msg)
-            }
-        state.check = "greeting"
-        state.notify = null
-        state.notifyWarn = null
-        state.notifyEmergency = null
-        if(state.trafficCheck != true){
-        	runEvery5Minutes(trafficCheck)
-        	state.trafficCheck = true
-        }    
-        }
-    }
-}
-else{
-	unschedule(trafficCheck)
-    state.check = null
-    state.notify = null
-    state.notifyWarn = null
-    state.notifyEmergency = null
-    state.trafficCheck = null
-}    
+    	unschedule(trafficCheck)
+    	state.clear()       
+    }    
 }
 
 private getTimeLeft(){
@@ -388,8 +413,9 @@ private getTimeLeft(){
      	}
    	}
     catch (e) {
-		log.error "Error creating device: ${e}"
-	} 
+		log.error "HTTP Error: ${e}"
+	}
+    
 	def getTime = timeToday(mytime)    
 	def timeTillArrival = getTime.time - now()
 	def timeTillArrivalMinutes = (timeTillArrival / 60000) as Double
