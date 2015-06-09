@@ -70,9 +70,9 @@ def mainPage() {
         }
         section("Setup") {
             href "apiKey", title: "Bing Maps API Key", state: greyOutApi()
-            href "wayPoints", title: "Select Way Points", state: greyOutWayPoints()
-            href "triggers", title: "Setup App Triggers", state: greyOutTriggers()
-            href "setupTimes", title: "Select Start Time", state: greyOutTimes()
+            href "wayPoints", title: "Select Way Points", state: greyOutWayPoints(), description: waypointDescription()
+            href "triggers", title: "Setup App Triggers", state: greyOutTriggers()//, description: triggerDescription()
+            href "setupTimes", title: "Select Start Time", state: greyOutTimes()//, description: startTimeLabel()
             href "notificationSettings", title: "Notification Settings", state: greyOutNotifications()
             href "appRestrictions", title: "App Restrictions", state: greyOutRestrictions()
         }
@@ -159,12 +159,23 @@ def appRestrictions(){
         section("About"){
             paragraph "Select when the app will stop running. If you don't select any of these the app will continue to run indefinitely.  (Pro Tip: You want to restrict it in some way.)"
         }
-        section("Stop running this app when..."){
-            input "people", "capability.presenceSensor", title: "These people are gone", required: false
-            input "modes", "mode", title: "and/or the current mode is", required: false, multiple: true
-        }	  
+        section("Only run this app when"){
+            input "people", "capability.presenceSensor", title: "These people are home", required: false
+            input "modes", "mode", title: "The current mode is", required: false, multiple: true
+            input "days", "enum", title: "Only on certain days of the week", multiple: true, required: false,
+				options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            href "timeIntervalInput", title: "Only during a certain time", description: timeLabel ?: "Tap to set", state: greyOutTimeLabel()    
+        }
+        
     }
 }
+
+page(name: "timeIntervalInput", title: "Only during a certain time", refreshAfterSelection:true) {
+		section {
+			input "starting", "time", title: "Starting", required: false, refreshAfterSelection:true
+			input "ending", "time", title: "Ending", required: false, refreshAfterSelection:true
+		}
+}  
 
 def installed() {
 	subscribe(app, totalTravelTime)
@@ -204,7 +215,7 @@ def updated() {
 }
 
 def trafficCheck(evt){
-	if(getModeOk() && anyoneIsHome()){
+	if(allOk){
 		if(state.travelTimeTraffic){
             int timeLeft = getTimeLeft()
             if(timeLeft <= 0){
@@ -504,26 +515,7 @@ def sendcolor(color) {
 }
 
 
-private getModeOk(){
-	def result = true
-	if(modes.contains(location.mode)){
-    	result = false
-    }
-    log.trace "modeOk: $result"
-    return result	
-}
 
-private anyoneIsHome() {
-  def result = false
-
-  if(people.findAll { it?.currentPresence == "present" }) {
-result = true
-  }
-
-  log.debug("anyoneIsHome: ${result}")
-
-  return result
-}
 /* Song selection isn't working for some reason.  Will revisit.
 private songOptions() {
 
@@ -625,8 +617,127 @@ def greyOutRestrictions(){
     result
 }
 
+def greyOutTimeLabel(){
+	def result = ""
+    if(starting || ending){
+    	result = true
+    }
+    result
+}
+
+def waypointDescription(){
+	def result = ""
+    if(location1 && location2){
+    	result = "Calculate times between ${location1} and ${location2}."
+    }
+    else if(location1){
+    	result = "Destination address not set"
+    }
+    else if(location2){
+    	result = "Starting address not set"
+    }
+    else{
+    	result = "Tap to set"
+    }
+    result
+}
+/*
+def startTimeLabel(){
+	def result = ""
+    if(mytime){
+    	def format1 = timeToday(mytime).replaceAll("Tue", "") as String
+		//def format2 = Date.parse("DD MM dd hh:mm:ss:SS ZZZ YYYY", format1).format("dd/MM/yyyy")
+    	result = "Arrival time set at ${format1}."
+	}
+    result
+}
+*/
 def travelParagraph(){
 	def timeTravel = state.travelTimeTraffic as Integer
 	def result = "Total travel time with traffic is $timeTravel minutes."
     return result
+}
+
+private getAllOk() {
+	modeOk && daysOk && timeOk && peopleOk
+}
+
+private getModeOk(){
+	def result = false
+	if(modes.contains(location.mode)){
+    	result = true
+    }
+    log.trace "modeOk: $result"
+    return result	
+}
+
+private getPeopleOk() {
+  def result = false
+
+  if(people.findAll { it?.currentPresence == "present" }) {
+result = true
+  }
+
+  log.debug("anyoneIsHome: ${result}")
+
+  return result
+}
+
+private getTimeOk() {
+	def result = true
+	if (starting && ending) {
+		def currTime = now()
+		def start = timeToday(starting).time
+		def stop = timeToday(ending).time
+		result = start < stop ? currTime >= start && currTime <= stop : currTime <= stop || currTime >= start
+	}
+    
+    else if (starting){
+    	result = currTime >= start
+    }
+    else if (ending){
+    	result = currTime <= stop
+    }
+    
+	log.trace "timeOk = $result"
+	result
+}
+
+private getTimeLabel(){
+	def timeLabel = "Tap to set"
+	
+    if(starting && ending){
+    	timeLabel = "Between" + " " + hhmm(starting) + " "  + "and" + " " +  hhmm(ending)
+    }
+    else if (starting) {
+		timeLabel = "Start at" + " " + hhmm(starting)
+    }
+    else if(ending){
+    timeLabel = "End at" + hhmm(ending)
+    }
+	timeLabel	
+}
+
+private hhmm(time, fmt = "h:mm a")
+{
+	def t = timeToday(time, location.timeZone)
+	def f = new java.text.SimpleDateFormat(fmt)
+	f.setTimeZone(location.timeZone ?: timeZone(time))
+	f.format(t)
+}
+
+private getDayOk(dayList) {
+	def result = true
+    if (dayList) {
+		def df = new java.text.SimpleDateFormat("EEEE")
+		if (location.timeZone) {
+			df.setTimeZone(location.timeZone)
+		}
+		else {
+			df.setTimeZone(TimeZone.getTimeZone("America/New_York"))
+		}
+		def day = df.format(new Date())
+		result = dayList.contains(day)
+	}
+    result
 }
