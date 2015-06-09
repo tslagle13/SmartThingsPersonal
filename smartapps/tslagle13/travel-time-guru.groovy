@@ -383,7 +383,7 @@ private getTimeLeft(){
         	def totalTimeFixed = totalTime.replaceAll("\\[", "").replaceAll("\\]","") as Double
         	def travelTimeMinutes = (totalTimeFixed / 60) as Double
         	def travelTimeMinutesRounded = travelTimeMinutes.round(0)
-			state.travelTimeTraffic = travelTimeMinutesRounded
+			state.travelTimeTraffic = travelTimeMinutesRounded as Integer
         	log.info "Travel time with traffic = ${state.travelTimeTraffic}"
      	}
    	}
