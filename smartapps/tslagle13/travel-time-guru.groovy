@@ -1,7 +1,7 @@
 /**
  *  Travel Time Guru
  *
- *  BETA 1
+ *  BETA 1.1
  * 
  *  Copyright 2015 Tim Slagle
  *
@@ -65,6 +65,9 @@ dynamicPage(name: "mainPage") {
 	section("About"){
     	paragraph "This app will lookup and notify you of when you need to leave for work.  Provide it with two way points and it will automatically check traffic every 5 minutes.  As it gets closer to the the time you need to leave in order to arrive on time it will begin to alert you based on the alert thresholds you set.  (This does require a Bing Maps API key from bingmapsportal.com)"
     }
+    section("Current travel time. (Touch the app button to update)") {
+    	paragraph travelParagraph()
+    }
 	section("Setup") {
     	href "apiKey", title: "Bing Maps API Key", state: greyOutApi()
         href "wayPoints", title: "Select Way Points", state: greyOutWayPoints()
@@ -75,9 +78,6 @@ dynamicPage(name: "mainPage") {
     }
     section([title:"Options", mobileOnly:true]) {
     	label title:"Assign a name", required:false
-    }
-    section("Current travel time. (Touch the app button to update)") {
-    	paragraph travelParagraph()
     }
 }   
 }
@@ -600,6 +600,7 @@ def greyOutRestrictions(){
 }
 
 def travelParagraph(){
-	def result = "Total travel time with traffic is $state.travelTimeTraffic minutes."
+	def timeTravel = state.travelTimeTraffic as Integer
+	def result = "Total travel time with traffic is $timeTravel minutes."
     return result
 }
