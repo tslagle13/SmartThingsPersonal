@@ -77,7 +77,7 @@ dynamicPage(name: "mainPage") {
     	label title:"Assign a name", required:false
     }
     section("Current travel time. (Touch the app button to update)") {
-    	paragraph "Total travel time with traffic is ${state.travelTimeTraffic} minutes."
+    	paragraph travelParagraph()
     }
 }   
 }
@@ -187,10 +187,8 @@ def initialize(){
     if(contactClosed){
     	subscribe(contactClosed, "contact.open", trafficCheck)
     }
-    state.check = null
-	state.notify = null
-	state.notifyWarn = null
-	state.notifyEmergency = null
+    state.clear()
+    log.debug "installed with settings: $settings"
 }
 
 def trafficCheck(evt){
@@ -405,24 +403,7 @@ result
 }
 
 def totalTravelTime(evt){
-	try {
-			httpGet("http://dev.virtualearth.net/REST/v1/Routes?wayPoint.1=${location1Fixed}&waypoint.2=${location2Fixed}&key=${apiKey}") { resp ->
-            	resp.headers.each {
-        			log.debug "${it.name} : ${it.value}"
-            
-    		}
-    		log.debug "response contentType: ${resp.contentType}"
-        	def totalTime = resp.data.resourceSets.resources.travelDurationTraffic as String
-        	def totalTimeFixed = totalTime.replaceAll("\\[", "").replaceAll("\\]","") as Double
-        	def travelTimeMinutes = (totalTimeFixed / 60) as Double
-        	def travelTimeMinutesRounded = travelTimeMinutes.round(0) as Integer
-			state.travelTimeTraffic = travelTimeMinutesRounded as Integer
-        	log.info "Travel time with traffic = ${state.travelTimeTraffic}"
-     	}
-   	}
-    catch (e) {
-		log.error "Error creating device: ${e}"
-	} 
+	getTimeLeft()
 }
 def sendcolor(color) {
 	log.debug "Sendcolor = $color"
@@ -618,3 +599,7 @@ def greyOutRestrictions(){
     result
 }
 
+def travelParagraph(){
+	def result = "Total travel time with traffic is $state.travelTimeTraffic minutes."
+    return result
+}
