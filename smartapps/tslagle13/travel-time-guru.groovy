@@ -1,7 +1,7 @@
 /**
  *  Travel Time Guru
  *
- *  BETA 1.11
+ *  BETA 1.2
  * 
  *  Copyright 2015 Tim Slagle
  *
@@ -69,12 +69,12 @@ def mainPage() {
             paragraph travelParagraph()
         }
         section("Setup") {
-            href "apiKey", title: "Bing Maps API Key", state: greyOutApi()
+            href "apiKey", title: "Bing Maps API Key", state: greyOutApi(), description: apiDescription()
             href "wayPoints", title: "Select Way Points", state: greyOutWayPoints(), description: waypointDescription()
-            href "triggers", title: "Setup App Triggers", state: greyOutTriggers()//, description: triggerDescription()
-            href "setupTimes", title: "Select Start Time", state: greyOutTimes()//, description: startTimeLabel()
-            href "notificationSettings", title: "Notification Settings", state: greyOutNotifications()
-            href "appRestrictions", title: "App Restrictions", state: greyOutRestrictions()
+            href "triggers", title: "Setup App Triggers", state: greyOutTriggers(), description: triggerDescription()
+            href "setupTimes", title: "Select Start Time", state: greyOutTimes()
+            href "notificationSettings", title: "Notification Settings", state: greyOutNotifications(), description: notificationsDescription()
+            href "appRestrictions", title: "App Restrictions", state: greyOutRestrictions(), description: restrictionsDesription()
         }
         section([title:"Options", mobileOnly:true]) {
             label title:"Assign a name", required:false
@@ -625,10 +625,15 @@ def greyOutTimeLabel(){
     result
 }
 
+def triggerDescription(){
+	def result = ""
+    result = "Motion: ${motions}"  + "\n" + "Contact Open: ${contactOpen}"  + "\n" + "Contact Closed: ${contactClosed}"
+}
+
 def waypointDescription(){
 	def result = ""
     if(location1 && location2){
-    	result = "Calculate times between ${location1} and ${location2}."
+    	result = "Calculate times between"  + "\n" + "${location1}"  + "\n" + "and ${location2}."
     }
     else if(location1){
     	result = "Destination address not set"
@@ -641,17 +646,48 @@ def waypointDescription(){
     }
     result
 }
-/*
-def startTimeLabel(){
+
+def notificationsDescription(){
 	def result = ""
-    if(mytime){
-    	def format1 = timeToday(mytime).replaceAll("Tue", "") as String
-		//def format2 = Date.parse("DD MM dd hh:mm:ss:SS ZZZ YYYY", format1).format("dd/MM/yyyy")
-    	result = "Arrival time set at ${format1}."
-	}
-    result
+    result = 	"Send Push: ${sendPushMessage}" + "\n" + "Sonos: ${sonos}"  + "\n" + "Hues: ${hues}"
+
 }
-*/
+
+def apiDescription(){
+	def result = ""
+    def length = apiKey.length()
+    if (length == 64){
+    	result = "Valid API Key"
+	}
+    else if (length != 0){
+    	result = "Invalid API key"
+    }
+    else{
+    	result = "Tap to enter API key"
+    }    
+}
+
+def restrictionsDesription(){
+	def result = ""
+    def daysRest = ""
+    def modesRest = ""
+    def peopleRest = ""
+    def timeRest = ""
+    if (days){
+    	daysRest = "Days"
+	}
+    if(modes){
+    	modesRest = "Modes"
+    }
+    if(starting || ending){
+    	timeRest = getTimeLabel()
+    }
+    if(people){
+    	peopleRest = "Presence"
+    }
+    result = "Days: ${days}" + "\n" + "Modes: ${modes}" + "\n" + "Time: ${getTimeLabel()}" + "\n" + "Presence: ${people}"
+}
+
 def travelParagraph(){
 	def timeTravel = state.travelTimeTraffic as Integer
 	def result = "Total travel time with traffic is $timeTravel minutes."
@@ -704,7 +740,7 @@ private getTimeOk() {
 }
 
 private getTimeLabel(){
-	def timeLabel = "Tap to set"
+	def timeLabel = "No restrictions"
 	
     if(starting && ending){
     	timeLabel = "Between" + " " + hhmm(starting) + " "  + "and" + " " +  hhmm(ending)
