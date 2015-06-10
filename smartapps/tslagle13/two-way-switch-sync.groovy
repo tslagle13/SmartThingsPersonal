@@ -45,7 +45,7 @@ definition(
 	name: "Two Way Switch Sync",
 	namespace: "tslagle13",
 	author: "Tim Slagle",
-	description: "Turns on, off and dim a collection of lights based on the state of a specific switch.",
+	description: "Syncs two swtich states between each other.",
 	category: "Convenience",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet.png",
 	iconX2Url: "https://s3.amazonaws.com/smartapp-icons/Meta/light_outlet@2x.png"
