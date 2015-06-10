@@ -670,22 +670,28 @@ def apiDescription(){
 def restrictionsDesription(){
 	def result = ""
     def daysRest = ""
-    def modesRest = ""
-    def peopleRest = ""
+    def modesBracket = ""
+    def peopleBracket = ""
     def timeRest = ""
+    def modesFixed = "No Mode Restrictions"
+    def daysFixed = "No Day Restrictions"
+    def peopleFixed = "No Presence Restrictions"
     if (days){
-    	daysRest = "Days"
-	}
-    if(modes){
-    	modesRest = "Modes"
+    	daysRest = "$days"
+        daysFixed = daysRest.replaceAll("\\[", "").replaceAll("\\]","")        
+    }
+    if(modes != null){
+    	modesBracket = "${modes}"
+        modesFixed = modesBracket.replaceAll("\\[", "").replaceAll("\\]","")
     }
     if(starting || ending){
     	timeRest = getTimeLabel()
     }
     if(people){
-    	peopleRest = "Presence"
+    	peopleBracket = "$people"
+        peopleFixed = peopleBracket.replaceAll("\\[", "").replaceAll("\\]","")
     }
-    result = "Days: ${days}" + "\n" + "Modes: ${modes}" + "\n" + "Time: ${getTimeLabel()}" + "\n" + "Presence: ${people}"
+    result = "Days: ${daysFixed}" + "\n" + "Modes: ${modesFixed}" + "\n" + "Time: ${getTimeLabel()}" + "\n" + "Presence: ${peopleFixed}"
 }
 
 def travelParagraph(){
@@ -740,7 +746,7 @@ private getTimeOk() {
 }
 
 private getTimeLabel(){
-	def timeLabel = "No restrictions"
+	def timeLabel = "No Time restrictions"
 	
     if(starting && ending){
     	timeLabel = "Between" + " " + hhmm(starting) + " "  + "and" + " " +  hhmm(ending)
