@@ -79,7 +79,7 @@ def pageSetup() {
         }
         section("Setup Menu") {
             href "directorSettings", title: "Director Settings", description: "", state:greyedOut()
-            href "ThermostatandDoors", title: "Thermostat and Doors", description: "", state: greyedOutTherm()
+            href "ACUnitandDoors", title: "Thermostat and Doors", description: "", state: greyedOutTherm()
             href "ThermostatBoost", title: "Thermostat Boost", description: "", state: greyedOutTherm1()
             href "Settings", title: "Settings", description: "", state: greyedOutSettings()
             }
