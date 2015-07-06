@@ -49,9 +49,11 @@ def pageSetup() {
     ]
 
 	return dynamicPage(pageProperties) {
-	paragraph "This app can be used to make your home seem occupied anytime you are away from your home. " +
-	paragraph "Please use each othe the sections below to setup the different preferences to your liking. " +
-	paragraph "I recommend this app be used with at least two away modes.  An example would be 'Away Day' 'and Away Night'. " 
+    	section("About"){
+        	paragraph "This app can be used to make your home seem occupied anytime you are away from your home. " +
+			"Please use each othe the sections below to setup the different preferences to your liking. " +
+			"I recommend this app be used with at least two away modes.  An example would be 'Away Day' 'and Away Night'. " 
+        }
         section("Setup Menu") {
             href "Setup", title: "Setup", description: "", state:greyedOut()
             href "Settings", title: "Settings", description: "", state: greyedOutSettings()
@@ -133,10 +135,11 @@ section("Number of active lights at any given time") {
 section("People") {
             input people
             
-            }             
-paragraph "In this section you need to setup the deatils of how you want your lighting to be affected while " +
-paragraph "you are away.  All of these settings are required in order for the simulator to run correctly."
-
+            }
+section("About this section"){            
+			paragraph "In this section you need to setup the deatils of how you want your lighting to be affected while " +
+			paragraph "you are away.  All of these settings are required in order for the simulator to run correctly."
+            }
     }
     
 }
@@ -179,9 +182,11 @@ section("More options") {
             href "timeIntervalInput", title: "Only during a certain time", description: getTimeLabel(starting, ending), state: greyedOutTime(starting, ending), refreshAfterSelection:true
             input days
             
-            }   
-paragraph "In this section you can restrict how your simulator runs.  For instance you can restrict on which days it will run " +
-paragraph "as well as a delay for the simulator to start after it is in the correct mode.  Delaying the simulator helps with false starts based on a incorrect mode change."
+            } 
+section("About this section"){              
+			paragraph "In this section you can restrict how your simulator runs.  For instance you can restrict on which days it will run " +
+			paragraph "as well as a delay for the simulator to start after it is in the correct mode.  Delaying the simulator helps with false starts based on a incorrect mode change."
+            }
     }
     
 }
