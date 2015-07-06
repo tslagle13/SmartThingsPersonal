@@ -50,7 +50,7 @@ def pageSetup() {
 
 	return dynamicPage(pageProperties) {
 	paragraph "This app can be used to make your home seem occupied anytime you are away from your home. " +
-	paragraph "Please use each othe the dsections below to setup the different preferences to you liking to make the app run " +
+	paragraph "Please use each othe the sections below to setup the different preferences to your liking. " +
 	paragraph "I recommend this app be used with at least two away modes.  An example would be 'Away Day' 'and Away Night'. " 
         section("Setup Menu") {
             href "Setup", title: "Setup", description: "", state:greyedOut()
@@ -180,7 +180,7 @@ section("More options") {
             input days
             
             }   
-paragraph "In this section you can restrict how your simulator runs.  For instance you cna restrict on which days it will run " +
+paragraph "In this section you can restrict how your simulator runs.  For instance you can restrict on which days it will run " +
 paragraph "as well as a delay for the simulator to start after it is in the correct mode.  Delaying the simulator helps with false starts based on a incorrect mode change."
     }
     
