@@ -1,5 +1,9 @@
 /**
  *  Vacation Lighting Director
+ * 
+ *  Version  2.4 - Added information paragraphs
+ * 
+ *  Source code can be found here: https://github.com/tslagle13/SmartThings/blob/master/smartapps/tslagle13/vacation-lighting-director.groovy
  *
  *  Copyright 2015 Tim Slagle
  *
@@ -45,6 +49,9 @@ def pageSetup() {
     ]
 
 	return dynamicPage(pageProperties) {
+	paragraph "This app can be used to make your home seem occupied anytime you are away from your home. " +
+	paragraph "Please use each othe the dsections below to setup the different preferences to you liking to make the app run " +
+	paragraph "I recommend this app be used with at least two away modes.  An example would be 'Away Day' 'and Away Night'. " 
         section("Setup Menu") {
             href "Setup", title: "Setup", description: "", state:greyedOut()
             href "Settings", title: "Settings", description: "", state: greyedOutSettings()
@@ -59,37 +66,39 @@ def pageSetup() {
 def Setup() {
 
     def newMode = [
-        name:       "newMode",
-        type:       "mode",
-        title:      "Which?",
-        multiple:   true,
-        required:   true
+        name:       	"newMode",
+        type:       	"mode",
+        title:      	"Which?",
+        multiple:   	true,
+        required:   	true
     ]
     def switches = [
-        name:       "switches",
-        type:       "capability.switch",
-        title:      "Switches",
-        multiple:   true,
-        required:   true
+        name:       	"switches",
+        type:       	"capability.switch",
+        title:      	"Switches",
+        multiple:   	true,
+        required:   	true
     ]
     
     def frequency_minutes = [
-        name:       "frequency_minutes",
-        type:       "number",
-        title:      "Minutes?"
+        name:       	"frequency_minutes",
+        type:       	"number",
+        title:      	"Minutes?"
+        required:	true
     ]
     
     def number_of_active_lights = [
-        name:       "number_of_active_lights",
-        type:       "number",
-        title:      "Number of active lights"
+        name:       	"number_of_active_lights",
+        type:       	"number",
+        title:      	"Number of active lights"
+        required:	true,
     ]
     
     def people = [
         name:       "people",
         type:       "capability.presenceSensor",
         title:      "If these people are home do not change light status",
-        required:	false,
+        required:	true,
         multiple:	true
     ]
     
@@ -125,7 +134,8 @@ section("People") {
             input people
             
             }             
-
+paragraph "In this section you need to setup the deatils of how you want your lighting to be affected while " +
+paragraph "you are away.  All of these settings are required in order for the simulator to run correctly."
 
     }
     
@@ -169,7 +179,9 @@ section("More options") {
             href "timeIntervalInput", title: "Only during a certain time", description: getTimeLabel(starting, ending), state: greyedOutTime(starting, ending), refreshAfterSelection:true
             input days
             
-            }      
+            }   
+paragraph "In this section you can restrict how your simulator runs.  For instance you cna restrict on which days it will run " +
+paragraph "as well as a delay for the simulator to start after it is in the correct mode.  Delaying the simulator helps with false starts based on a incorrect mode change."
     }
     
 }
