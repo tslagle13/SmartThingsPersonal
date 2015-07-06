@@ -1,9 +1,10 @@
 /**
  *  Vacation Lighting Director
- *
- *  Version 2.2 - Tim Slagle - Updated the time logic and made the GUI a little nicer.  Things will now turn green when you select them, like the time input!
- *  Version 2.3 - Both values for time restrictions are no longer requrired.
  * 
+ *  Version  2.4 - Added information paragraphs
+ * 
+ *  Source code can be found here: https://github.com/tslagle13/SmartThings/blob/master/smartapps/tslagle13/vacation-lighting-director.groovy
+ *
  *  Copyright 2015 Tim Slagle
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -11,33 +12,9 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *	The original licensing applies, with the following exceptions:
- *		1.	These modifications may NOT be used without freely distributing all these modifications freely
- *			and without limitation, in source form.	 The distribution may be met with a link to source code
- *			with these modifications.
- *		2.	These modifications may NOT be used, directly or indirectly, for the purpose of any type of
- *			monetary gain.	These modifications may not be used in a larger entity which is being sold,
- *			leased, or anything other than freely given.
- *		3.	To clarify 1 and 2 above, if you use these modifications, it must be a free project, and
- *			available to anyone with "no strings attached."	 (You may require a free registration on
- *			a free website or portal in order to distribute the modifications.)
- *		4.	The above listed exceptions to the original licensing do not apply to the holder of the
- *			copyright of the original work.	 The original copyright holder can use the modifications
- *			to hopefully improve their original work.  In that event, this author transfers all claim
- *			and ownership of the modifications to "SmartThings."
- *
- *	Original Copyright information:
- *
- *	Copyright 2014 SmartThings
- *
- *	Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *	in compliance with the License. You may obtain a copy of the License at:
- *
- *		http://www.apache.org/licenses/LICENSE-2.0
- *
- *	Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *	on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *	for the specific language governing permissions and limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
  *
  */
 
@@ -72,6 +49,9 @@ def pageSetup() {
     ]
 
 	return dynamicPage(pageProperties) {
+	paragraph "This app can be used to make your home seem occupied anytime you are away from your home. " +
+	paragraph "Please use each othe the dsections below to setup the different preferences to you liking to make the app run " +
+	paragraph "I recommend this app be used with at least two away modes.  An example would be 'Away Day' 'and Away Night'. " 
         section("Setup Menu") {
             href "Setup", title: "Setup", description: "", state:greyedOut()
             href "Settings", title: "Settings", description: "", state: greyedOutSettings()
@@ -86,37 +66,39 @@ def pageSetup() {
 def Setup() {
 
     def newMode = [
-        name:       "newMode",
-        type:       "mode",
-        title:      "Which?",
-        multiple:   true,
-        required:   true
+        name:       	"newMode",
+        type:       	"mode",
+        title:      	"Which?",
+        multiple:   	true,
+        required:   	true
     ]
     def switches = [
-        name:       "switches",
-        type:       "capability.switch",
-        title:      "Switches",
-        multiple:   true,
-        required:   true
+        name:       	"switches",
+        type:       	"capability.switch",
+        title:      	"Switches",
+        multiple:   	true,
+        required:   	true
     ]
     
     def frequency_minutes = [
-        name:       "frequency_minutes",
-        type:       "number",
-        title:      "Minutes?"
+        name:       	"frequency_minutes",
+        type:       	"number",
+        title:      	"Minutes?"
+        required:	true
     ]
     
     def number_of_active_lights = [
-        name:       "number_of_active_lights",
-        type:       "number",
-        title:      "Number of active lights"
+        name:       	"number_of_active_lights",
+        type:       	"number",
+        title:      	"Number of active lights"
+        required:	true,
     ]
     
     def people = [
         name:       "people",
         type:       "capability.presenceSensor",
         title:      "If these people are home do not change light status",
-        required:	false,
+        required:	true,
         multiple:	true
     ]
     
@@ -152,7 +134,8 @@ section("People") {
             input people
             
             }             
-
+paragraph "In this section you need to setup the deatils of how you want your lighting to be affected while " +
+paragraph "you are away.  All of these settings are required in order for the simulator to run correctly."
 
     }
     
@@ -196,7 +179,9 @@ section("More options") {
             href "timeIntervalInput", title: "Only during a certain time", description: getTimeLabel(starting, ending), state: greyedOutTime(starting, ending), refreshAfterSelection:true
             input days
             
-            }      
+            }   
+paragraph "In this section you can restrict how your simulator runs.  For instance you cna restrict on which days it will run " +
+paragraph "as well as a delay for the simulator to start after it is in the correct mode.  Delaying the simulator helps with false starts based on a incorrect mode change."
     }
     
 }
