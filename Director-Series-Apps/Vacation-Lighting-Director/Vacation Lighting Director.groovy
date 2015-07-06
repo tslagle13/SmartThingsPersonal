@@ -83,14 +83,14 @@ def Setup() {
     def frequency_minutes = [
         name:       	"frequency_minutes",
         type:       	"number",
-        title:      	"Minutes?"
+        title:      	"Minutes?",
         required:	true
     ]
     
     def number_of_active_lights = [
         name:       	"number_of_active_lights",
         type:       	"number",
-        title:      	"Number of active lights"
+        title:      	"Number of active lights",
         required:	true,
     ]
     
