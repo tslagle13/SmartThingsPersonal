@@ -115,7 +115,7 @@ def checkDoor(evt) {
 if(allOk){
 log.debug("checkDoor")
     def openContacts = contacts.findAll { it?.latestValue("contact") == 'open' }
-    def openLocks = locks.findAll { it?.latestValue("lock") == 'unlocked' }
+    def openLocks = locks.findAll { it?.latestValue("lock") == 'unlocked' ||  it?.latestValue("lock") == 'unknown' }
     def openContactsNonSecure = contactsNonSecure.findAll { it?.latestValue("contact") == 'open' }
 
    	if (openContacts || openLocks){
