@@ -1,3 +1,0 @@
-I have made some huge improvements to the "Light Follows Me App". Basically I have created one app that can house 15 "scenes". This is really cool because I hate having so many apps that I can't find the one I want so this takes all of my lighting rules and moves it into one app.
-
-Each scene is independent of each other and can be triggered my motion. Each scene can be restriceted to run only when a certain lux value is below a customizable level. Then you can have that trigger turn on lights and even dim them to a certain level if you want. After motion stops you can choose to turn the scene off as well.
