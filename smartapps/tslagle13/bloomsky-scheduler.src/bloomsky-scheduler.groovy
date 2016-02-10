@@ -45,13 +45,8 @@ def updated() {
 }
 
 def initialize() {
-	subscribe(app, refreshBloomskyApp)
+	schedule("0 0/5 * 1/1 * ? *", "refreshBloomsky")
 	refreshBloomsky()
-}
-
-def refreshBloomskyApp(evt) {
-	bloomsky.refresh()
-    schedule("0 0/5 * 1/1 * ? *", "refreshBloomsky")
 }
 
 def refreshBloomsky() {
