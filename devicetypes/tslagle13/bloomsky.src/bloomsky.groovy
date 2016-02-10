@@ -23,6 +23,9 @@ metadata {
 		capability "Temperature Measurement"
 		capability "Ultraviolet Index"
         
+        attribute "day", "string"
+        attribute "pressure", "number"
+        attribute "rain", "string"
         
 	}
     preferences {
@@ -38,13 +41,13 @@ metadata {
         standardTile("refresh", "device.weather", decoration: "flat") {
 			state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
 		}
-        valueTile("illuminance", "device.illuminance", decoration: "flat", width: 2) {
+        valueTile("light", "device.illuminance", decoration: "flat", width: 2) {
 			state "default", label:'${currentValue} Luminance'
 		}
         valueTile("rain", "device.rain", decoration: "flat") {
 			state "default", label:'${currentValue}'
 		}
-        valueTile("uv", "device.ultraviolet", decoration: "flat", width: 2) {
+        valueTile("uv", "device.ultravioletIndex", decoration: "flat", width: 2) {
 			state "default", label:'${currentValue} UV Index'
 		}
         valueTile("humidity", "device.humidity", decoration: "flat", width:2) {
@@ -56,7 +59,7 @@ metadata {
         valueTile("battery", "device.battery", decoration: "flat", width: 2) {
 			state "default", label:'Device Battery ${currentValue} V'
 		}
-        valueTile("night", "device.night", decoration: "flat",) {
+        valueTile("night", "device.day", decoration: "flat",) {
 			state "default", label:'${currentValue}'
 		}
 		valueTile("temperature", "device.temperature") {
@@ -72,7 +75,7 @@ metadata {
 				]
 		}
         main(["temperature"])
-		details(["humidity","temperature", "illuminance", "rain", "uv", "pressure", "battery", "night", "refresh"])}
+		details(["humidity","temperature", "light", "rain", "uv", "pressure", "battery", "night", "refresh"])}
 	
 }
 
@@ -106,7 +109,7 @@ def callAPI() {
             }
             if (resp.data.Data.Luminance) {
             	def L =  resp.data.Data.Luminance.toString()
-            	def luminance = L.replaceAll("\\[", "").replaceAll("\\]","")
+            	def luminance = (L.replaceAll("\\[", "").replaceAll("\\]","")) * 1
                 sendEvent(name: "illuminance", value: luminance)
                 log.debug "Luminance:" + luminance
             }
@@ -130,17 +133,17 @@ def callAPI() {
             if (resp.data.Data.UVIndex) {
             	def U =  resp.data.Data.UVIndex.toString()
             	def uvIndex = U.replaceAll("\\[", "").replaceAll("\\]","")
-                sendEvent(name: "ultraviolet", value: uvIndex)
+                sendEvent(name: "ultravioletIndex", value: uvIndex)
                 log.debug "uvIndex:" + uvIndex
             }
             if (resp.data.Data.Night) {
             	def N =  resp.data.Data.Night.toString()
             	def night = N.replaceAll("\\[", "").replaceAll("\\]","")
                 if (night == "false") {
-                	sendEvent(name: "night", value: "It's day time")
+                	sendEvent(name: "day", value: "It's day time")
                 }
                 else {
-                	sendEvent(name: "night", value: "It's night time")
+                	sendEvent(name: "day", value: "It's night time")
                 }
                 log.debug "Night:" + night
             }
