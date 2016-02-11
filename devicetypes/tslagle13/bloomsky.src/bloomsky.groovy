@@ -75,9 +75,22 @@ metadata {
 				]
 		}
         main(["temperature"])
-		details(["humidity","temperature", "light", "rain", "uv", "pressure", "battery", "night", "refresh"])}
+		details(["cameraDetails", "humidity","temperature", "light", "rain", "uv", "pressure", "battery", "night", "refresh"])}
 	
 }
+
+def parse(description) {
+	log.debug "Parsing '${description}'"
+    
+    def map = [:]
+    def retResult = []
+    def descMap = parseDescriptionAsMap(description)
+        
+    //Image
+	if (descMap["bucket"] && descMap["key"]) {
+		putImageInS3(descMap)
+	}
+}    
 
 def poll() {
 	callAPI()
@@ -153,5 +166,49 @@ def callAPI() {
                 sendEvent(name: "battery", value: voltage)
                 log.debug "voltage:" + voltage
             }
+            if (resp.data.Data.ImageURL) {
+            	def I =  resp.data.Data.ImageURL.toString()
+            	def image = I.replaceAll("\\[", "").replaceAll("\\]","").toString()
+                httpGet(image) { it -> 
+        			storeImage(getPictureName(), it.data)
+        		}
+                log.debug "image:" + image
+            }
         }
+        
+
+}
+
+def takeImage(url) {
+	log.debug ".........................."+url
+        
+
+}
+
+def putImageInS3(map) {
+
+	def s3ObjectContent
+
+	try {
+		def imageBytes = getS3Object(map.bucket, map.key + ".jpg")
+
+		if(imageBytes)
+		{
+			s3ObjectContent = imageBytes.getObjectContent()
+			def bytes = new ByteArrayInputStream(s3ObjectContent.bytes)
+			storeImage(getPictureName(), bytes)
+		}
+	}
+	catch(Exception e) {
+		log.error e
+	}
+	finally {
+		//Explicitly close the stream
+		if (s3ObjectContent) { s3ObjectContent.close() }
+	}
+}
+
+private getPictureName() {
+  def pictureUuid = java.util.UUID.randomUUID().toString().replaceAll('-', '')
+  "image" + "_$pictureUuid" + ".jpg"
 }
