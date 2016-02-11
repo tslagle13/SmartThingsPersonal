@@ -98,6 +98,11 @@ def refresh() {
 	callAPI()
 }
 
+def getTemperature(value) {
+    def cmdScale = getTemperatureScale()
+    return convertTemperatureIfNeeded(value.toFloat(), "F", 4)
+}
+
 def callAPI() {
     def pollParams = [
         uri: "http://thirdpartyapi.appspot.com",
@@ -109,8 +114,10 @@ def callAPI() {
         	if (resp.data.Data.Temperature) {
         		def T =  resp.data.Data.Temperature.toString()
             	def temp = T.replaceAll("\\[", "").replaceAll("\\]","")
-                sendEvent(name: "temperature", value: temp, unit: "F")
-                log.debug "Temp:" + temp
+                temp = getTemperature(temp)
+                def tempScale = getTemperatureScale()
+                sendEvent(name: "temperature", value: temp, unit: tempScale)
+                log.debug "Temp:" + temp + " $tempScale"
             }
             if (resp.data.Data.Humidity) {
             	def H =  resp.data.Data.Humidity.toString()
