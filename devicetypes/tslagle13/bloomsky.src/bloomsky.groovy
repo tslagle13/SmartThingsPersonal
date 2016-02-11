@@ -37,27 +37,34 @@ metadata {
 	}
 
 	tiles(scale:1) {
-		carouselTile("cameraDetails", "device.image", width: 3, height: 2) { }
+		carouselTile("cameraDetails", "device.image", width: 2, height: 2) { }
         standardTile("refresh", "device.weather", decoration: "flat") {
 			state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
 		}
-        valueTile("light", "device.illuminance", decoration: "flat", width: 2) {
-			state "default", label:'${currentValue} Luminance'
+        valueTile("light", "device.illuminance", decoration: "flat", width: 1) {
+			state "default", label:'${currentValue} Lux'
 		}
         valueTile("rain", "device.rain", decoration: "flat") {
 			state "default", label:'${currentValue}'
 		}
-        valueTile("uv", "device.ultravioletIndex", decoration: "flat", width: 2) {
-			state "default", label:'${currentValue} UV Index'
+        valueTile("uv", "device.ultravioletIndex") {
+			state "default", label:'${currentValue} UV',
+				backgroundColors:[
+					[value: 1, color: "#289500"],
+					[value: 3, color: "#F7e400"],
+					[value: 6, color: "#F85900"],
+					[value: 8, color: "#d80010"],
+					[value: 11, color: "#6B49C8"]
+				]
 		}
-        valueTile("humidity", "device.humidity", decoration: "flat", width:2) {
-			state "default", label:'${currentValue} Humidity'
+        valueTile("humidity", "device.humidity", decoration: "flat", width:1) {
+			state "default", label:'${currentValue}%', unit: "Humidity"
 		}
-        valueTile("pressure", "device.pressure", decoration: "flat", width: 2) {
-			state "default", label:'${currentValue} inHg Pressure'
+        valueTile("pressure", "device.pressure", decoration: "flat", width: 1) {
+			state "default", label:'${currentValue} inHg'
 		}
-        valueTile("battery", "device.battery", decoration: "flat", width: 2) {
-			state "default", label:'Device Battery ${currentValue} V'
+        valueTile("battery", "device.battery", decoration: "flat", width: 1) {
+			state "default", label:'${currentValue} mV Battery'
 		}
         valueTile("night", "device.day", decoration: "flat",) {
 			state "default", label:'${currentValue}'
@@ -75,21 +82,8 @@ metadata {
 				]
 		}
         main(["temperature"])
-		details(["cameraDetails", "humidity","temperature", "light", "rain", "uv", "pressure", "battery", "night", "refresh"])}
+		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "light", "rain", "night", "battery", "refresh"])}
 	
-}
-
-def parse(description) {
-	log.debug "Parsing '${description}'"
-    
-    def map = [:]
-    def retResult = []
-    def descMap = parseDescriptionAsMap(description)
-        
-    //Image
-	if (descMap["bucket"] && descMap["key"]) {
-		putImageInS3(descMap)
-	}
 }    
 
 def poll() {
@@ -117,12 +111,12 @@ def callAPI() {
             if (resp.data.Data.Humidity) {
             	def H =  resp.data.Data.Humidity.toString()
             	def humidity = H.replaceAll("\\[", "").replaceAll("\\]","")
-                sendEvent(name: "humidity", value: humidity + "%")
+                sendEvent(name: "humidity", value: humidity)
                 log.debug "Humidity:" + humidity
             }
             if (resp.data.Data.Luminance) {
             	def L =  resp.data.Data.Luminance.toString()
-            	def luminance = (L.replaceAll("\\[", "").replaceAll("\\]","")) * 1
+            	def luminance = ((L.replaceAll("\\[", "").replaceAll("\\]","")) as int).intdiv(100)
                 sendEvent(name: "illuminance", value: luminance)
                 log.debug "Luminance:" + luminance
             }
@@ -177,35 +171,6 @@ def callAPI() {
         }
         
 
-}
-
-def takeImage(url) {
-	log.debug ".........................."+url
-        
-
-}
-
-def putImageInS3(map) {
-
-	def s3ObjectContent
-
-	try {
-		def imageBytes = getS3Object(map.bucket, map.key + ".jpg")
-
-		if(imageBytes)
-		{
-			s3ObjectContent = imageBytes.getObjectContent()
-			def bytes = new ByteArrayInputStream(s3ObjectContent.bytes)
-			storeImage(getPictureName(), bytes)
-		}
-	}
-	catch(Exception e) {
-		log.error e
-	}
-	finally {
-		//Explicitly close the stream
-		if (s3ObjectContent) { s3ObjectContent.close() }
-	}
 }
 
 private getPictureName() {
