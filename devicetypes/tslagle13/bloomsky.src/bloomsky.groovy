@@ -1,6 +1,10 @@
 /**
  *  Bloomsky
  *
+ *	Version: 0.4 - Convert cd/m2 to lux properly
+ *				 - Make humidity display properly with humidity text
+ * 
+ *
  *  Copyright 2016 Tim Slagle
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
@@ -36,18 +40,18 @@ metadata {
 		// TODO: define status and reply messages here
 	}
 
-	tiles(scale:1) {
-		carouselTile("cameraDetails", "device.image", width: 2, height: 2) { }
+	tiles(scale:2) {
+		carouselTile("cameraDetails", "device.image", width: 4, height: 4) { }
         standardTile("refresh", "device.weather", decoration: "flat") {
 			state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
 		}
-        valueTile("light", "device.illuminance", decoration: "flat", width: 1) {
+        valueTile("light", "device.illuminance", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue} Lux'
 		}
-        valueTile("rain", "device.rain", decoration: "flat") {
+        valueTile("rain", "device.rain", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue}'
 		}
-        valueTile("uv", "device.ultravioletIndex") {
+        valueTile("uv", "device.ultravioletIndex", width: 2, height: 2) {
 			state "default", label:'${currentValue} UV',
 				backgroundColors:[
 					[value: 1, color: "#289500"],
@@ -57,19 +61,19 @@ metadata {
 					[value: 11, color: "#6B49C8"]
 				]
 		}
-        valueTile("humidity", "device.humidity", decoration: "flat", width:1) {
-			state "default", label:'${currentValue}%', unit: "Humidity"
+        valueTile("humidity", "device.humidity", inactiveLabel: false, width: 2, height: 2) {
+			state "humidity", label:'${currentValue}% humidity', unit:""
 		}
-        valueTile("pressure", "device.pressure", decoration: "flat", width: 1) {
-			state "default", label:'${currentValue} inHg'
+        valueTile("pressure", "device.pressure", inactiveLabel: false, width: 2, height: 2) {
+			state "pressure", label:'${currentValue} inHg', unit:""
 		}
-        valueTile("battery", "device.battery", decoration: "flat", width: 1) {
+        valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue} mV Battery'
 		}
-        valueTile("night", "device.day", decoration: "flat",) {
+        valueTile("night", "device.day", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue}'
 		}
-		valueTile("temperature", "device.temperature") {
+		valueTile("temperature", "device.temperature", width: 2, height: 2) {
 			state "default", label:'${currentValue}°',
 				backgroundColors:[
 					[value: 31, color: "#153591"],
@@ -111,12 +115,12 @@ def callAPI() {
             if (resp.data.Data.Humidity) {
             	def H =  resp.data.Data.Humidity.toString()
             	def humidity = H.replaceAll("\\[", "").replaceAll("\\]","")
-                sendEvent(name: "humidity", value: humidity)
+                sendEvent(name: "humidity", value: humidity, unit: "%")
                 log.debug "Humidity:" + humidity
             }
             if (resp.data.Data.Luminance) {
             	def L =  resp.data.Data.Luminance.toString()
-            	def luminance = ((L.replaceAll("\\[", "").replaceAll("\\]","")) as int).intdiv(100)
+            	def luminance = ((L.replaceAll("\\[", "").replaceAll("\\]","")) as int).intdiv(3600)
                 sendEvent(name: "illuminance", value: luminance)
                 log.debug "Luminance:" + luminance
             }
