@@ -42,7 +42,7 @@ metadata {
 
 	tiles(scale:2) {
 		carouselTile("cameraDetails", "device.image", width: 4, height: 4) { }
-        standardTile("refresh", "device.weather", decoration: "flat") {
+        standardTile("refresh", "device.weather", decoration: "flat", width: 2, height: 2) {
 			state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
 		}
         valueTile("light", "device.illuminance", decoration: "flat", width: 2, height: 2) {
