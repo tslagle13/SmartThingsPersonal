@@ -1,8 +1,11 @@
 /**
  *  Bloomsky
  *
+ *  Version: 0.5 - Fixed long decimal values on temp and pressure. 
+ *
  *	Version: 0.4 - Convert cd/m2 to lux properly
  *				 - Make humidity display properly with humidity text
+ * 
  * 
  *
  *  Copyright 2016 Tim Slagle
@@ -65,7 +68,7 @@ metadata {
 			state "humidity", label:'${currentValue}% humidity', unit:""
 		}
         valueTile("pressure", "device.pressure", inactiveLabel: false, width: 2, height: 2) {
-			state "pressure", label:'${currentValue} inHg', unit:""
+			state "pressure", label:'${currentValue} mbar', unit:""
 		}
         valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue} mV Battery'
@@ -108,7 +111,7 @@ def callAPI() {
         httpGet(pollParams) { resp ->
         	if (resp.data.Data.Temperature) {
         		def T =  resp.data.Data.Temperature.toString()
-            	def temp = T.replaceAll("\\[", "").replaceAll("\\]","")
+            	def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
                 sendEvent(name: "temperature", value: temp, unit: "F")
                 log.debug "Temp:" + temp
             }
@@ -137,7 +140,7 @@ def callAPI() {
             }
             if (resp.data.Data.Pressure) {
             	def P =  resp.data.Data.Pressure.toString()
-            	def pressure = P.replaceAll("\\[", "").replaceAll("\\]","")
+            	def pressure = (P.replaceAll("\\[", "").replaceAll("\\]","").take(4))
                 sendEvent(name: "pressure", value: pressure, unit: "inHg")
                 log.debug "Pressure:" + pressure
             }
