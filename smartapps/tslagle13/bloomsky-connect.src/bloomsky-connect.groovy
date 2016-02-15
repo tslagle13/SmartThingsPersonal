@@ -119,8 +119,9 @@ private getAPIKey() {
     return key
 }
 
-//schedule refresh for child devices
+//refresh for child devices
 def refreshBloomsky(evt) {
+	state.lastTime = now()
 	def devices = getChildDevices()
     devices.each{
     	it.callAPI()
@@ -131,3 +132,4 @@ def refreshBloomsky(evt) {
 def loggingOn() {
 	return logging
 }
+
