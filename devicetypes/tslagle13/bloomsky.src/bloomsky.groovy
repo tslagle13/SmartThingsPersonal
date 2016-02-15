@@ -124,7 +124,7 @@ def callAPI() {
                 // Get the Device Info of the Correct Bloom Sky
                 def individualBloomSky
                 // If you don't have Device ID specific get the first bloom sky only
-                if(deviceID) {
+                if(device.deviceNetworkId) {
                     individualBloomSky = resp.getData().findAll{ it.DeviceID == device.deviceNetworkId }
                 }
                 else {
