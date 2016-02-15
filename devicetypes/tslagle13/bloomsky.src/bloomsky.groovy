@@ -1,11 +1,18 @@
 /**
  *  Bloomsky
  *
- *  Version: 0.5 - Fixed long decimal values on temp and pressure. 
+ *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *	Version: 0.4 - Convert cd/m2 to lux properly
- *				 - Make humidity display properly with humidity text
- * 
+ *	Version: 1.0 - Feature!: This device now has a device manager.
+ *                      - Uninstall the current bloomsky device from ST. Copy this code overtop the current DTH
+ *						  and install the connect app. The Connect app will create a new device for you.
+ *				 - Logging level taken from parent app
+ *				 - API Key transmitted from parent app in secure manner
+ *				 - Only updates DTH when current value changes. Keeps history clean and removes needless send events 
+ *
+ *	Version: 0.5 - Celcius support thanks to @terafin
+ *				 - Specific device refresh thanks to @thrash99er
+ *               
  * 
  *
  *  Copyright 2016 Tim Slagle
@@ -34,9 +41,6 @@ metadata {
         attribute "pressure", "number"
         attribute "rain", "string"
         
-	}
-    preferences {
-		input "apiKey", "text", title: "API Key", required: true
 	}
 
 	simulator {
@@ -68,7 +72,7 @@ metadata {
 			state "humidity", label:'${currentValue}% humidity', unit:""
 		}
         valueTile("pressure", "device.pressure", inactiveLabel: false, width: 2, height: 2) {
-			state "pressure", label:'${currentValue} mbar', unit:""
+			state "pressure", label:'${currentValue} inHg', unit:""
 		}
         valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue} mV Battery'
@@ -89,8 +93,7 @@ metadata {
 				]
 		}
         main(["temperature"])
-		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "light", "rain", "night", "battery", "refresh"])}
-	
+		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "light", "rain", "night", "battery", "refresh"])}	
 }    
 
 def poll() {
@@ -101,85 +104,167 @@ def refresh() {
 	callAPI()
 }
 
+//convert temp to celcius if needed
+def getTemperature(value) {
+    def cmdScale = getTemperatureScale()
+    return convertTemperatureIfNeeded(value.toFloat(), "F", 4)
+}
+
 def callAPI() {
+	log.debug "Refreshing Bloomsky Device - ${device.label}"
+	def logging = parent.loggingOn()
     def pollParams = [
         uri: "http://thirdpartyapi.appspot.com",
         path: "/api/skydata/",
         requestContentType: "application/json",
-        headers: ["Authorization": apiKey]
+        headers: ["Authorization": parent.getAPIKey()]
 		]
-        httpGet(pollParams) { resp ->
-        	if (resp.data.Data.Temperature) {
-        		def T =  resp.data.Data.Temperature.toString()
-            	def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
-                sendEvent(name: "temperature", value: temp, unit: "F")
-                log.debug "Temp:" + temp
-            }
-            if (resp.data.Data.Humidity) {
-            	def H =  resp.data.Data.Humidity.toString()
-            	def humidity = H.replaceAll("\\[", "").replaceAll("\\]","")
-                sendEvent(name: "humidity", value: humidity, unit: "%")
-                log.debug "Humidity:" + humidity
-            }
-            if (resp.data.Data.Luminance) {
-            	def L =  resp.data.Data.Luminance.toString()
-            	def luminance = ((L.replaceAll("\\[", "").replaceAll("\\]","")) as int).intdiv(3600)
-                sendEvent(name: "illuminance", value: luminance)
-                log.debug "Luminance:" + luminance
-            }
-            if (resp.data.Data.Rain) {
-            	def R =  resp.data.Data.Rain.toString()
-            	def rain = R.replaceAll("\\[", "").replaceAll("\\]","")
+        try {
+            httpGet(pollParams) { resp ->
+                // Get the Device Info of the Correct Bloom Sky
+                def individualBloomSky
+                // If you don't have Device ID specific get the first bloom sky only
+                if(deviceID) {
+                    individualBloomSky = resp.getData().findAll{ it.DeviceID == device.deviceNetworkId }
+                }
+                else {
+                    individualBloomSky = resp.data[0]
+                }
+				if (logging) {
+                	log.debug ("This BloomSky: " + individualBloomSky)
+                }
+				//if statements crawl through json to send events for each data point
+                if (individualBloomSky.Data.Temperature) {
+                    def T =  individualBloomSky.Data.Temperature.toString()
+                    def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
+                    if (temp != state.currentTemp) {
+                        sendEvent(name: "temperature", value: temp, unit: "F")
+                        state.currentTemp = temp
+                        if (logging) {
+                            log.debug "Temp:" + temp
+                        }
+                    }
+                }
+                if (individualBloomSky.Data.Humidity) {
+                    def H =  individualBloomSky.Data.Humidity.toString()
+                    def humidity = H.replaceAll("\\[", "").replaceAll("\\]","")
+                    if (humidity != state.currentHumidity) {
+                        sendEvent(name: "humidity", value: humidity, unit: "%")
+                        state.currentHumidity = humidity
+                        if (logging) {
+                            log.debug "Humidity:" + humidity
+                        }
+                    }    
+                }
+                if (individualBloomSky.Data.Luminance) {
+                    def L =  individualBloomSky.Data.Luminance.toString()
+                    def luminance = ((L.replaceAll("\\[", "").replaceAll("\\]","")) as int).intdiv(3600)
+                    if (luminance != state.currentLuminance) {
+                        sendEvent(name: "illuminance", value: luminance)
+                        state.currentLuminance = luminance
+                        if (logging) {
+                            log.debug "Preluminance:" + L
+                            log.debug "Luminance:" + luminance
+                        }
+					}
+                }
+                if (individualBloomSky.Data.Pressure) {
+                    def P =  individualBloomSky.Data.Pressure.toString()
+                    def pressure = (P.replaceAll("\\[", "").replaceAll("\\]","").take(4))
+                    if (pressure != state.currentPressure) {
+                        sendEvent(name: "pressure", value: pressure, unit: "inHg")
+                        state.currentPressure = pressure
+                        if (logging) {
+                            log.debug "Pressure:" + pressure
+                        }
+                    }
+                }
+                if (individualBloomSky.Data.UVIndex) {
+                    def U =  individualBloomSky.Data.UVIndex.toString()
+                    def uvIndex = U.replaceAll("\\[", "").replaceAll("\\]","")
+                    if (uvIndex != state.currentIlluminance) {
+                        sendEvent(name: "ultravioletIndex", value: uvIndex)
+                        state.currentIlluminance = uvIndex
+                        if (logging) {
+                            log.debug "uvIndex:" + uvIndex
+                        }
+                    }
+                }
+                if (individualBloomSky.Data.Voltage) {
+                    def V =  individualBloomSky.Data.Voltage.toString()
+                    def voltage = V.replaceAll("\\[", "").replaceAll("\\]","")
+                    if (voltage != state.currentBattery) {
+                        sendEvent(name: "battery", value: voltage)
+                        state.currentBattery = voltage
+                        if (logging) {
+                            log.debug "voltage:" + voltage
+                        }
+                    }
+                }
+                if (individualBloomSky.Data.ImageURL) {
+                    def I =  individualBloomSky.Data.ImageURL.toString()
+                    def image = I.replaceAll("\\[", "").replaceAll("\\]","").toString()
+                    if (I != state.currentImage) {
+                        httpGet(image) { it -> 
+                            storeImage(getPictureName(), it.data)
+                            state.currentImage = I
+                        }
+                        if (logging) {
+                            log.debug "image:" + image
+                        }    
+					}
+                }
+                //for some reason the rain and night booleans evaluate as false no matter what, took out if statement for the time being
+                def R =  individualBloomSky.Data.Rain.toString()
+                def rain = R.replaceAll("\\[", "").replaceAll("\\]","")
                 if (rain == "false"){
-                	sendEvent(name: "rain", value: "Not Raining")
+                	if (state.rain != "false") {
+                    	sendEvent(name: "rain", value: "Not Raining")
+                        state.rain = "false"
+                        if (logging) {
+                			log.debug "Rain:" + rain
+                		}  
+                    }
                 }
                 else {
-                	sendEvent(name: "rain", value: "Raining")
-                }
-                log.debug "Rain:" + rain
-            }
-            if (resp.data.Data.Pressure) {
-            	def P =  resp.data.Data.Pressure.toString()
-            	def pressure = (P.replaceAll("\\[", "").replaceAll("\\]","").take(4))
-                sendEvent(name: "pressure", value: pressure, unit: "inHg")
-                log.debug "Pressure:" + pressure
-            }
-            if (resp.data.Data.UVIndex) {
-            	def U =  resp.data.Data.UVIndex.toString()
-            	def uvIndex = U.replaceAll("\\[", "").replaceAll("\\]","")
-                sendEvent(name: "ultravioletIndex", value: uvIndex)
-                log.debug "uvIndex:" + uvIndex
-            }
-            if (resp.data.Data.Night) {
-            	def N =  resp.data.Data.Night.toString()
-            	def night = N.replaceAll("\\[", "").replaceAll("\\]","")
+                	if (state.rain != "true") {
+                    	sendEvent(name: "rain", value: "Raining")
+                    	state.rain = "true"
+                        if (logging) {
+                			log.debug "Rain:" + rain
+                		}
+                	}
+                }    
+                def N =  individualBloomSky.Data.Night.toString()
+                def night = N.replaceAll("\\[", "").replaceAll("\\]","")
                 if (night == "false") {
-                	sendEvent(name: "day", value: "It's day time")
+                	if (state.night != "false") {
+                    	sendEvent(name: "day", value: "It's day time")
+                    	state.night = "false"
+                        if (logging) {
+                			log.debug "Night:" + night
+                		} 
+                    }
                 }
                 else {
-                	sendEvent(name: "day", value: "It's night time")
-                }
-                log.debug "Night:" + night
-            }
-            if (resp.data.Data.Voltage) {
-            	def V =  resp.data.Data.Voltage.toString()
-            	def voltage = V.replaceAll("\\[", "").replaceAll("\\]","")
-                sendEvent(name: "battery", value: voltage)
-                log.debug "voltage:" + voltage
-            }
-            if (resp.data.Data.ImageURL) {
-            	def I =  resp.data.Data.ImageURL.toString()
-            	def image = I.replaceAll("\\[", "").replaceAll("\\]","").toString()
-                httpGet(image) { it -> 
-        			storeImage(getPictureName(), it.data)
-        		}
-                log.debug "image:" + image
-            }
+                	if (state.night != "true") {
+                    	sendEvent(name: "day", value: "It's night time")
+                        state.night = "true"
+                        if (logging) {
+                			log.debug "Night:" + night
+                		} 
+                    }    
+                }   
+        		 
         }
+        }catch (Exception e) { //log exception gracefully
+			log.debug "Error: $e"
+		}   
         
 
 }
 
+//create unique name for picture storage
 private getPictureName() {
   def pictureUuid = java.util.UUID.randomUUID().toString().replaceAll('-', '')
   "image" + "_$pictureUuid" + ".jpg"
