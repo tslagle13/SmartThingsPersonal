@@ -14,10 +14,11 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Instructions:
- *   - Copy this app into your IDE using the "From Code" Option in the IDE
- *   - If you have a bloomsky device installed currently, remove it and remove the DTH code from your account.
- *   - Copy the new DTH code into your account (https://github.com/tslagle13/SmartThingsPersonal/blob/master/devicetypes/tslagle13/bloomsky.src/bloomsky.groovy)
+ *  Instructions: 
+ *   - Copy this app into your IDE using the "From Code" Option in the IDE and publish it
+ *   - If you have a bloomsky device installed currently, remove it and remove the DTH code from your account. 
+ *		- If this is your first time installing a bloomsky device you can skip this step completely.
+ *   - Copy the new DTH code into your account and publish it (https://github.com/tslagle13/SmartThingsPersonal/blob/master/devicetypes/tslagle13/bloomsky.src/bloomsky.groovy)
  *   - Install the "BloomSky (Connect)" app through the SmartThings Mobile App
  */
  
