@@ -3,6 +3,8 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
+ *	Version: 1.0.1 - Fixed issue where DTH would not update at night. 
+ *
  *	Version: 1.0 - Feature!: This device now has a device manager.
  *                      - Uninstall the current bloomsky device from ST. Copy this code overtop the current DTH
  *						  and install the connect app. The Connect app will create a new device for you.
@@ -204,11 +206,8 @@ def callAPI() {
                 if (individualBloomSky.Data.ImageURL) {
                     def I =  individualBloomSky.Data.ImageURL.toString()
                     def image = I.replaceAll("\\[", "").replaceAll("\\]","").toString()
-                    if (I != state.currentImage) {
                         httpGet(image) { it -> 
                             storeImage(getPictureName(), it.data)
-                            state.currentImage = I
-                        }
                         if (logging) {
                             log.debug "image:" + image
                         }    
