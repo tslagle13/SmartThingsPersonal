@@ -3,6 +3,7 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
+ *	Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
  *	Version: 1.0.1 - Fixed issue where DTH would not update at night. 
  *
  *	Version: 1.0 - Feature!: This device now has a device manager.
@@ -42,6 +43,7 @@ metadata {
         attribute "day", "string"
         attribute "pressure", "number"
         attribute "rain", "string"
+        attribute "lastUpdated", "string"
         
 	}
 
@@ -82,6 +84,9 @@ metadata {
         valueTile("night", "device.day", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue}'
 		}
+         valueTile("lastUpdated", "device.lastUpdated", decoration: "flat", width: 2, height: 2) {
+			state "default", label:'${currentValue}'
+		}
 		valueTile("temperature", "device.temperature", width: 2, height: 2) {
 			state "default", label:'${currentValue}°',
 				backgroundColors:[
@@ -95,7 +100,7 @@ metadata {
 				]
 		}
         main(["temperature"])
-		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "light", "rain", "night", "battery", "refresh"])}	
+		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "light", "rain", "night", "battery", "lastUpdated", "refresh"])}	
 }    
 
 def poll() {
@@ -132,9 +137,15 @@ def callAPI() {
                 else {
                     individualBloomSky = resp.data[0]
                 }
-				if (logging) {
-                	log.debug ("This BloomSky: " + individualBloomSky)
+                
+              
+                // def timeString = new Date(ts + location.timeZone.rawOffset ).format("yyyy-MM-dd HH:mm")
+                // log.debug "TSS " + timeString
+				
+                if (logging) {
+                    log.debug ("This BloomSky: " + individualBloomSky)
                 }
+               
 				//if statements crawl through json to send events for each data point
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
@@ -213,6 +224,16 @@ def callAPI() {
                         }    
 					}
                 }
+                
+                def newTS =  individualBloomSky.Data.TS.toString()
+                def lastUpdated = Long.parseLong(((newTS.replaceAll("\\[", "").replaceAll("\\]",""))))
+                def lastUpdateTick = (lastUpdated * 1000L) + location.timeZone.rawOffset
+                def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:MM").format(lastUpdateTick)
+               
+                sendEvent(name: "lastUpdated", value: finalUpdated)
+                state.lastUpdated = finalUpdated
+                
+                
                 //for some reason the rain and night booleans evaluate as false no matter what, took out if statement for the time being
                 def R =  individualBloomSky.Data.Rain.toString()
                 def rain = R.replaceAll("\\[", "").replaceAll("\\]","")
