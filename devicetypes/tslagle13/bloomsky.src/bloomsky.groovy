@@ -3,7 +3,10 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *	Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
+ *	Version: 1.0.3 - Removed Lux value. Dynamic Lux value will no longer be supported in this device type.
+ * 	
+ *  Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
+ * 
  *	Version: 1.0.1 - Fixed issue where DTH would not update at night. 
  *
  *	Version: 1.0 - Feature!: This device now has a device manager.
@@ -55,10 +58,10 @@ metadata {
 		carouselTile("cameraDetails", "device.image", width: 4, height: 4) { }
         standardTile("refresh", "device.weather", decoration: "flat", width: 2, height: 2) {
 			state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
-		}
+		}/*
         valueTile("light", "device.illuminance", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue} Lux'
-		}
+		}*/
         valueTile("rain", "device.rain", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue}'
 		}
@@ -100,7 +103,7 @@ metadata {
 				]
 		}
         main(["temperature"])
-		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "light", "rain", "night", "battery", "lastUpdated", "refresh"])}	
+		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "rain", "night", "battery", "lastUpdated", "refresh"])}	
 }    
 
 def poll() {
@@ -168,7 +171,7 @@ def callAPI() {
                             log.debug "Humidity:" + humidity
                         }
                     }    
-                }
+                }/*
                 if (individualBloomSky.Data.Luminance) {
                     def L =  individualBloomSky.Data.Luminance.toString()
                     def luminance = ((L.replaceAll("\\[", "").replaceAll("\\]","")) as int).intdiv(3600)
@@ -180,7 +183,7 @@ def callAPI() {
                             log.debug "Luminance:" + luminance
                         }
 					}
-                }
+                }*/
                 if (individualBloomSky.Data.Pressure) {
                     def P =  individualBloomSky.Data.Pressure.toString()
                     def pressure = (P.replaceAll("\\[", "").replaceAll("\\]","").take(4))
