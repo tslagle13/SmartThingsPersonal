@@ -37,29 +37,11 @@ definition(
 
 
 preferences {
-    page(name:"mainPage", title:"BloomSky Setup", content:"mainPage", refreshTimeout:5)
-	page(name:"selectDevices", title:"Select BloomSky Devices", content:"selectDevices", refreshTimeout:5)
-    section("Title") {
+	section("Title") {
     	input "apiKey", "password", title: "API Key", Required: true
         input "logging", "bool", title: "Enable Logging", defaultValue: false, required: false
 	}
 }
-
-def mainPage() {
-	def bloomSkyDevices = getBloomskyIds()
-	if (state.apiKey) {
-        return bulbDiscovery()
-    } else {
-		return bridgeDiscovery()
-	}
-}
-
-def selectDevices(params=[:])
-{
-	// display the devices to select
-	
-}
-
 
 def installed() {
 	initialize()
@@ -71,7 +53,7 @@ def updated() {
 }
 
 def initialize() {
-	// getBloomskyIds()
+	getBloomskyIds()
     schedule("0 0/5 * 1/1 * ? *", "refreshBloomsky")
 }
 
@@ -95,8 +77,7 @@ def getBloomskyIds(evt) {
 				log.debug "Error: $e"
             }
 		}    
-    // createBloomskyDevices()
-    return state.deviceCollection
+    createBloomskyDevices()
 }
 
 def createBloomskyDevices() {

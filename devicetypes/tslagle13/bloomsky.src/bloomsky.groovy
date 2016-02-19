@@ -3,8 +3,6 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *  Version: 1.0.4 - fixed the Celcius support, and changed the order of tile
- *
  *	Version: 1.0.3 - Removed Lux value. Dynamic Lux value will no longer be supported in this device type.
  * 	
  *  Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
@@ -105,7 +103,7 @@ metadata {
 				]
 		}
         main(["temperature"])
-		details(["cameraDetails", "temperature", "uv", "humidity", "pressure",  "battery", "rain", "night", "lastUpdated", "refresh"])}	
+		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "rain", "night", "battery", "lastUpdated", "refresh"])}	
 }    
 
 def poll() {
@@ -155,7 +153,6 @@ def callAPI() {
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
                     def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
-                    temp = getTemperature(temp)
                     if (temp != state.currentTemp) {
                         sendEvent(name: "temperature", value: temp, unit: "F")
                         state.currentTemp = temp
