@@ -3,22 +3,17 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *  Version: 1.0.4 - fixed the Celcius support, and changed the order of tile
+ *		Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
+ *		Version: 1.0.1 - Fixed issue where DTH would not update at night. 
  *
- *	Version: 1.0.3 - Removed Lux value. Dynamic Lux value will no longer be supported in this device type.
- * 	
- *  Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
- * 
- *	Version: 1.0.1 - Fixed issue where DTH would not update at night. 
- *
- *	Version: 1.0 - Feature!: This device now has a device manager.
+ *		Version: 1.0 - Feature!: This device now has a device manager.
  *                      - Uninstall the current bloomsky device from ST. Copy this code overtop the current DTH
  *						  and install the connect app. The Connect app will create a new device for you.
  *				 - Logging level taken from parent app
  *				 - API Key transmitted from parent app in secure manner
  *				 - Only updates DTH when current value changes. Keeps history clean and removes needless send events 
  *
- *	Version: 0.5 - Celcius support thanks to @terafin
+ *		Version: 0.5 - Celcius support thanks to @terafin
  *				 - Specific device refresh thanks to @thrash99er
  *               
  * 
@@ -44,12 +39,14 @@ metadata {
 		capability "Sensor"
 		capability "Temperature Measurement"
 		capability "Ultraviolet Index"
-        
+        capability "Ultraviolet Index"
+		capability "Contact Sensor"
+		
         attribute "day", "string"
         attribute "pressure", "number"
         attribute "rain", "string"
         attribute "lastUpdated", "string"
-        
+     
 	}
 
 	simulator {
@@ -60,10 +57,10 @@ metadata {
 		carouselTile("cameraDetails", "device.image", width: 4, height: 4) { }
         standardTile("refresh", "device.weather", decoration: "flat", width: 2, height: 2) {
 			state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
-		}/*
+		}
         valueTile("light", "device.illuminance", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue} Lux'
-		}*/
+		}
         valueTile("rain", "device.rain", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue}'
 		}
@@ -104,8 +101,12 @@ metadata {
 					[value: 96, color: "#bc2323"]
 				]
 		}
+		standardTile("contact", "device.contact", width: 2, height: 2) {
+			state "open", label: '${name}', icon: "st.contact.contact.open", backgroundColor: "#ffa81e"
+			state "closed", label: '${name}', icon: "st.contact.contact.closed", backgroundColor: "#79b821"
+		}
         main(["temperature"])
-		details(["cameraDetails", "temperature", "uv", "humidity", "pressure",  "battery", "rain", "night", "lastUpdated", "refresh"])}	
+		details(["cameraDetails", "temperature", "uv", "humidity", "pressure", "light", "rain", "night", "battery", "lastUpdated", "contact", "refresh"])}	
 }    
 
 def poll() {
@@ -155,7 +156,6 @@ def callAPI() {
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
                     def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
-                    temp = getTemperature(temp)
                     if (temp != state.currentTemp) {
                         sendEvent(name: "temperature", value: temp, unit: "F")
                         state.currentTemp = temp
@@ -174,7 +174,7 @@ def callAPI() {
                             log.debug "Humidity:" + humidity
                         }
                     }    
-                }/*
+                }
                 if (individualBloomSky.Data.Luminance) {
                     def L =  individualBloomSky.Data.Luminance.toString()
                     def luminance = ((L.replaceAll("\\[", "").replaceAll("\\]","")) as int).intdiv(3600)
@@ -186,7 +186,7 @@ def callAPI() {
                             log.debug "Luminance:" + luminance
                         }
 					}
-                }*/
+                }
                 if (individualBloomSky.Data.Pressure) {
                     def P =  individualBloomSky.Data.Pressure.toString()
                     def pressure = (P.replaceAll("\\[", "").replaceAll("\\]","").take(4))
@@ -266,7 +266,11 @@ def callAPI() {
                 if (night == "false") {
                 	if (state.night != "false") {
                     	sendEvent(name: "day", value: "It's day time")
+						
                     	state.night = "false"
+						
+						sendEvent(name: "contact", value: "closed")
+						state.currentContact = "closed"
                         if (logging) {
                 			log.debug "Night:" + night
                 		} 
@@ -276,6 +280,8 @@ def callAPI() {
                 	if (state.night != "true") {
                     	sendEvent(name: "day", value: "It's night time")
                         state.night = "true"
+						sendEvent(name: "contact", value: "open")
+						state.currentContact = "open"
                         if (logging) {
                 			log.debug "Night:" + night
                 		} 
