@@ -157,7 +157,7 @@ def callAPI() {
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
                     def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
-                    temp = getTemperature(value)
+                    temp = getTemperature(temp)
                     if (temp != state.currentTemp) {
                         sendEvent(name: "temperature", value: temp, unit: "F")
                         state.currentTemp = temp
