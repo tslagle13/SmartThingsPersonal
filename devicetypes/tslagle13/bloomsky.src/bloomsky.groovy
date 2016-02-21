@@ -236,7 +236,7 @@ def callAPI() {
                 def newTS =  individualBloomSky.Data.TS.toString()
                 def lastUpdated = Long.parseLong(((newTS.replaceAll("\\[", "").replaceAll("\\]",""))))
                 def lastUpdateTick = (lastUpdated * 1000L) + location.timeZone.rawOffset
-                def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:MM").format(lastUpdateTick)
+                def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:mm").format(lastUpdateTick)
                
                 sendEvent(name: "lastUpdated", value: finalUpdated)
                 state.lastUpdated = finalUpdated
