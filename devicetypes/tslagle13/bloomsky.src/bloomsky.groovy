@@ -3,7 +3,7 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *  Version: 1.0.6 - fixed code halting issue with temp conversion introduced by 1.0.5
+ *  Version: 1.0.6 - fixed code halting issue with temp conversion introduced by 1.0.5 and fixed last updated display issue
  *  
  *  Version: 1.0.5 - fixed celcius support, i had removed by accident - @thrash99er
  *
@@ -237,7 +237,7 @@ def callAPI() {
                 def newTS =  individualBloomSky.Data.TS.toString()
                 def lastUpdated = Long.parseLong(((newTS.replaceAll("\\[", "").replaceAll("\\]",""))))
                 def lastUpdateTick = (lastUpdated * 1000L) + location.timeZone.rawOffset
-                def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:MM").format(lastUpdateTick)
+                def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:mm").format(lastUpdateTick)
                
                 sendEvent(name: "lastUpdated", value: finalUpdated)
                 state.lastUpdated = finalUpdated
