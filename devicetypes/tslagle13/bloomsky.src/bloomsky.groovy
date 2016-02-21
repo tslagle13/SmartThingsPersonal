@@ -3,13 +3,14 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *  Version: 1.0.5 - fixed celcius support, i had removed by accident - @thrash99er
+ *      Version: 1.0.6 - fixed issue w/ minutes not displaying in last updated - @thrash99er
+ *  	Version: 1.0.5 - fixed celcius support, i had removed by accident - @thrash99er
  *
- *  Version: 1.0.4 - reincluded lx after bloomsky api change
+ *  	Version: 1.0.4 - reincluded lx after bloomsky api change
  *
  *	Version: 1.0.3 - Removed Lux value. Dynamic Lux value will no longer be supported in this device type.
  * 	
- *  Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
+ *  	Version: 1.0.2 - Added new tile to display last time the data was retrieved - lastUpdated  @thrash99er
  * 
  *	Version: 1.0.1 - Fixed issue where DTH would not update at night. 
  *
@@ -157,7 +158,7 @@ def callAPI() {
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
                     def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
-                    temp = getTemperature(value)
+                    temp = getTemperature(temp)
                     if (temp != state.currentTemp) {
                         sendEvent(name: "temperature", value: temp, unit: "F")
                         state.currentTemp = temp
@@ -236,7 +237,7 @@ def callAPI() {
                 def newTS =  individualBloomSky.Data.TS.toString()
                 def lastUpdated = Long.parseLong(((newTS.replaceAll("\\[", "").replaceAll("\\]",""))))
                 def lastUpdateTick = (lastUpdated * 1000L) + location.timeZone.rawOffset
-                def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:MM").format(lastUpdateTick)
+                def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:mm").format(lastUpdateTick)
                
                 sendEvent(name: "lastUpdated", value: finalUpdated)
                 state.lastUpdated = finalUpdated
