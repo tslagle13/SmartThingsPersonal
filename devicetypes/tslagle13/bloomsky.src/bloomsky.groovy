@@ -3,6 +3,8 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
+ *  Version: 1.0.5 - fixed celcius support, i had removed by accident - @thrash99er
+ *
  *  Version: 1.0.4 - reincluded lx after bloomsky api change
  *
  *	Version: 1.0.3 - Removed Lux value. Dynamic Lux value will no longer be supported in this device type.
@@ -155,6 +157,7 @@ def callAPI() {
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
                     def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
+                    temp = getTemperature(value)
                     if (temp != state.currentTemp) {
                         sendEvent(name: "temperature", value: temp, unit: "F")
                         state.currentTemp = temp
