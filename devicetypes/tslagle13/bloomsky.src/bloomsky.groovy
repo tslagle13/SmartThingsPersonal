@@ -3,7 +3,9 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *  Version: 1.0.6 - fixed code halting issue with temp conversion introduced by 1.0.5 and fixed last updated display issue
+ *  Version: 1.0.7 - Fixed trailing decimcals for android.
+ *
+ *	Version: 1.0.6 - fixed code halting issue with temp conversion introduced by 1.0.5 and fixed last updated display issue
  *  
  *  Version: 1.0.5 - fixed celcius support, i had removed by accident - @thrash99er
  *
@@ -158,12 +160,12 @@ def callAPI() {
 				//if statements crawl through json to send events for each data point
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
-                    def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
-                    temp = (getTemperature(temp)).take(5)
-                    if (temp != state.currentTemp) {
+                    def temp = T.replaceAll("\\[", "").replaceAll("\\]","")
+                    temp = getTemperature(temp).toDouble().trunc(1)
+                    //if (temp != state.currentTemp) {
                         sendEvent(name: "temperature", value: temp, unit: "F")
                         state.currentTemp = temp  
-                    }
+                    //}
                     if (logging) {
                         log.debug "Temp:" + temp
                     }
@@ -192,7 +194,7 @@ def callAPI() {
                 }
                 if (individualBloomSky.Data.Pressure) {
                     def P =  individualBloomSky.Data.Pressure.toString()
-                    def pressure = (P.replaceAll("\\[", "").replaceAll("\\]","").take(4))
+                    def pressure = P.replaceAll("\\[", "").replaceAll("\\]","").toDouble().trunc(1)
                     if (pressure != state.currentPressure) {
                         sendEvent(name: "pressure", value: pressure, unit: "inHg")
                         state.currentPressure = pressure
