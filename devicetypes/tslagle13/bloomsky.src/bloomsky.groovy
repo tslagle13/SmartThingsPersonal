@@ -3,6 +3,8 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
+ *  Version: 1.0.6 - fixed code halting issue with temp conversion introduced by 1.0.5
+ *  
  *  Version: 1.0.5 - fixed celcius support, i had removed by accident - @thrash99er
  *
  *  Version: 1.0.4 - reincluded lx after bloomsky api change
@@ -157,13 +159,13 @@ def callAPI() {
                 if (individualBloomSky.Data.Temperature) {
                     def T =  individualBloomSky.Data.Temperature.toString()
                     def temp = ((T.replaceAll("\\[", "").replaceAll("\\]","")).take(5))
-                    temp = getTemperature(value)
+                    temp = (getTemperature(temp)).take(5)
                     if (temp != state.currentTemp) {
                         sendEvent(name: "temperature", value: temp, unit: "F")
-                        state.currentTemp = temp
-                        if (logging) {
-                            log.debug "Temp:" + temp
-                        }
+                        state.currentTemp = temp  
+                    }
+                    if (logging) {
+                        log.debug "Temp:" + temp
                     }
                 }
                 if (individualBloomSky.Data.Humidity) {
@@ -172,10 +174,10 @@ def callAPI() {
                     if (humidity != state.currentHumidity) {
                         sendEvent(name: "humidity", value: humidity, unit: "%")
                         state.currentHumidity = humidity
-                        if (logging) {
+                    } 
+                    if (logging) {
                             log.debug "Humidity:" + humidity
-                        }
-                    }    
+                    }
                 }
                 if (individualBloomSky.Data.Luminance) {
                     def L =  individualBloomSky.Data.Luminance.toString()
@@ -183,11 +185,10 @@ def callAPI() {
                     if (luminance != state.currentLuminance) {
                         sendEvent(name: "illuminance", value: luminance)
                         state.currentLuminance = luminance
-                        if (logging) {
-                            log.debug "Preluminance:" + L
+                    }
+                    if (logging) {
                             log.debug "Luminance:" + luminance
-                        }
-					}
+                    }
                 }
                 if (individualBloomSky.Data.Pressure) {
                     def P =  individualBloomSky.Data.Pressure.toString()
@@ -195,9 +196,9 @@ def callAPI() {
                     if (pressure != state.currentPressure) {
                         sendEvent(name: "pressure", value: pressure, unit: "inHg")
                         state.currentPressure = pressure
-                        if (logging) {
+                    }
+                    if (logging) {
                             log.debug "Pressure:" + pressure
-                        }
                     }
                 }
                 if (individualBloomSky.Data.UVIndex) {
@@ -206,9 +207,9 @@ def callAPI() {
                     if (uvIndex != state.currentIlluminance) {
                         sendEvent(name: "ultravioletIndex", value: uvIndex)
                         state.currentIlluminance = uvIndex
-                        if (logging) {
+                    }
+                    if (logging) {
                             log.debug "uvIndex:" + uvIndex
-                        }
                     }
                 }
                 if (individualBloomSky.Data.Voltage) {
@@ -217,9 +218,9 @@ def callAPI() {
                     if (voltage != state.currentBattery) {
                         sendEvent(name: "battery", value: voltage)
                         state.currentBattery = voltage
-                        if (logging) {
+                    }
+                    if (logging) {
                             log.debug "voltage:" + voltage
-                        }
                     }
                 }
                 if (individualBloomSky.Data.ImageURL) {
@@ -227,10 +228,10 @@ def callAPI() {
                     def image = I.replaceAll("\\[", "").replaceAll("\\]","").toString()
                         httpGet(image) { it -> 
                             storeImage(getPictureName(), it.data)
-                        if (logging) {
+                    }
+                    if (logging) {
                             log.debug "image:" + image
-                        }    
-					}
+                    }
                 }
                 
                 def newTS =  individualBloomSky.Data.TS.toString()
@@ -249,19 +250,19 @@ def callAPI() {
                 	if (state.rain != "false") {
                     	sendEvent(name: "rain", value: "Not Raining")
                         state.rain = "false"
-                        if (logging) {
-                			log.debug "Rain:" + rain
-                		}  
                     }
+                    if (logging) {
+                			log.debug "Rain:" + rain
+                	} 
                 }
                 else {
                 	if (state.rain != "true") {
                     	sendEvent(name: "rain", value: "Raining")
                     	state.rain = "true"
-                        if (logging) {
-                			log.debug "Rain:" + rain
-                		}
                 	}
+                    if (logging) {
+                			log.debug "Rain:" + rain
+               		} 
                 }    
                 def N =  individualBloomSky.Data.Night.toString()
                 def night = N.replaceAll("\\[", "").replaceAll("\\]","")
@@ -269,10 +270,10 @@ def callAPI() {
                 	if (state.night != "false") {
                     	sendEvent(name: "day", value: "It's day time")
                     	state.night = "false"
-                        if (logging) {
-                			log.debug "Night:" + night
-                		} 
                     }
+                    if (logging) {
+              			log.debug "Night:" + night
+              		}
                 }
                 else {
                 	if (state.night != "true") {
@@ -281,13 +282,17 @@ def callAPI() {
                         if (logging) {
                 			log.debug "Night:" + night
                 		} 
-                    }    
-                }   
+                    }
+                    if (logging) {
+              			log.debug "Night:" + night
+              		}
+                }
         		 
         }
         }catch (Exception e) { //log exception gracefully
 			log.debug "Error: $e"
 		}   
+        
         
 
 }
