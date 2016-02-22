@@ -56,7 +56,7 @@ def updated() {
 
 def initialize() {
 	getBloomskyIds()
-    schedule("0 0/5 * 1/1 * ? *", "refreshBloomsky")
+    schedule("0 0/10 * 1/1 * ? *", "refreshBloomsky")
 }
 
 // use API key to find device IDs 
