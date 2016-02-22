@@ -3,7 +3,7 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *  Version: 1.0 - Perfomance improvements. The DTH now updates almsot twice as fast!
+ *  Version: 2.0 - Perfomance improvements. The DTH now updates almsot twice as fast!
  *				 - Updated the "Rain" tile to a "Water Sensor" tile. You can use bloomsky in any water detection app now!
  *				 - Removed the "It's Night Time" tile. It was sort of meaningless. 
  * 
