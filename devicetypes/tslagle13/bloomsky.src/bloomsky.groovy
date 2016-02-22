@@ -118,7 +118,6 @@ def getTemperature(value) {
 //call Bloomsky API and update device
 def callAPI() {
 	log.debug "Refreshing Bloomsky Device - ${device.label}"
-	def logging = parent.loggingOn()
     //building the http request for the bloomsky API
     def pollParams = [
         uri: "http://thirdpartyapi.appspot.com",
