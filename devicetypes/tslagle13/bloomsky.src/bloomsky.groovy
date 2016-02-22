@@ -3,6 +3,8 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
+ *  Version: 2.0.1 - Fixed issue with pollster
+ * 
  *  Version: 2.0 - Perfomance improvements. The DTH now updates almsot twice as fast!
  *				 - Updated the "Rain" tile to a "Water Sensor" tile. You can use bloomsky in any water detection app now!
  *				 - Removed the "It's Night Time" tile. It was sort of meaningless. 
@@ -34,15 +36,14 @@ metadata {
 		capability "Battery"
 		capability "Illuminance Measurement"
 		capability "Refresh"
+        capability "Polling"
 		capability "Relative Humidity Measurement"
 		capability "Sensor"
 		capability "Temperature Measurement"
 		capability "Ultraviolet Index"
         capability "Water Sensor"
         
-        attribute "day", "string"
         attribute "pressure", "number"
-        attribute "rain", "string"
         attribute "lastUpdated", "string"
         
 	}
@@ -116,17 +117,15 @@ def getTemperature(value) {
 }
 
 //call Bloomsky API and update device
-def callAPI() {
+private def callAPI() {
 	log.debug "Refreshing Bloomsky Device - ${device.label}"
-    //building the http request for the bloomsky API
-    def pollParams = [
-        uri: "http://thirdpartyapi.appspot.com",
-        path: "/api/skydata/",
-        requestContentType: "application/json",
-        headers: ["Authorization": parent.getAPIKey()]
-		]
         try {
-            httpGet(pollParams) { resp ->
+            httpGet([
+        			uri: "http://thirdpartyapi.appspot.com",
+        			path: "/api/skydata/",
+        			requestContentType: "application/json",
+        			headers: ["Authorization": parent.getAPIKey()]
+				]) { resp ->
             	
                 // Get the Device Info of the Correct Bloom Sky
                 def individualBloomSky = resp.getData().findAll{ it.DeviceID == device.deviceNetworkId }
@@ -139,7 +138,7 @@ def callAPI() {
                 }
                 def data = [:]
                 data << individualBloomSky.Data //put bloomsky data into hash map
-                //itterate through hashap pairs to update device. Used case statement because it was twice as fast.
+                //itterate through hashmap pairs to update device. Used case statement because it was twice as fast.
                 data.each {oldkey, datum->
                 	def key = oldkey.toLowerCase() //bloomsky returns camel cased keys. Put to lowercase so dth can update correctly
                 	switch(datum) {
@@ -194,7 +193,8 @@ def callAPI() {
         	}
         }catch (Exception e) { //log exception gracefully
 			log.debug "Error: $e"
-		}  
+		}
+        data.clear()
 }
 
 //create unique name for picture storage
