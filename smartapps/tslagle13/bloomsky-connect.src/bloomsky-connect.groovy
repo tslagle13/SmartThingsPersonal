@@ -1,7 +1,10 @@
 /**
  *  BloomSky (Connect)
  *
- *	Version - 0.1
+ *	Version - 0.2 
+ *		- remove logging option. Just log all the time. It's all good.
+ *  
+ *  Version - 0.1
  *
  *  Copyright 2016 Tim Slagle
  *
@@ -39,7 +42,6 @@ definition(
 preferences {
 	section("Title") {
     	input "apiKey", "password", title: "API Key", Required: true
-        input "logging", "bool", title: "Enable Logging", defaultValue: false, required: false
 	}
 }
 
@@ -68,14 +70,9 @@ def getBloomskyIds(evt) {
         try {
             httpGet(pollParams) { resp ->
                 state.deviceCollection = resp.getData().collectAll{it.DeviceID} //get all device IDs on bloomsky account
-                if (logging){
-                	log.debug state.deviceCollection
-                }
             } 
         } catch (Exception e) {
-        	if (logging){
-				log.debug "Error: $e"
-            }
+        	log.debug "Error: $e"   
 		}    
     createBloomskyDevices()
 }
@@ -87,15 +84,11 @@ def createBloomskyDevices() {
             //if child device doens't exist, create it
         	if (!(childDevices.name).toString(/*convert to string for testing*/).contains("${it}")) {
             	addChildDevice("tslagle13", "Bloomsky", it, null, [label:"Bloomsky" + it, name:"${it}"]) //create child device with name and label so name remains protected
-                if (logging){
                     log.debug "Created Child Device Bloomsky${it}"
-            	}
             }
             //if child device does exist log that it does
             else if ((childDevices.name).toString(/*convert to string for testing*/).contains("${it}")) {
-            	if (logging){
             		log.debug "Child device Bloomsky${it} already exists"
-                }
             }
         }
         removeOldDevices(getChildDevices().name - state.deviceCollection) //find child devices that exist in ST that do not exist in the bloomsky account. 
@@ -106,10 +99,8 @@ def createBloomskyDevices() {
 def removeOldDevices(devices) {
     devices.each {
     	def device = getChildDevice("${it}") //find device ID with DNI of non bloomsky device
-        deleteChildDevice(device.deviceNetworkId)  
-        if (logging){
-        	log.debug "Removed Child Device '${device.name}' because it no longer exists in your bloomsky account."
-        }    
+        deleteChildDevice(device.deviceNetworkId)
+        	log.debug "Removed Child Device '${device.name}' because it no longer exists in your bloomsky account."   
     }
 }
 
@@ -129,7 +120,5 @@ def refreshBloomsky(evt) {
     log.debug "Refreshing bloomsky devices"
 }
 
-def loggingOn() {
-	return logging
-}
+
 
