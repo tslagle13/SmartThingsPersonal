@@ -3,7 +3,9 @@
  *
  *  This DTH requires the BloomSky (Connect) app (https://github.com/tslagle13/SmartThingsPersonal/blob/master/smartapps/tslagle13/bloomsky-connect.src/bloomsky-connect.groovy)
  *
- *  Version: 2.0.1 - Fixed issue with pollster
+ *  Version: 2.0.2 - Fixed DST issue and display time in AM/PM
+ *
+ *	Version: 2.0.1 - Fixed issue with pollster
  * 
  *  Version: 2.0 - Perfomance improvements. The DTH now updates almsot twice as fast!
  *				 - Updated the "Rain" tile to a "Water Sensor" tile. You can use bloomsky in any water detection app now!
@@ -144,50 +146,55 @@ private def callAPI() {
                 	switch(datum) {
                     	case { key == "voltage"}: //update "battery"
                         	sendEvent(name:"battery", value:datum)
-                            log.debug "${key}:${datum}"
-                          break
+                            //log.debug "${key}:${datum}"
+                          break;
                         case { key == "ts"}: //update last update from bloomsky
-                        	def lastUpdateTick = (datum * 1000L) + location.timeZone.rawOffset
-                			def finalUpdated = new java.text.SimpleDateFormat("MMM dd HH:mm").format(lastUpdateTick)
-                			sendEvent(name: "lastUpdated", value: finalUpdated)
-                            log.debug "${key}:${datum}"
-                          break
+                        	def date = (datum * 1000L)
+                            def df = new java.text.SimpleDateFormat("MMM dd hh:mm a")
+                            df.setTimeZone(location.timeZone)
+                        	def lastUpdated = df.format(date)
+                			sendEvent(name: "lastUpdated", value: lastUpdated)
+                            //log.debug "${key}:${datum}"
+                          break;
                         case { key == "rain" && datum == false}: //check if it is raining or not
                         	sendEvent(name: "water", value: "dry")
-                            log.debug "${key}:${datum}"
-                          break
+                            //log.debug "${key}:${datum}"
+                          break;
                         case { key == "rain" && datum == true}:
                         	sendEvent(name: "water", value: "wet")
-                            log.debug "${key}:${datum}"
-                          break
+                            //log.debug "${key}:${datum}"
+                          break;
                         case { key == "luminance"}: //update illuminance
                         	sendEvent(name: "illuminance", value: datum)
-                            log.debug "${key}:${datum}"
-                          break
+                            //log.debug "${key}:${datum}"
+                          break;
                         case { key == "uvindex"}: //bloomsky does UV index! how cool is that!?
                         	sendEvent(name: "ultravioletIndex", value: datum)
-                            log.debug "${key}:${datum}"
-                          break
+                            //log.debug "${key}:${datum}"
+                          break;
                         case { it instanceof Integer && key != "imagets"}: //check for integers. Two data points are integers so we save some expense doing this.
                         	sendEvent(name:"${key}", value: datum)
-                            log.debug "${key}:${datum}"
-                          break
+                            //log.debug "${key}:${datum}"
+                          break;
                         case { key == "temperature"}: //temperature needs to be converted to celcuis in some cases so we break it out on its own
                         	def temp = getTemperature(datum).toDouble().trunc(1)
                         	sendEvent(name:"${key}", value: temp)
-                            log.debug "${key}:${temp}"
-                          break
+                            //log.debug "${key}:${temp}"
+                          break;
                     	case { it instanceof BigDecimal && key != "imagets"}: //rest of the data points are big decimals. Another expense saver.
                         	def newDatum = datum.toFloat().trunc(1)
                         	sendEvent(name:"${key}", value: newDatum)
-                            log.debug "${key}:${newDatum}"
-                          break
+                            //log.debug "${key}:${newDatum}"
+                          break;
                         case { key == "imageurl"}: //lastly update the image from bloomsky to the DTH
                         	httpGet(datum) { it -> 
                             	storeImage(getPictureName(), it.data)
                     		}
-                            log.debug "${key}:${datum}"
-                      	  break
+                            //log.debug "${key}:${datum}"
+                      	  break;
+                        default: 
+                        	//log.debug "${key} is not being used"
+                          break;
                 	}
             	}
         	}
