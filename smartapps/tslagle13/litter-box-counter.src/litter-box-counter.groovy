@@ -97,9 +97,7 @@ def usageCounter() {
 
 
 //check if daily count is under average
-def checkDailyCount() {
-	if (((now() - state.lastTimeDaily) > 60000) || (state.lastTimeDaily == 0)) {
-		def dailyCount = 0
+def checkDailyCount() {def dailyCount = 0
 		log.debug "checkDailyCount()"
     	state.averageList.each{ it ->
     		if ((now() - it) <= 86400000) {
@@ -137,5 +135,4 @@ def checkDailyCount() {
     	   		}
     	    }
     	}
-    }
 }    
