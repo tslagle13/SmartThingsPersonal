@@ -83,7 +83,7 @@ metadata {
 			state "pressure", label:'${currentValue} inHg', unit:""
 		}
         valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2) {
-			state "default", label:'${currentValue} mV Battery'
+			state "default", label:'${currentValue}% Battery'
 		}
          valueTile("lastUpdated", "device.lastUpdated", decoration: "flat", width: 2, height: 2) {
 			state "default", label:'${currentValue}'
@@ -145,7 +145,7 @@ private def callAPI() {
                 	def key = oldkey.toLowerCase() //bloomsky returns camel cased keys. Put to lowercase so dth can update correctly
                 	switch(datum) {
                     	case { key == "voltage"}: //update "battery"
-                        	sendEvent(name:"battery", value:datum)
+                        	sendEvent(name:"battery", value: getBattery(datum))
                             //log.debug "${key}:${datum}"
                           break;
                         case { key == "ts"}: //update last update from bloomsky
@@ -208,4 +208,44 @@ private def callAPI() {
 private getPictureName() {
   def pictureUuid = java.util.UUID.randomUUID().toString().replaceAll('-', '')
   "image" + "_$pictureUuid" + ".jpg"
+}
+
+def getBattery(v) {
+	def result
+    switch (v) {
+    	case 2500..2600:
+        	result = 100
+          break;
+        case 2450..2499:
+        	result = 90
+          break; 
+        case 2400..2449:
+        	result = 80
+          break; 
+        case 2350..2399:
+        	result = 70
+          break; 
+        case 2300..2349:
+        	result = 60
+          break; 
+        case 2250..2299:
+        	result = 50
+          break; 
+        case 2200..2249:
+        	result = 40
+          break; 
+        case 2150..2199:
+        	result = 30
+          break; 
+        case 2100..2149:
+        	result = 20
+          break; 
+        case 2050..2099:
+        	result = 10
+          break; 
+        case 1999..2049:
+        	result = 0
+          break; 
+    }
+    return result
 }
