@@ -246,6 +246,9 @@ def getBattery(v) {
         case 1999..2049:
         	result = 0
           break; 
+        default: 
+          result = "Check bloomsky device"
+          break;
     }
     return result
 }
