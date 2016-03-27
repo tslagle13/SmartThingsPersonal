@@ -213,7 +213,7 @@ private getPictureName() {
 def getBattery(v) {
 	def result
     switch (v) {
-    	case 2500..2600:
+    	case 2500..2700:
         	result = 100
           break;
         case 2450..2499:
