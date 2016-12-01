@@ -123,7 +123,7 @@ private def callAPI() {
 	log.debug "Refreshing Bloomsky Device - ${device.label}"
         try {
             httpGet([
-        			uri: "http://thirdpartyapi.appspot.com",
+        			uri: "https://api.bloomsky.com",
         			path: "/api/skydata/",
         			requestContentType: "application/json",
         			headers: ["Authorization": parent.getAPIKey()]
