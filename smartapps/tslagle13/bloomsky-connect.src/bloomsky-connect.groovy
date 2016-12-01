@@ -62,7 +62,7 @@ def initialize() {
 // use API key to find device IDs 
 def getBloomskyIds(evt) {
 	def pollParams = [
-        uri: "http://thirdpartyapi.appspot.com",
+        uri: "https://api.bloomsky.com",
         path: "/api/skydata/",
         requestContentType: "application/json",
         headers: ["Authorization": apiKey]
