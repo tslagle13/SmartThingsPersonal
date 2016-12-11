@@ -3,7 +3,8 @@
  *  Supports Longer interval times (up to 180 mins)
  *  Only turns off lights it turned on (vs calling to turn all off)
  * 
- *  Version  2.6 - General interface, spelling, wording, and formatting fixes.
+ *  Version  2.7 - Simplified interface.
+ *  Version  2.6 - General spelling, wording, and formatting fixes.
  *                 Updated SmartApp icons.
  *  Version  2.5 - Moved scheduling over to Cron and added time as a trigger.
  *                 Cleaned up formatting and some typos.
@@ -48,7 +49,7 @@ definition(
 preferences {
     page name:"pageSetup"
     page name:"Setup"
-    page name:"Settings"
+    page name:"Options"
 
 }
 
@@ -57,7 +58,7 @@ def pageSetup() {
 
     def pageProperties = [
         name:       "pageSetup",
-        title:      "About this SmartApp",
+        title:      "About",
         nextPage:   null,
         install:    true,
         uninstall:  true
@@ -69,12 +70,12 @@ def pageSetup() {
 			"Randomly turns lights on / off during specified times to make your home appear " +
                       "occupied while you're away."
         }
-        section("Setup & Settings") {
-            href "Setup", title: "Setup", description: "", state:greyedOut()
-            href "Settings", title: "Settings", description: "", state: greyedOutSettings()
+        section("Name (optional)") {
+            label title:"Name this vacation setting", required:false
         }
-        section([title:"Additional Options", mobileOnly:true]) {
-            label title:"Name for this SmartApp", required:false
+        section("Setup & Options (required)") {
+            href "Setup", title: "Setup", description: "", state:greyedOut()
+            href "Options", title: "Options", description: "", state: greyedOutSettings() 
         }
     }
 }
@@ -85,14 +86,14 @@ def Setup() {
     def newMode = [
         name:               "newMode",
         type:               "mode",
-        title:              "Modes",
+        title:              "Which Modes activate vacation lighting?",
         multiple:           true,
         required:           true
     ]
     def switches = [
         name:               "switches",
         type:               "capability.switch",
-        title:              "Switches",
+        title:              "Which lights do you want to include?",
         multiple:           true,
         required:           true
     ]
@@ -100,16 +101,16 @@ def Setup() {
     def frequency_minutes = [
         name:               "frequency_minutes",
         type:               "number",
-        title:              "Change lights after this many minutes (5-180)",
+        title:              "Change lights after how many minutes? (5-180)",
         range:              "5..180",
-        required:           true
+        required:        true
     ]
 
     def number_of_active_lights = [
         name:               "number_of_active_lights",
         type:               "number",
-        title:              "How many lights at one time?",
-        required:           true,
+        title:              "Turn on how many lights at one time?",
+        required:        true,
     ]
 
     def pageName = "Setup"
@@ -124,33 +125,31 @@ def Setup() {
 
         section(""){
             paragraph "Choose when to activate vacation lighting, which switches to include, how many " +
-                      "lights can be active at one time, and how often to choose new lights to turn on.\n\nAll " +
-                      "settings are required."
+                      "lights to turn on at one time, and how often to change them."
         }
-        section("Modes & time vacation lighting is active") {
+        section("Mode & time settings (required)") {
             input newMode
-            href "timeIntervalInput", title: "Start & End Times", description: timeIntervalLabel(), refreshAfterSelection:true
-        }
-        section("Choose switches to include") {
-            input switches
-        }
-        section("Select number of lights turned on at one time") {
-            input number_of_active_lights
-        }
-        section("Set how long until new lights are turned on/off") {
+            href "timeIntervalInput", title: "Starting and ending when?", description: timeIntervalLabel(), refreshAfterSelection:true
+         }
+        section("Switch & interval settings (required)") {
+        
+        	input switches
+        
+        	input number_of_active_lights
+            
             input frequency_minutes
         }
     }
 }
 
-// Show "Setup" page
-def Settings() {
+// Show "Options" page
+def Options() {
 
     def falseAlarmThreshold = [
         name:       "falseAlarmThreshold",
         type:       "decimal",
-        title:      "Delay this many minutes (default is 2)",
-        required:   false
+        title:      "Delay how many minutes? (default is 2)",
+        required:        false
     ]
     def days = [
         name:       "days",
@@ -158,14 +157,14 @@ def Settings() {
         title:      "Run only on these days",
         multiple:   true,
         required:   true,
-        options:    ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        options: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     ]
 
-    def pageName = "Settings"
+    def pageName = "Options"
 
     def pageProperties = [
-        name:       "Settings",
-        title:      "Settings",
+        name:       "Options",
+        title:      "Options",
         nextPage:   "pageSetup"
     ]
 
@@ -173,22 +172,16 @@ def Settings() {
         name:       "People",
         type:       "capability.presenceSensor",
         title:      "Don't activate vacation lighting if any of these people are home",
-        required:   false,
-        multiple:   true
+        required:        false,
+        multiple:        true
     ]
 
     return dynamicPage(pageProperties) {
 
-        section(""){
-            paragraph "These settings limit how vacation lighting works. You can select:\n\n- which days you " +
-            		  "want vacation lighting to run\n\n- who overrides it when they're home\n\n- how long to " +
-                      "delay starting when triggered (this helps eliminate \"false starts\" following an " +
-                      "accidental Mode change)."
-        }
-        section("Which days vacation lighting can run") {
+        section("Limit days of the week") {
             input days
         }
-        section("Delay following Mode selection") {
+        section("Activation delay") {
             input falseAlarmThreshold
         }
         section("People who override") {
@@ -199,7 +192,7 @@ def Settings() {
     }
 }
 
-page(name: "timeIntervalInput", title: "Vacation Lighting Start & End Times", refreshAfterSelection:true) {
+page(name: "timeIntervalInput", title: "Starting & ending times", refreshAfterSelection:true) {
     section {
         input "startTimeType", "enum", title: "Starting at", options: [["time": "Specific time"], ["sunrise": "Sunrise"], ["sunset": "Sunset"]], defaultValue: "time", submitOnChange: true
         if (startTimeType in ["sunrise","sunset"]) {
