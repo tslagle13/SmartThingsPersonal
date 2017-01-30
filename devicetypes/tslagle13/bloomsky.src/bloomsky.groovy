@@ -5,6 +5,7 @@
 *
 *  Version History:  
 *
+*  2.1.3 - 01/30/2016 - Minor Bug Fixes for STORM data
 *  2.1.2 - 01/27/2016 - Added Unit options
 *  2.1.1 - 01/25/2016 - Added STORM capabilities (testing)
 *  2.1.0 - 01/15/2016 - UI updated (by RudiP)
@@ -33,10 +34,10 @@
 *
 */
 
-def getVersion() { return "2.1.2"}
+def getVersion() { return "2.1.3"}
 
 metadata {
-    definition (name: "Bloomsky", namespace: "RudiP", author: "Tim Slagle") {
+    definition (name: "Bloomsky", namespace: "tslagle13", author: "Tim Slagle") {
         capability "Battery"
         capability "Illuminance Measurement"
         capability "Refresh"
@@ -306,11 +307,11 @@ private def callAPI() {
 
             // Bloomsky (STORM) data
             data << individualBloomSky.Storm
-            def rainRate = 0
-            def rainDaily = 0
-            def windSpeed = 0
+            def rainRate = 0.0
+            def rainDaily = 0.0
+            def windSpeed = 0.0
             def windDirection = "N"
-            def windGust = 0
+            def windGust = 0.0
             def msgStorm = "No STORM data"
             def rainUnit = "in"
             if (("true" == rainMm)) {
@@ -330,42 +331,52 @@ private def callAPI() {
 
                     switch(key) {
                         case "raindaily":
-                            rainDaily = datum.toDouble()
-                            if (("true" == rainMm)) {
-                                rainDaily = rainDaily.trunc(1)
-                            } else {
-                                rainDaily =  (rainDaily * 0.039370).round(1).trunc(1)
+                            if (datum < 9000) {
+                                rainDaily = datum.toDouble()
+                                if (("true" == rainMm)) {
+                                    rainDaily = rainDaily.trunc(1)
+                                } else {
+                                    rainDaily =  (rainDaily * 0.039370).round(1).trunc(1)
+                                }
                             }
                             sendEvent(name:"rainDaily", value: rainDaily, unit: rainUnit)
                         break;
                         case "rainrate":
-                            rainRate = datum.toDouble()
-                            if (("true" == rainMm)) {
-                                rainRate = rainRate.trunc(1)
-                            } else {
-                                rainRate =  (rainRate * 0.039370).round(1).trunc(1)
+                            if (datum < 9000) {
+                                rainRate = datum.toDouble()
+                                if (("true" == rainMm)) {
+                                    rainRate = rainRate.trunc(1)
+                                } else {
+                                    rainRate =  (rainRate * 0.039370).round(1).trunc(1)
+                                }
                             }
                             sendEvent(name:"rainRate", value: rainRate, unit: rainUnit+"/h")
                         break;
                         case "sustainedwindspeed":
-                            windSpeed = datum.toDouble()
-                            if (("true" == windspeedKph)) {
-                                windSpeed =  (windSpeed * 1.609344).round(1).trunc(1)
-                            } else {
-                                windSpeed = windSpeed.trunc(1)
+                            if (datum < 9000) {
+                                windSpeed = datum.toDouble()
+                                if (("true" == windspeedKph)) {
+                                    windSpeed =  (windSpeed * 1.609344).round(1).trunc(1)
+                                } else {
+                                    windSpeed = windSpeed.trunc(1)
+                                }
                             }
                             sendEvent(name:"windSpeed", value: windSpeed, unit: windSpeedUnit)
                         break;
                         case "winddirection":
-                            windDirection = datum.toString()
+                            if (datum < 9000) {
+                                windDirection = datum.toString()
+                            }
                             sendEvent(name:"windDirection", value: datum)
                         break;
                         case "windgust":
-                            windGust = datum.toDouble()
-                            if (("true" == windspeedKph)) {
-                                windGust =  (windGust * 1.609344).round(1).trunc(1)
-                            } else {
-                                windGust = windGust.trunc(1)
+                            if (datum < 9000) {
+                                windGust = datum.toDouble()
+                                if (("true" == windspeedKph)) {
+                                    windGust =  (windGust * 1.609344).round(1).trunc(1)
+                                } else {
+                                    windGust = windGust.trunc(1)
+                                }
                             }
                             sendEvent(name:"windGust", value: windGust, unit: windSpeedUnit)
                         break;
@@ -406,8 +417,8 @@ private getPictureName() {
 def getBattery(v) {
     def result = 0
     def miliVolts = v
-    // Minimum: 2500 - Maximum: 2620
-    def minVolts = 2500
+    // Minimum: 2480 - Maximum: 2620
+    def minVolts = 2480
     def maxVolts = 2620
     if (miliVolts >= minVolts) {
         if (miliVolts > maxVolts) {
