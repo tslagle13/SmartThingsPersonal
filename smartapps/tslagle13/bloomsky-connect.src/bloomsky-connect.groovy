@@ -30,7 +30,7 @@ import groovy.json.*
 
 definition(
     name: "BloomSky (Connect)",
-    namespace: "RudiP",
+    namespace: "tslagle13",
     author: "Tim Slagle",
     description: "Used to spin up device types for BloomSky weather stations. ",
     category: "My Apps",
@@ -112,7 +112,7 @@ def createBloomskyDevices() {
         	def childDevices = getChildDevices()
             //if child device doens't exist, create it
         	if (!(childDevices.name).toString(/*convert to string for testing*/).contains("${it}")) {
-            	addChildDevice("RudiP", "Bloomsky", it, null, [label:"Bloomsky " + it, name:"${it}"]) //create child device with name and label so name remains protected
+            	addChildDevice("tslagle13", "Bloomsky", it, null, [label:"Bloomsky " + it, name:"${it}"]) //create child device with name and label so name remains protected
                 log.info "Created Child Device - Bloomsky ${it}"
             }
             //if child device does exist log that it does
@@ -150,5 +150,3 @@ def refreshBloomsky(evt) {
     	it.callAPI()
     }
 }
-
-
