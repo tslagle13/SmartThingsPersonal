@@ -5,6 +5,7 @@
 *
 *  Version History:  
 *
+*  2.1.4 - 01/30/2016 - Temperature Bug Fixes
 *  2.1.3 - 01/30/2016 - Minor Bug Fixes for STORM data
 *  2.1.2 - 01/27/2016 - Added Unit options
 *  2.1.1 - 01/25/2016 - Added STORM capabilities (testing)
@@ -34,7 +35,7 @@
 *
 */
 
-def getVersion() { return "2.1.3"}
+def getVersion() { return "2.1.4"}
 
 metadata {
     definition (name: "Bloomsky", namespace: "tslagle13", author: "Tim Slagle") {
@@ -106,7 +107,14 @@ metadata {
             state "default", label:'${currentValue} Lux'
         }
         valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2) {
-            state "default", label:'${currentValue}% Battery'
+            state "default", label:'${currentValue}% Battery',
+                backgroundColors:[
+                    [value: 0, color: "#0d0d0c"],
+  					[value: 5, color: "#d04e00"],
+                    [value: 10, color: "#d80010"],
+                    [value: 15, color: "#ffffff"]
+                ]
+
         }
         valueTile("lastUpdated", "device.lastUpdated", decoration: "flat", width: 2, height: 2) {
             state "default", label:'${currentValue}'
@@ -131,6 +139,7 @@ metadata {
     }
 
     preferences {
+        input "tempCelsius", "boolean", title: "Temperature in C? (Default = F)", displayDuringSetup:false, defaultValue:false
         input "pressureMbar", "boolean", title: "Pressure in Mbar? (Default = inHg)", displayDuringSetup:false, defaultValue:false
         input "enableStorm", "boolean", title: "Enable STORM data?", displayDuringSetup:false, defaultValue:false
         input "windspeedKph", "boolean", title: "Wind Speed in Kph? (Default = Mph)", displayDuringSetup:false, defaultValue:false
@@ -367,7 +376,7 @@ private def callAPI() {
                             if (datum < 9000) {
                                 windDirection = datum.toString()
                             }
-                            sendEvent(name:"windDirection", value: datum)
+                            sendEvent(name:"windDirection", value: windDirection)
                         break;
                         case "windgust":
                             if (datum < 9000) {
@@ -404,7 +413,7 @@ private def callAPI() {
 
 //convert temp to celcius if needed
 def getTemperature(value) {
-    //def cmdScale = getTemperatureScale()
+    def cmdScale = getTemperatureScale()
     return convertTemperatureIfNeeded(value.toFloat(), "F", 4)
 }
 
@@ -434,6 +443,10 @@ def getBattery(v) {
 
 def tempScale() {
     //def tempScale = getTemperatureScale()
-    def tempScaleUnit = "C"
+    def tempScaleUnit = "F"
+    if (("true" == tempCelsius)) {
+        tempScaleUnit = "C"
+    }
     return tempScaleUnit
 }
+
