@@ -5,11 +5,11 @@
 *
 *  Version History:  
 *
-*  2.1.4 - 01/30/2016 - Temperature Bug Fixes
-*  2.1.3 - 01/30/2016 - Minor Bug Fixes for STORM data
-*  2.1.2 - 01/27/2016 - Added Unit options
-*  2.1.1 - 01/25/2016 - Added STORM capabilities (testing)
-*  2.1.0 - 01/15/2016 - UI updated (by RudiP)
+*  2.1.4 - 01/30/2017 - Temperature Bug Fixes
+*  2.1.3 - 01/30/2017 - Minor Bug Fixes for STORM data
+*  2.1.2 - 01/27/2017 - Added Unit options
+*  2.1.1 - 01/25/2017 - Added STORM capabilities (testing)
+*  2.1.0 - 01/15/2017 - UI updated (by RudiP)
 *  2.0.3 - Updated BloomSky API references
 *  2.0.2 - Fixed DST issue and display time in AM/PM
 *  2.0.1 - Fixde issue with pollster
