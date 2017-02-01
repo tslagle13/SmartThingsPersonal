@@ -5,6 +5,7 @@
 *
 *  Version History:  
 *
+*  2.1.5 - 02/01/2017 - WindDirection validation fixed
 *  2.1.4 - 01/30/2017 - Temperature Bug Fixes
 *  2.1.3 - 01/30/2017 - Minor Bug Fixes for STORM data
 *  2.1.2 - 01/27/2017 - Added Unit options
@@ -35,7 +36,7 @@
 *
 */
 
-def getVersion() { return "2.1.4"}
+def getVersion() { return "2.1.5"}
 
 metadata {
     definition (name: "Bloomsky", namespace: "tslagle13", author: "Tim Slagle") {
@@ -373,7 +374,7 @@ private def callAPI() {
                             sendEvent(name:"windSpeed", value: windSpeed, unit: windSpeedUnit)
                         break;
                         case "winddirection":
-                            if (datum < 9000) {
+                            if (datum instanceof String) {
                                 windDirection = datum.toString()
                             }
                             sendEvent(name:"windDirection", value: windDirection)
