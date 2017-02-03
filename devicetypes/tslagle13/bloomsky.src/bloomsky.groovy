@@ -40,7 +40,7 @@
 def getVersion() { return "2.1.6"}
 
 metadata {
-    definition (name: "Bloomsky", namespace: "RudiP", author: "Tim Slagle") {
+    definition (name: "Bloomsky", namespace: "tslagle13", author: "Tim Slagle") {
         capability "Battery"
         capability "Illuminance Measurement"
         capability "Refresh"
