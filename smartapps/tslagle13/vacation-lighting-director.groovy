@@ -3,6 +3,7 @@
  *  Supports Longer interval times (up to 180 mins)
  *  Only turns off lights it turned on (vs calling to turn all off)
  * 
+ *  Version  2.8 - Updated so that only lights already on are turned off when picking new lights in the schedCheck.
  *  Version  2.7 - Simplified interface.
  *  Version  2.6 - General spelling, wording, and formatting fixes.
  *                 Updated SmartApp icons.
@@ -360,42 +361,39 @@ def scheduleCheck(evt) {
         log.debug("Running")
         atomicState.Running = true
 
-        // turn off switches
-        def inactive_switches = switches
         def vacactive_switches = []
-        if (atomicState.Running) {
-            if (atomicState?.vacactive_switches) {
-                vacactive_switches = atomicState.vacactive_switches
-                if (vacactive_switches?.size()) {
-                    for (int i = 0; i < vacactive_switches.size() ; i++) {
-                        inactive_switches[vacactive_switches[i]].off()
-                        log.trace "turned off ${inactive_switches[vacactive_switches[i]]}"
-                    }
-                }
-            }
-            atomicState.vacactive_switches = []
-        }
 
         def random = new Random()
-        vacactive_switches = []
         def numlight = number_of_active_lights
-        if (numlight > inactive_switches.size()) { numlight = inactive_switches.size() }
-        log.trace "inactive switches: ${inactive_switches.size()} numlight: ${numlight}"
+        if (numlight > switches.size()) { numlight = switches.size() }
+        log.trace "switches: ${switches.size()} numlight: ${numlight}"
         for (int i = 0 ; i < numlight ; i++) {
-
             // grab a random switch to turn on
-            def random_int = random.nextInt(inactive_switches.size())
+            def random_int = random.nextInt(switches.size())
             while (vacactive_switches?.contains(random_int)) {
-                random_int = random.nextInt(inactive_switches.size())
+                random_int = random.nextInt(switches.size())
             }
             vacactive_switches << random_int
         }
-        for (int i = 0 ; i < vacactive_switches.size() ; i++) {
-            inactive_switches[vacactive_switches[i]].on()
-            log.trace "turned on ${inactive_switches[vacactive_switches[i]]}"
+
+        log.trace "Current vacative_switches: ${atomicState?.vacactive_switches}"
+        log.trace "Desired vacative_switches: ${vacactive_switches}"
+
+        def switchesToTurnOff = atomicState.vacactive_switches - vacactive_switches
+
+        switchesToTurnOff?.each {
+                switches[it].off()
+                log.trace "Turning off ${switches[it]}"
         }
+
+        def switchesToTurnOn = vacactive_switches - atomicState.vacactive_switches
+
+        switchesToTurnOn?.each {
+                switches[it].on()
+                log.trace "Turning on ${switches[it]}"
+        }
+
         atomicState.vacactive_switches = vacactive_switches
-        //log.trace "vacactive ${vacactive_switches} inactive ${inactive_switches}"
 
     } else if(people && someoneIsHome){
         //don't turn off lights if anyone is home
