@@ -5,6 +5,9 @@
 *
 *  Version History:  
 *
+*  2.1.9 - 06/28/2017 - Using UV from STORM if present and new 24hRain data.
+*  2.1.8 - 05/03/2017 - UI improvements.
+*  2.1.7 - 02/06/2017 - Fixed background colors for Temperature in Celsius
 *  2.1.6 - 02/03/2017 - Added tiles for Wind and Rain. Using Temp unit from Location (removed from preferences)
 *  2.1.5 - 02/01/2017 - WindDirection validation fixed
 *  2.1.4 - 01/30/2017 - Temperature Bug Fixes
@@ -37,7 +40,7 @@
 *
 */
 
-def getVersion() { return "2.1.6"}
+def getVersion() { return "2.1.9"}
 
 metadata {
     definition (name: "Bloomsky", namespace: "tslagle13", author: "Tim Slagle") {
@@ -52,11 +55,13 @@ metadata {
         capability "Water Sensor"
 
         attribute "pressure", "number"
+        attribute "pressureUnit", "string"
         attribute "lastUpdated", "string"
         attribute "deviceMode", "string"
         // STORM data
         attribute "rainRate", "number"
         attribute "rainDaily", "number"
+        attribute "rain24h", "number"
         attribute "windSpeed", "number"
         attribute "windDirection", "string"
         attribute "windGust", "number"
@@ -69,7 +74,7 @@ metadata {
     tiles(scale:2) {
         multiAttributeTile(name: "main", type:"generic", width:6, height:4, canChangeIcon: true) {
 			tileAttribute("device.temperature", key: "PRIMARY_CONTROL") {
-				attributeState("default", label:'${currentValue}°', icon:"st.Weather.weather2", backgroundColors: getTempColors())
+				attributeState("temperature", label:'${currentValue}°', icon:"st.Weather.weather2", backgroundColors: getTempColors())
 			}
             tileAttribute("device.lastUpdated", key: "SECONDARY_CONTROL") {
                 attributeState("default", label:'Updated: ${currentValue}')
@@ -81,8 +86,8 @@ metadata {
         }
 
         carouselTile("cameraDetails", "device.image", width: 4, height: 4) { }
-        valueTile("temperature", "device.temperature",  width: 2, height: 2) {
-            state("default", label:'${currentValue}°', backgroundColors: getTempColors())
+        valueTile("temperature", "device.temperature", inactiveLabel: false, width: 2, height: 2) {
+            state("temperature", label:'${currentValue}°', backgroundColors: getTempColors())
         }
         standardTile("water", "device.water", width: 2, height: 2) {
             state "dry", icon:"st.alarm.water.dry", backgroundColor:"#ffffff"
@@ -101,20 +106,20 @@ metadata {
         valueTile("light", "device.illuminance", decoration: "flat", width: 2, height: 2) {
             state "default", label:'${currentValue} Lux'
         }
-        valueTile("humidity", "device.humidity", inactiveLabel: false, width: 2, height: 2) {
-            state "humidity", label:'${currentValue}% humidity', unit:""
+        valueTile("humidityLabel", "device.humidity", inactiveLabel: false, width: 2, height: 1) {
+            state "default", label:'Humidity'
         }
-        valueTile("pressure", "device.pressure", inactiveLabel: false, width: 2, height: 2) {
-            state "pressure", label:'Pressure: ${currentValue}', unit:""
+        valueTile("humidity", "device.humidity", inactiveLabel: false, width: 2, height: 1) {
+            state "humidity", label:'${currentValue}%', unit:""
+        }
+        valueTile("pressureLabel", "device.pressureUnit", width: 2, height: 1) {
+            state("default", label:'Pressure (${currentValue})')
+        }
+        valueTile("pressure", "device.pressure", inactiveLabel: false, width: 2, height: 1) {
+            state("pressure", label:'${currentValue}')
         }
         valueTile("battery", "device.battery", decoration: "flat", width: 2, height: 2) {
-            state "default", label:'${currentValue}% Battery', 
-            backgroundColors:[
-                    [value: 0, color: "#0d0d0c"],
-  					[value: 5, color: "#d04e00"],
-                    [value: 10, color: "#d80010"],
-                    [value: 15, color: "#ffffff"]
-                ]
+            state "default", label:'Battery: ${currentValue}%'
         }
         valueTile("lastUpdated", "device.lastUpdated", decoration: "flat", width: 2, height: 2) {
             state "default", label:'${currentValue}'
@@ -133,11 +138,12 @@ metadata {
         valueTile("msgStormRain", "device.msgStormRain", inactiveLabel: false, decoration: "flat", width: 6, height: 2) {
             state "default", label:'${currentValue}'
         }
+
         standardTile("refresh", "device.weather", decoration: "flat", width: 2, height: 2) {
             state "default", label: "", action: "refresh", icon:"st.secondary.refresh"
         }
         main(["main"])
-        details(["cameraDetails", "temperature", "water", "uv", "light", "humidity", "deviceMode", "pressure", "lastUpdated", "msgStorm", "msgStormRain", "refresh", "battery", "deviceType"])
+        details(["cameraDetails", "temperature", "water", "uv", "light", "humidityLabel", "humidity", "deviceMode", "lastUpdated", "pressureLabel", "pressure", "msgStorm", "msgStormRain", "deviceType", "battery", "refresh"])
     }
 
     preferences {
@@ -150,6 +156,23 @@ metadata {
 }    
 
 def getTempColors() {
+	def colorMap = []
+    colorMap = [
+        [value: 0, color: "#a39393"],
+        [value: 4, color: "#c56fc5"],
+        [value: 5, color: "#800f87"],
+        [value: 20, color: "#0e47e3"],
+        [value: 35, color: "#1e9cbb"],
+        [value: 50, color: "#90d2a7"],
+        [value: 65, color: "#f1d801"],
+        [value: 80, color: "#ffa500"],
+        [value: 95, color: "#d04e00"],
+        [value: 110, color: "#bc2323"]
+    ]
+    return colorMap
+}
+
+def getTempColors2() {
 	def colorMap = []
     if (state?.tempMetric) {
 		colorMap = [
@@ -164,27 +187,40 @@ def getTempColors() {
 			[value: 27, color: "#ffa500"],
 			[value: 35, color: "#d04e00"],
 			[value: 43, color: "#bc2323"]
-			]
+		]
 	} else {
 		colorMap = [
 			// Fahrenheit Color Range
-			[value: -10, color: "#a39393"],
-			[value: 4, color: "#c56fc5"],
-			[value: 5, color: "#800f87"],
-			[value: 20, color: "#0e47e3"],
-			[value: 35, color: "#1e9cbb"],
-			[value: 50, color: "#90d2a7"],
-			[value: 65, color: "#f1d801"],
-			[value: 80, color: "#ffa500"],
-			[value: 95, color: "#d04e00"],
-			[value: 110, color: "#bc2323"]
+            [value: 32, color: "#153591"],
+            [value: 44, color: "#1e9cbb"],
+            [value: 59, color: "#90d2a7"],
+            [value: 74, color: "#44b621"],
+            [value: 84, color: "#f1d801"],
+            [value: 92, color: "#d04e00"],
+            [value: 98, color: "#bc2323"]
 		]
 	}
     return colorMap
 }
 
-mappings {
-	path("/getDetailHTML") {action: [GET: "getDetailHTML"]}
+def getPressureColors() {
+	def colorMap = []
+    if ("true" == pressureMbar) {
+		colorMap = [
+			// mbar Color Range
+			[value: 0, color: "#1e9cbb"],
+            [value: 1009, color: "#289500"],
+            [value: 1022, color: "#ffa500"]
+		]
+	} else {
+		colorMap = [
+			// inHg Color Range
+			[value: 0, color: "#1e9cbb"],
+            [value: 29.80, color: "#289500"],
+            [value: 30.20, color: "#ffa500"]
+		]
+	}
+    return colorMap
 }
 
 def installed() {
@@ -203,6 +239,7 @@ def updated() {
     if (!("true" == enableStorm)) {
         sendEvent(name:"rainRate", value: 0.0, displayed:false)
         sendEvent(name:"rainDaily", value: 0.0, displayed:false)
+        sendEvent(name:"rain24h", value: 0.0, displayed:false)
         sendEvent(name:"windSpeed", value: 0.0, displayed:false)
         sendEvent(name:"windDirection", value: "N", displayed:false)
         sendEvent(name:"windGust", value: 0.0, displayed:false)
@@ -250,7 +287,10 @@ private def callAPI() {
                 individualBloomSky = resp.data[0]
                 if (state.debug) log.debug "Using BloomSky ID: ${individualBloomSky.DeviceID}"
             }
-            
+
+            // Initialize data fields for both (Sky & Storm)
+            def uvindex = 0
+
             // Bloomsky (SKY1/SKY2) data
             data << individualBloomSky.Data
             if (data) {
@@ -283,18 +323,21 @@ private def callAPI() {
                             sendEvent(name: "illuminance", value: datum, unit: "Lux")
                         break;
                         case "uvindex": //bloomsky does UV index! how cool is that!?
-                            sendEvent(name: "ultravioletIndex", value: datum)
+                            uvindex = datum.toInteger()
                         break;
                         case "pressure": 
                             def presValue = datum.toDouble().trunc(2)
                             def presUnit = "inHg"
                             if (("true" == pressureMbar)) {
-                                presValue =  (presValue * 33.8639).round(0).toInteger()
+                                //presValue =  (presValue * 33.8639).round(0).toInteger()
+                                presValue =  (presValue * 33.8639).trunc(1)
                                 presUnit = "mbar"
                             } else {
-                                presValue = presValue.trunc(1)
+                                presValue = presValue.trunc(2)
                             }
                             sendEvent(name:"${key}", value: presValue, unit: presUnit)
+                            sendEvent(name:"pressureUnit", value: presUnit, displayed:false)
+
                         break;
                         case "humidity":
                             sendEvent(name: "${key}", value: datum, unit: "%")
@@ -331,6 +374,7 @@ private def callAPI() {
             data << individualBloomSky.Storm
             def rainRate = 0.0
             def rainDaily = 0.0
+            def rain24h = 0.0
             def windSpeed = 0.0
             def windDirection = "N"
             def windGust = 0.0
@@ -353,6 +397,9 @@ private def callAPI() {
                     if (state.debug) log.debug "${key}:${datum}"
 
                     switch(key) {
+                        case "uvindex":
+                            uvindex = datum.toInteger()
+                        break;
                         case "raindaily":
                             if (datum.toDouble() < 9000) {
                                 rainDaily = datum.toDouble()
@@ -363,6 +410,17 @@ private def callAPI() {
                                 }
                             }
                             sendEvent(name:"rainDaily", value: rainDaily, unit: rainUnit)
+                        break;
+                        case "24hrain":
+                            if (datum.toDouble() < 9000) {
+                                rain24h = datum.toDouble()
+                                if (("true" == rainMm)) {
+                                    rain24h = rain24h.trunc(1)
+                                } else {
+                                    rain24h =  (rain24h * 0.039370).round(1).trunc(1)
+                                }
+                            }
+                            sendEvent(name:"rain24h", value: rain24h, unit: rainUnit)
                         break;
                         case "rainrate":
                             if (datum.toDouble() < 9000) {
@@ -410,11 +468,14 @@ private def callAPI() {
                 }
                 //--- Create STORM data message
                 msgStorm = "Wind: " + windSpeed.toString() + " " + windSpeedUnit + " / " + windDirection + "  -  Gusts: " + windGust.toString() + " " + windSpeedUnit
-                msgStormRain = "Rain Rate: " + rainRate.toString() + " " + rainUnit + "/h  -  Daily: " + rainDaily.toString() + " " + rainUnit
+                msgStormRain = "Rain Rate: " + rainRate.toString() + " " + rainUnit + "/h  -  Daily: " + rainDaily.toString() + " " + rainUnit + " - Last 24h: " + rain24h.toString() + " " + rainUnit
 
             } else {
                 if (state.debug) log.debug "--- STORM data Disabled"
             }
+
+            // Send Events for both Sky & Storm
+            sendEvent(name: "ultravioletIndex", value: uvindex)
             sendEvent(name: "msgStorm", value: msgStorm, displayed:false)
             sendEvent(name: "msgStormRain", value: msgStormRain, displayed:false)
 
