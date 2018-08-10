@@ -5,6 +5,7 @@
 *
 *  Version History:  
 *
+*  2.1.10 - 08/10/2018 - Fix rain measurement units conversion (api endpoint defaults to imperial) and increase rain resolution
 *  2.1.9 - 06/28/2017 - Using UV from STORM if present and new 24hRain data.
 *  2.1.8 - 05/03/2017 - UI improvements.
 *  2.1.7 - 02/06/2017 - Fixed background colors for Temperature in Celsius
@@ -404,9 +405,9 @@ private def callAPI() {
                             if (datum.toDouble() < 9000) {
                                 rainDaily = datum.toDouble()
                                 if (("true" == rainMm)) {
-                                    rainDaily = rainDaily.trunc(1)
+                                    rainDaily = (rainDaily * 25.4)
                                 } else {
-                                    rainDaily =  (rainDaily * 0.039370).round(1).trunc(1)
+                                    rainDaily =  rainDaily
                                 }
                             }
                             sendEvent(name:"rainDaily", value: rainDaily, unit: rainUnit)
@@ -415,9 +416,9 @@ private def callAPI() {
                             if (datum.toDouble() < 9000) {
                                 rain24h = datum.toDouble()
                                 if (("true" == rainMm)) {
-                                    rain24h = rain24h.trunc(1)
+                                    rain24h = (rain24h * 25.4)
                                 } else {
-                                    rain24h =  (rain24h * 0.039370).round(1).trunc(1)
+                                    rain24h =  rain24h
                                 }
                             }
                             sendEvent(name:"rain24h", value: rain24h, unit: rainUnit)
@@ -426,9 +427,9 @@ private def callAPI() {
                             if (datum.toDouble() < 9000) {
                                 rainRate = datum.toDouble()
                                 if (("true" == rainMm)) {
-                                    rainRate = rainRate.trunc(1)
+                                    rainRate = (rainRate * 25.4)
                                 } else {
-                                    rainRate =  (rainRate * 0.039370).round(1).trunc(1)
+                                    rainRate =  rainRate
                                 }
                             }
                             sendEvent(name:"rainRate", value: rainRate, unit: rainUnit+"/h")
@@ -468,7 +469,7 @@ private def callAPI() {
                 }
                 //--- Create STORM data message
                 msgStorm = "Wind: " + windSpeed.toString() + " " + windSpeedUnit + " / " + windDirection + "  -  Gusts: " + windGust.toString() + " " + windSpeedUnit
-                msgStormRain = "Rain Rate: " + rainRate.toString() + " " + rainUnit + "/h  -  Daily: " + rainDaily.toString() + " " + rainUnit + " - Last 24h: " + rain24h.toString() + " " + rainUnit
+                msgStormRain = "Rain Rate: " + String.format("%5.2f", rainRate) + " " + rainUnit + "/h  -  Daily: " + String.format("%5.2f", rainDaily) + " " + rainUnit + " - Last 24h: " + String.format("%5.2f", rain24h) + " " + rainUnit
 
             } else {
                 if (state.debug) log.debug "--- STORM data Disabled"
