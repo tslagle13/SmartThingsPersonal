@@ -41,7 +41,7 @@
 *
 */
 
-def getVersion() { return "2.1.9"}
+def getVersion() { return "2.1.10"}
 
 metadata {
     definition (name: "Bloomsky", namespace: "tslagle13", author: "Tim Slagle") {
