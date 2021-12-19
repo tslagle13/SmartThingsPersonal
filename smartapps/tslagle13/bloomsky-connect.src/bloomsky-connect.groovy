@@ -97,7 +97,7 @@ def getBloomskyIds(evt) {
 		]
         try {
             httpGet(pollParams) { resp ->
-                state.deviceCollection = resp.getData().collectAll{it.DeviceID} //get all device IDs on bloomsky account
+                state.deviceCollection = resp.getData().collectNested{it.DeviceID} //get all device IDs on bloomsky account
             } 
         } catch (Exception e) {
         	log.debug "Error: $e"   
